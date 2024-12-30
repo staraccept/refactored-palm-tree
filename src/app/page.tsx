@@ -186,18 +186,12 @@ export default function Home() {
       return;
     }
     try {
-      const response = await fetch('https://hooks.zapier.com/hooks/catch/17465641/28qqau0/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone,
-        })
+      const params = new URLSearchParams({
+        ...formData,
+          submitTime: new Date().toISOString()
+      });
+      const response = await fetch(`https://hooks.zapier.com/hooks/catch/17465641/28qqau0/?${params.toString()}`, {
+        method: 'GET',
       });
          
       if (response.ok) {
