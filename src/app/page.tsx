@@ -918,6 +918,16 @@ export default function Home() {
               </select>
             </div>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Pricing Plan Preference?</label>
+            <select className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <option value="">Do you have a preferred pricing plan?</option>
+              <option value="onthego">0-On The Go</option>
+              <option value="mobilepro">Mobile Pro Bundle</option>
+              <option value="retailorcounterservicerestaurantbundle">Retail or Counter-Service Restaurant Bundle</option>
+              <option value="fullservicerestaurantandbarbundle">Full-Service Restaurant & Bar Bundle</option>
+            </select>
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Business Type</label>
@@ -927,6 +937,16 @@ export default function Home() {
               <option value="restaurant">Restaurant</option>
               <option value="service">Service Business</option>
               <option value="other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Estimated Monthly Volume</label>
+            <select className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <option value="">Select estimated monthly volume</option>
+              <option value="0-50,000">0-50,000</option>
+              <option value="50000-250000">50000-250000</option>
+              <option value="250000-1000000">250000-1000000</option>
+              <option value="1000000+">1000000+</option>
             </select>
           </div>
 
@@ -960,7 +980,7 @@ export default function Home() {
               },
               {
                 title: 'Quick Integration',
-                description: 'Get up and running in minutes, not days',
+                description: 'Get up and running in days, not weeks',
                 icon: '⚡'
               },
               {
