@@ -1,19 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  eslint: {
-    ignoreDuringBuilds: true
-  },
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'interfaces.zapier.com',
-        port: '',
-        pathname: '/**'
-      }
-    ]
-  }
-}
+  // Add your other config here
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
