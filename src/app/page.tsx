@@ -11,6 +11,7 @@ declare global {
     }
   }
 }
+
 declare global {
   interface Window {
     $zChat?: {
@@ -18,6 +19,7 @@ declare global {
     };
   }
 }
+
 interface Stat {
   value: string;
   label: string;
@@ -35,7 +37,6 @@ interface FAQ {
   answer: string;
 }
 
-// Add these arrays after the interfaces but before export default function Home()
 const stats: Stat[] = [
   {
     value: "99.9%",
@@ -97,8 +98,6 @@ const faqs: FAQ[] = [
   }
 ];
 
-// Keep all your existing interfaces (Plan, Testimonial, Stat, FAQ, Feature, BlogPost, Integration)
-
 export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -106,7 +105,7 @@ export default function Home() {
   const [selectedFAQ, setSelectedFAQ] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showChat, setShowChat] = useState(false);
-  const [currentImage, setCurrentImage] = useState(0);  // Only declare this once
+  const [currentImage, setCurrentImage] = useState(0);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -120,34 +119,34 @@ export default function Home() {
     message: ''
   });
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prevState => ({
       ...prevState,
       [name]: value
     }));
   };
-  
+
   const images = [
     {
-        src: '/qsrduo2.png',
-        alt: 'QSR Duo POS System'
+      src: '/qsrduo2.png',
+      alt: 'QSR Duo POS System'
     },
     {
-        src: '/retailduo2.jpg',
-        alt: 'Advanced POS Terminal'
+      src: '/retailduo2.jpg',
+      alt: 'Advanced POS Terminal'
     },
     {
-        src: '/qsrmini3.png',
-        alt: 'Compact POS Solution'
+      src: '/qsrmini3.png',
+      alt: 'Compact POS Solution'
     },
     {
-        src: '/retailflex3.png',
-        alt: 'Flexible Payment Terminal'
+      src: '/retailflex3.png',
+      alt: 'Flexible Payment Terminal'
     },
     {
-        src: '/retailmini3.png',
-        alt: 'Retail Mini POS'
+      src: '/retailmini3.png',
+      alt: 'Retail Mini POS'
     }
   ];
 
@@ -158,27 +157,42 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleDemoRequest = async (e) => {
+  const handleDemoRequest = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Basic validation
+    const requiredFields = ['firstName', 'lastName', 'email', 'phone'];
+    const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
+    
+    if (missingFields.length > 0) {
+      alert('Please fill in all required fields: ' + missingFields.join(', '));
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      alert('Please enter a valid email address');
+      return;
+    }
+
     setIsLoading(true);
-    console.log('Submitting form data:', formData); // Debug log
 
     try {
-      console.log('Sending to Zapier...'); // Debug log
       const response = await fetch('https://hooks.zapier.com/hooks/catch/17465641/28qqau0/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'  // Add this line
+          'Accept': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          submitTime: new Date().toISOString()
+        })
       });
-      
-      console.log('Response:', response); // Debug log
 
       if (response.ok) {
-        console.log('Success!'); // Debug log
-        alert('Message sent successfully!');
+        alert('Thank you! Your message has been sent successfully. We will contact you soon.');
         setFormData({
           firstName: '',
           lastName: '',
@@ -192,16 +206,15 @@ export default function Home() {
           message: ''
         });
       } else {
-        throw new Error('Failed to send message');
+        throw new Error(`Failed to send message: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error details:', error); // Debug log
-      alert('Error sending message. Please try again.');
-      console.error('Error:', error);
+      console.error('Submission error:', error);
+      alert('Sorry, there was an error sending your message. Please try again or contact us directly.');
     } finally {
       setIsLoading(false);
     }
-};
+  };
 
      {/* Navigation */}
 <motion.nav 
@@ -901,7 +914,7 @@ export default function Home() {
 
     <div className="grid md:grid-cols-2 gap-12 items-start">
       {/* Contact Form */}
-<div className="bg-white rounded-xl shadow-sm p-8 border border-gray-100">
+      <div className="bg-white rounded-xl shadow-sm p-8 border border-gray-100">
   <form onSubmit={handleDemoRequest} className="space-y-6">
     <div className="grid md:grid-cols-2 gap-6">
       <div>
