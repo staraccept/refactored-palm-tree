@@ -1017,7 +1017,7 @@ export default function Home() {
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Do you have a preferred pricing plan?</option>
-                    <option value="onthego">0-On The Go</option>
+                    <option value="onthego">On The Go</option>
                     <option value="mobilepro">Mobile Pro Bundle</option>
                     <option value="retailorcounterservicerestaurantbundle">Retail or Counter-Service Restaurant Bundle</option>
                     <option value="fullservicerestaurantandbarbundle">Full-Service Restaurant & Bar Bundle</option>
