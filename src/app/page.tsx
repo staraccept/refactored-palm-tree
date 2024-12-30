@@ -181,12 +181,12 @@ export default function Home() {
           whileTap={{ scale: 0.95 }}
         >
           <Image
-            src="/staracceptlogo.png"
-            alt="staraccept"
-            width={187.5}
-            height={50}
-            className="h-auto w-auto transition-all duration-300 hover:brightness-110"
-          />
+  src="/staracceptlogo.png"
+  alt="staraccept"
+  width={187.5}
+  height={50}
+  className="transition-all duration-300 hover:brightness-110"
+/>
         </motion.div>
       </div>
 
