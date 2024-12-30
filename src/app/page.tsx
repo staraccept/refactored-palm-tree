@@ -124,10 +124,14 @@ export default function Home() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
+    setFormData(prevState => {
+        const newState = {
+        ...prevState,
+        [name]: value
+        };
+         console.log('Updated Form Data:', newState); // Log the updated state
+      return newState;
+    });
   };
 
   const images = [
@@ -191,7 +195,9 @@ export default function Home() {
           ...formData,
           submitTime: new Date().toISOString()
         });
-      const response = await fetch(`https://hooks.zapier.com/hooks/catch/17465641/28qqau0/?${params.toString()}`, {
+      const url = `https://hooks.zapier.com/hooks/catch/17465641/28qqau0/?${params.toString()}`
+      console.log("Generated URL:", url);
+      const response = await fetch(url, {
         method: 'GET',
       });
          
@@ -1017,7 +1023,7 @@ export default function Home() {
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Do you have a preferred pricing plan?</option>
-                    <option value="onthego">On The Go</option>
+                    <option value="onthego">0-On The Go</option>
                     <option value="mobilepro">Mobile Pro Bundle</option>
                     <option value="retailorcounterservicerestaurantbundle">Retail or Counter-Service Restaurant Bundle</option>
                     <option value="fullservicerestaurantandbarbundle">Full-Service Restaurant & Bar Bundle</option>
