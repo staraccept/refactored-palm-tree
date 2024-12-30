@@ -185,7 +185,7 @@ export default function Home() {
   alt="staraccept"
   width={187.5}
   height={50}
-  className="transition-all duration-300 hover:brightness-110"
+  className="transition-all duration-187.5 hover:brightness-110"
 />
         </motion.div>
       </div>
