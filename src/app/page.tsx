@@ -256,7 +256,7 @@ export default function Home() {
     animate={{ opacity: 1 }}
     transition={{ duration: 1 }}
   >
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full max-w-[1920px] mx-auto">
       <Image
         src={images[currentImage].src}
         alt={images[currentImage].alt}
@@ -283,7 +283,7 @@ export default function Home() {
   </div>
 
   {/* Hero Content */}
-  <div className="absolute inset-0 flex items-center">
+  <div className="absolute inset-0 flex items-center max-w-[1920px] mx-auto">
     <div className="relative max-w-6xl mx-auto px-4 z-20 mt-16">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
