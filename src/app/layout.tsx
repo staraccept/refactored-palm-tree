@@ -1,15 +1,10 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter } from 'next/font/google';
 import "./globals.css";
 
 const inter = Inter({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  subsets: ['latin'],
+  variable: '--font-sans',
 });
 
 export const metadata: Metadata = {
@@ -19,8 +14,8 @@ export const metadata: Metadata = {
 
 const zapierCode = `
   <script async type="module" src="https://interfaces.zapier.com/assets/web-components/zapier-interfaces/zapier-interfaces.esm.js"></script>
-  <zapier-interfaces-chatbot-embed 
-    is-popup="true" 
+  <zapier-interfaces-chatbot-embed
+    is-popup="true"
     chatbot-id="clrxzf6j4001l14nch69l1izo"
     data-open="false"
   ></zapier-interfaces-chatbot-embed>
@@ -33,7 +28,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}>
+      {/* Removed any conditional logic that might add the 'dark' class */}
+      <body className={`${inter.variable} font-sans antialiased`}>
         {children}
         <div dangerouslySetInnerHTML={{ __html: zapierCode }} />
       </body>
