@@ -165,18 +165,18 @@ export default function Home() {
     setIsLoading(true);
     setSubmitStatus('idle');
     setSubmitMessage('');
-
+  
     // Basic validation
     const requiredFields = ['firstName', 'lastName', 'email', 'phone'];
     const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
-
+  
     if (missingFields.length > 0) {
       setSubmitStatus('error');
       setSubmitMessage('Please fill in all required fields: ' + missingFields.join(', '));
       setIsLoading(false);
       return;
     }
-
+  
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
@@ -185,11 +185,12 @@ export default function Home() {
       setIsLoading(false);
       return;
     }
+    
     try {
       const params = new URLSearchParams({
-        ...formData,
+          ...formData,
           submitTime: new Date().toISOString()
-      });
+        });
       const response = await fetch(`https://hooks.zapier.com/hooks/catch/17465641/28qqau0/?${params.toString()}`, {
         method: 'GET',
       });
