@@ -195,7 +195,7 @@ export default function Home() {
           ...formData,
           submitTime: new Date().toISOString()
         });
-      const url = `https://hooks.zapier.com/hooks/catch/17465641/28qqau0/?${params.toString()}`
+      const url = `https://hooks.zapier.com/hooks/catch/17465641/28l6a3r/?${params.toString()}`
       console.log("Generated URL:", url);
       const response = await fetch(url, {
         method: 'GET',
