@@ -198,7 +198,7 @@ export default function Home() {
           submitTime: new Date().toISOString()
         })
       });
-
+  
       if (response.ok) {
         setSubmitStatus('success');
         setSubmitMessage('Thank you! Your message has been sent successfully. We will contact you soon.');
@@ -215,8 +215,14 @@ export default function Home() {
           message: ''
         });
       } else {
-        throw new Error(`Failed to send message: ${response.status}`);
-      }
+        // Log the full response if the fetch fails
+         const errorBody = await response.text();
+         console.error(`Failed to send message: ${response.status} ${errorBody}`);
+  
+        setSubmitStatus('error');
+        setSubmitMessage(`Sorry, there was an error sending your message. Please try again or contact us directly. Status code: ${response.status}`);
+          }
+      
     } catch (error) {
       console.error('Submission error:', error);
       setSubmitStatus('error');
@@ -225,7 +231,6 @@ export default function Home() {
       setIsLoading(false);
     }
   };
-
 
   return (
     <main>
