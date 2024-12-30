@@ -161,17 +161,23 @@ export default function Home() {
   const handleDemoRequest = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    console.log('Submitting form data:', formData); // Debug log
 
     try {
+      console.log('Sending to Zapier...'); // Debug log
       const response = await fetch('https://hooks.zapier.com/hooks/catch/17465641/28qqau0/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'  // Add this line
         },
         body: JSON.stringify(formData)
       });
+      
+      console.log('Response:', response); // Debug log
 
       if (response.ok) {
+        console.log('Success!'); // Debug log
         alert('Message sent successfully!');
         setFormData({
           firstName: '',
@@ -189,12 +195,13 @@ export default function Home() {
         throw new Error('Failed to send message');
       }
     } catch (error) {
+      console.error('Error details:', error); // Debug log
       alert('Error sending message. Please try again.');
       console.error('Error:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+};
 
      {/* Navigation */}
 <motion.nav 
