@@ -106,14 +106,31 @@ export default function Home() {
   const [selectedFAQ, setSelectedFAQ] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showChat, setShowChat] = useState(false);
-  
-  // Add the new carousel state and images array HERE
-  const [currentImage, setCurrentImage] = useState(0);
-  
+  const [currentImage, setCurrentImage] = useState(0);  // Only declare this once
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    callDate: '',
+    preferredTime: '',
+    pricingPlan: '',
+    businessType: '',
+    monthlyVolume: '',
+    message: ''
+  });
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+  
   const images = [
     {
-        src: '/qsrduo2.png',  // Added comma here
+        src: '/qsrduo2.png',
         alt: 'QSR Duo POS System'
     },
     {
@@ -132,9 +149,8 @@ export default function Home() {
         src: '/retailmini3.png',
         alt: 'Retail Mini POS'
     }
-];
+  ];
 
-  // Add the useEffect hook HERE
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % images.length);
@@ -142,25 +158,43 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleDemoRequest = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleDemoRequest = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Add your actual form submission logic here
-    }, 2000);
-  };
 
-  return (
-    <main className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100/80">
-      {/* Promotional Banner */}
-      <motion.div
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        className="fixed top-0 w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white"
-      >
-      </motion.div>
+    try {
+      const response = await fetch('https://hooks.zapier.com/hooks/catch/17465641/28qqau0/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        alert('Message sent successfully!');
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          callDate: '',
+          preferredTime: '',
+          pricingPlan: '',
+          businessType: '',
+          monthlyVolume: '',
+          message: ''
+        });
+      } else {
+        throw new Error('Failed to send message');
+      }
+    } catch (error) {
+      alert('Error sending message. Please try again.');
+      console.error('Error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
      {/* Navigation */}
 <motion.nav 
@@ -860,113 +894,155 @@ export default function Home() {
 
     <div className="grid md:grid-cols-2 gap-12 items-start">
       {/* Contact Form */}
-      <div className="bg-white rounded-xl shadow-sm p-8 border border-gray-100">
-        <form onSubmit={handleDemoRequest} className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-              <input
-                type="text"
-                className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="John"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-              <input
-                type="text"
-                className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Doe"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Business Email</label>
-            <input
-              type="email"
-              className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="john@yourcompany.com"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-            <input
-              type="tel"
-              className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="(555) 123-4567"
-            />
-          </div>
-
-          {/* New Callback Schedule Fields */}
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Call Date</label>
-              <input
-                type="date"
-                className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Time</label>
-              <select className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">Select a time</option>
-                <option value="morning">Morning (9AM - 12PM)</option>
-                <option value="afternoon">Afternoon (12PM - 5PM)</option>
-                <option value="evening">Evening (5PM - 8PM)</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Pricing Plan Preference?</label>
-            <select className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option value="">Do you have a preferred pricing plan?</option>
-              <option value="onthego">0-On The Go</option>
-              <option value="mobilepro">Mobile Pro Bundle</option>
-              <option value="retailorcounterservicerestaurantbundle">Retail or Counter-Service Restaurant Bundle</option>
-              <option value="fullservicerestaurantandbarbundle">Full-Service Restaurant & Bar Bundle</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Business Type</label>
-            <select className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option value="">Select a business type</option>
-              <option value="retail">Retail</option>
-              <option value="restaurant">Restaurant</option>
-              <option value="service">Service Business</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Estimated Monthly Volume</label>
-            <select className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option value="">Select estimated monthly volume</option>
-              <option value="0-50,000">0-50,000</option>
-              <option value="50000-250000">50000-250000</option>
-              <option value="250000-1000000">250000-1000000</option>
-              <option value="1000000+">1000000+</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
-            <textarea
-              className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent h-32 resize-none"
-              placeholder="Tell us about your business needs..."
-            ></textarea>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full py-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-          >
-            Send Message
-          </button>
-        </form>
+<div className="bg-white rounded-xl shadow-sm p-8 border border-gray-100">
+  <form onSubmit={handleDemoRequest} className="space-y-6">
+    <div className="grid md:grid-cols-2 gap-6">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+        <input
+          type="text"
+          name="firstName"
+          value={formData.firstName}
+          onChange={handleInputChange}
+          className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="John"
+        />
       </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+        <input
+          type="text"
+          name="lastName"
+          value={formData.lastName}
+          onChange={handleInputChange}
+          className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Doe"
+        />
+      </div>
+    </div>
 
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">Business Email</label>
+      <input
+        type="email"
+        name="email"
+        value={formData.email}
+        onChange={handleInputChange}
+        className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        placeholder="john@yourcompany.com"
+      />
+    </div>
+
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+      <input
+        type="tel"
+        name="phone"
+        value={formData.phone}
+        onChange={handleInputChange}
+        className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        placeholder="(555) 123-4567"
+      />
+    </div>
+
+    {/* New Callback Schedule Fields */}
+    <div className="grid md:grid-cols-2 gap-6">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Call Date</label>
+        <input
+          type="date"
+          name="callDate"
+          value={formData.callDate}
+          onChange={handleInputChange}
+          className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Time</label>
+        <select 
+          name="preferredTime"
+          value={formData.preferredTime}
+          onChange={handleInputChange}
+          className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          <option value="">Select a time</option>
+          <option value="morning">Morning (9AM - 12PM)</option>
+          <option value="afternoon">Afternoon (12PM - 5PM)</option>
+          <option value="evening">Evening (5PM - 8PM)</option>
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">Pricing Plan Preference?</label>
+      <select 
+        name="pricingPlan"
+        value={formData.pricingPlan}
+        onChange={handleInputChange}
+        className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      >
+        <option value="">Do you have a preferred pricing plan?</option>
+        <option value="onthego">0-On The Go</option>
+        <option value="mobilepro">Mobile Pro Bundle</option>
+        <option value="retailorcounterservicerestaurantbundle">Retail or Counter-Service Restaurant Bundle</option>
+        <option value="fullservicerestaurantandbarbundle">Full-Service Restaurant & Bar Bundle</option>
+      </select>
+    </div>
+
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">Business Type</label>
+      <select 
+        name="businessType"
+        value={formData.businessType}
+        onChange={handleInputChange}
+        className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      >
+        <option value="">Select a business type</option>
+        <option value="retail">Retail</option>
+        <option value="restaurant">Restaurant</option>
+        <option value="service">Service Business</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">Estimated Monthly Volume</label>
+      <select 
+        name="monthlyVolume"
+        value={formData.monthlyVolume}
+        onChange={handleInputChange}
+        className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      >
+        <option value="">Select estimated monthly volume</option>
+        <option value="0-50,000">0-50,000</option>
+        <option value="50000-250000">50000-250000</option>
+        <option value="250000-1000000">250000-1000000</option>
+        <option value="1000000+">1000000+</option>
+      </select>
+    </div>
+
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
+      <textarea
+        name="message"
+        value={formData.message}
+        onChange={handleInputChange}
+        className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent h-32 resize-none"
+        placeholder="Tell us about your business needs..."
+      ></textarea>
+    </div>
+
+    <button
+      type="submit"
+      disabled={isLoading}
+      className={`w-full py-4 ${
+        isLoading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+      } text-white rounded-lg font-semibold transition-colors`}
+    >
+      {isLoading ? 'Sending...' : 'Send Message'}
+    </button>
+  </form>
+</div>
       {/* Right Side Content */}
       <div className="space-y-8">
         <div className="bg-white rounded-xl p-6 border border-gray-100">
