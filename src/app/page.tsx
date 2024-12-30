@@ -185,7 +185,6 @@ export default function Home() {
       setIsLoading(false);
       return;
     }
-
     try {
       const response = await fetch('https://hooks.zapier.com/hooks/catch/17465641/28qqau0/', {
         method: 'POST',
@@ -194,11 +193,13 @@ export default function Home() {
           'Accept': 'application/json'
         },
         body: JSON.stringify({
-          ...formData,
-          submitTime: new Date().toISOString()
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
         })
       });
-  
+         
       if (response.ok) {
         setSubmitStatus('success');
         setSubmitMessage('Thank you! Your message has been sent successfully. We will contact you soon.');
@@ -231,7 +232,6 @@ export default function Home() {
       setIsLoading(false);
     }
   };
-
   return (
     <main>
       {/* Navigation */}
