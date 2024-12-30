@@ -249,7 +249,7 @@ export default function Home() {
 </motion.nav>
 
 {/* Hero Section */}
-<div className="relative h-[600px] w-full pt-16">
+<div className="relative h-[600px] w-full max-w-[1920px] mx-auto pt-16">
   <motion.div
     className="absolute inset-0 overflow-hidden"
     initial={{ opacity: 0 }}
