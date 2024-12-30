@@ -231,12 +231,12 @@ export default function Home() {
     <main>
       {/* Navigation */}
       <motion.nav
-        className="fixed top-0 w-full bg-white bg-opacity-90 backdrop-blur-sm shadow-sm z-50"
+        className="fixed top-0 z-50 w-full bg-white shadow-sm bg-opacity-90 backdrop-blur-sm"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl px-4 mx-auto sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <motion.div
@@ -258,12 +258,12 @@ export default function Home() {
             </div>
 
             {/* Mobile menu button */}
-            <div className="md:hidden flex items-center">
+            <div className="flex items-center md:hidden">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="text-gray-600 hover:text-gray-900 focus:outline-none"
               >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   {isMenuOpen ? (
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   ) : (
@@ -274,7 +274,7 @@ export default function Home() {
             </div>
 
             {/* Desktop menu */}
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="items-center hidden space-x-8 md:flex">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -302,7 +302,7 @@ export default function Home() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition-colors"
+                className="px-4 py-2 text-white transition-colors rounded-lg bg-amber-500 hover:bg-amber-600"
                 onClick={() => {
                   const contactSection = document.getElementById('contact');
                   contactSection?.scrollIntoView({ behavior: 'smooth' });
@@ -332,12 +332,12 @@ export default function Home() {
               className="object-cover"
               quality={90}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10"></div>
+            <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/60 to-transparent"></div>
           </div>
         </motion.div>
 
         {/* Carousel Navigation Dots */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+        <div className="absolute z-20 flex space-x-2 transform -translate-x-1/2 bottom-8 left-1/2">
           {images.map((_, index) => (
             <button
               key={index}
@@ -351,14 +351,14 @@ export default function Home() {
 
         {/* Hero Content */}
         <div className="absolute inset-0 flex items-center max-w-[1920px] mx-auto">
-          <div className="relative max-w-6xl mx-auto px-4 z-20 mt-16">
+          <div className="relative z-20 max-w-6xl px-4 mx-auto mt-16">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-white max-w-xl"
+              className="max-w-xl text-white"
             >
               <motion.h1
-                className="text-2xl md:text-3xl font-bold mb-6 text-white"
+                className="mb-6 text-2xl font-bold text-white md:text-3xl"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
@@ -367,7 +367,7 @@ export default function Home() {
               </motion.h1>
 
               <motion.p
-                className="text-lg text-white/80 mb-8"
+                className="mb-8 text-lg text-white/80"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
@@ -379,7 +379,7 @@ export default function Home() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="bg-amber-500 text-white px-6 py-3 rounded-lg hover:bg-amber-600 transition-colors font-semibold text-sm"
+                  className="px-6 py-3 text-sm font-semibold text-white transition-colors rounded-lg bg-amber-500 hover:bg-amber-600"
                   onClick={() => {
                     const contactSection = document.getElementById('contact');
                     contactSection?.scrollIntoView({ behavior: 'smooth' });
@@ -391,7 +391,7 @@ export default function Home() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="border-2 border-white text-white hover:bg-white hover:text-amber-500 px-6 py-3 rounded-lg transition-colors font-semibold text-sm"
+                  className="px-6 py-3 text-sm font-semibold text-white transition-colors border-2 border-white rounded-lg hover:bg-white hover:text-amber-500"
                   onClick={() => {
                     const pricingSection = document.getElementById('pricing');
                     pricingSection?.scrollIntoView({ behavior: 'smooth' });
@@ -410,7 +410,7 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         className="bg-white border-b border-gray-100 shadow-sm"
       >
-        <div className="max-w-6xl mx-auto py-3">
+        <div className="max-w-6xl py-3 mx-auto">
           <div className="grid grid-cols-4 gap-2 px-4 md:px-0">
             {[
               {
@@ -438,11 +438,11 @@ export default function Home() {
                 key={index}
                 className="flex flex-col items-center text-center group"
               >
-                <div className="text-amber-500 mb-2">
+                <div className="mb-2 text-amber-500">
                   {item.icon}
                 </div>
                 <span className="text-sm font-medium text-gray-800">{item.text}</span>
-                <span className="text-xs text-gray-500 hidden md:block">{item.subtext}</span>
+                <span className="hidden text-xs text-gray-500 md:block">{item.subtext}</span>
               </div>
             ))}
           </div>
@@ -450,14 +450,14 @@ export default function Home() {
       </motion.div>
 
       {/* Pricing Section */}
-      <motion.div className="py-20 px-4 bg-gray-50" id="pricing">
+      <motion.div className="px-4 py-20 bg-gray-50" id="pricing">
         <div className="max-w-6xl mx-auto">
-          <motion.div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-gray-600 text-lg"></p>
+          <motion.div className="mb-16 text-center">
+            <h2 className="mb-4 text-3xl font-bold md:text-4xl">Simple, Transparent Pricing</h2>
+            <p className="text-lg text-gray-600"></p>
 
             {/* Pricing Toggle */}
-            <div className="mt-6 flex items-center justify-center gap-4">
+            <div className="flex items-center justify-center gap-4 mt-6">
               <motion.button
                 className={`px-4 py-2 rounded-lg transition-colors ${
                   activeTab === 'standard'
@@ -485,11 +485,11 @@ export default function Home() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="max-w-6xl mx-auto mb-8 mt-4"
+              className="max-w-6xl mx-auto mt-4 mb-8"
             >
-              <div className="flex items-center justify-between bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-100 shadow-sm">
+              <div className="flex items-center justify-between p-4 border border-green-100 rounded-lg shadow-sm bg-gradient-to-r from-green-50 to-emerald-50">
                 <div className="flex items-center space-x-4">
-                  <div className="bg-green-500 rounded-full p-2">
+                  <div className="p-2 bg-green-500 rounded-full">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                     </svg>
@@ -497,11 +497,11 @@ export default function Home() {
                   <div>
                     <h4 className="text-lg font-semibold text-gray-900">Predictable Monthly Pricing, Zero Processing Fees</h4>
                     <p className="text-sm text-gray-600">Replace unpredictable transaction fees with a fixed monthly rate. Each plan includes one complete POS system with all hardware and software.</p>
-                    <p className="text-xs text-gray-500 mt-1">*Custom and enterprise configurations available. Contact us for multi-terminal and multi-location pricing and specific business needs.</p>
+                    <p className="mt-1 text-xs text-gray-500">*Custom and enterprise configurations available. Contact us for multi-terminal and multi-location pricing and specific business needs.</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <span className="text-sm font-semibold text-green-600 bg-green-100 px-4 py-2 rounded-full whitespace-nowrap">
+                  <span className="px-4 py-2 text-sm font-semibold text-green-600 bg-green-100 rounded-full whitespace-nowrap">
                     ALL-INCLUSIVE PRICING
                   </span>
                   <motion.button
@@ -521,20 +521,20 @@ export default function Home() {
               </div>
             </motion.div>
           )}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
 
             {/* Virtual Terminal */}
-            <motion.div className="relative bg-white p-6 rounded-xl border border-gray-200 hover:shadow-xl transition-all flex flex-col h-full">
-              <div className="absolute -top-px left-0 w-full h-1 bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+            <motion.div className="relative flex flex-col h-full p-6 transition-all bg-white border border-gray-200 rounded-xl hover:shadow-xl">
+              <div className="absolute left-0 w-full h-1 -top-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
 
               <div className="flex-grow">
 
-                <h3 className="text-xl font-semibold mb-4">On The Go</h3>
+                <h3 className="mb-4 text-xl font-semibold">On The Go</h3>
                 <div className="flex items-baseline mb-2">
                   <span className="text-3xl font-bold">$29</span>
-                  <span className="text-sm text-gray-500 ml-2">/mo</span>
+                  <span className="ml-2 text-sm text-gray-500">/mo</span>
                 </div>
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="mb-4 text-sm text-gray-600">
                   {activeTab === 'zero_processing'
                     ? '0% Card Processing Plan'
                     : 'with Flat Rate Or Interchange Pricing'}
@@ -550,7 +550,7 @@ export default function Home() {
                       key={index}
                       className="flex items-center text-gray-600"
                     >
-                      <svg className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="flex-shrink-0 w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                       </svg>
                       {feature}
@@ -567,7 +567,7 @@ export default function Home() {
                     const contactSection = document.getElementById('contact');
                     contactSection?.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="w-full py-3 rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors font-semibold"
+                  className="w-full py-3 font-semibold text-gray-800 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200"
                 >
                   Get Started
                 </motion.button>
@@ -575,16 +575,16 @@ export default function Home() {
             </motion.div>
 
             {/* Advanced Mobile Package */}
-            <motion.div className="relative bg-white p-6 rounded-xl border border-gray-200 hover:shadow-xl transition-all flex flex-col h-full">
-              <div className="absolute -top-px left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-200 to-transparent"></div>
+            <motion.div className="relative flex flex-col h-full p-6 transition-all bg-white border border-gray-200 rounded-xl hover:shadow-xl">
+              <div className="absolute left-0 w-full h-1 -top-px bg-gradient-to-r from-transparent via-cyan-200 to-transparent"></div>
 
               <div className="flex-grow">
-                <h3 className="text-xl font-semibold mb-4">Mobile Pro Bundle</h3>
+                <h3 className="mb-4 text-xl font-semibold">Mobile Pro Bundle</h3>
                 <div className="flex items-baseline mb-2">
                   <span className="text-3xl font-bold">${activeTab === 'zero_processing' ? '99' : '49'}</span>
-                  <span className="text-sm text-gray-500 ml-2">/mo</span>
+                  <span className="ml-2 text-sm text-gray-500">/mo</span>
                 </div>
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="mb-4 text-sm text-gray-600">
                   {activeTab === 'zero_processing'
                     ? '0% Card Processing Plan'
                     : 'with Flat Rate Or Interchange Pricing'}
@@ -602,7 +602,7 @@ export default function Home() {
                       key={index}
                       className="flex items-center text-gray-600"
                     >
-                      <svg className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="flex-shrink-0 w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                       </svg>
                       {feature}
@@ -619,7 +619,7 @@ export default function Home() {
                     const contactSection = document.getElementById('contact');
                     contactSection?.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="w-full py-3 rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors font-semibold"
+                  className="w-full py-3 font-semibold text-gray-800 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200"
                 >
                   Get Started
                 </motion.button>
@@ -627,21 +627,21 @@ export default function Home() {
             </motion.div>
 
             {/* Clover Station Duo 2 Bundle - Popular Choice */}
-            <motion.div className="relative bg-white p-6 rounded-xl border-2 border-blue-500 hover:shadow-xl transition-all flex flex-col h-full">
-              <div className="absolute -top-px left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-white px-4 py-1 rounded-full text-sm font-semibold shadow-lg">
+            <motion.div className="relative flex flex-col h-full p-6 transition-all bg-white border-2 border-blue-500 rounded-xl hover:shadow-xl">
+              <div className="absolute left-0 w-full h-1 -top-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
+              <div className="absolute z-10 transform -translate-x-1/2 -top-4 left-1/2">
+                <span className="px-4 py-1 text-sm font-semibold text-white rounded-full shadow-lg bg-gradient-to-r from-blue-600 to-blue-400">
                   Most Popular
                 </span>
               </div>
 
               <div className="flex-grow mt-2">
-                <h3 className="text-xl font-semibold mb-4">Retail or Counter-Service Restaurant Bundle</h3>
+                <h3 className="mb-4 text-xl font-semibold">Retail or Counter-Service Restaurant Bundle</h3>
                 <div className="flex items-baseline mb-2">
                   <span className="text-3xl font-bold">${activeTab === 'zero_processing' ? '149' : '99'}</span>
-                  <span className="text-sm text-gray-500 ml-2">/mo</span>
+                  <span className="ml-2 text-sm text-gray-500">/mo</span>
                 </div>
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="mb-4 text-sm text-gray-600">
                   {activeTab === 'zero_processing'
                     ? '0% Card Processing Plan'
                     : 'with Flat Rate Or Interchange Pricing'}
@@ -659,7 +659,7 @@ export default function Home() {
                       key={index}
                       className="flex items-center text-gray-600"
                     >
-                      <svg className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="flex-shrink-0 w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                       </svg>
                       {feature}
@@ -677,7 +677,7 @@ export default function Home() {
                     const contactSection = document.getElementById('contact');
                     contactSection?.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="w-full py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors font-semibold"
+                  className="w-full py-3 font-semibold text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
                 >
                   Get Started
                 </motion.button>
@@ -685,21 +685,21 @@ export default function Home() {
             </motion.div>
 
             {/* Restaurant & Bar Bundle */}
-            <motion.div className="relative bg-white p-6 rounded-xl border border-gray-200 hover:shadow-xl transition-all flex flex-col h-full">
-              <div className="absolute -top-px left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-200 to-transparent"></div>
-              <div className="absolute -right-3 top-3 z-10">
-                <span className="bg-gradient-to-r from-purple-600 to-purple-400 text-white px-3 py-1 rounded-l-full text-xs font-semibold shadow-lg whitespace-nowrap">
+            <motion.div className="relative flex flex-col h-full p-6 transition-all bg-white border border-gray-200 rounded-xl hover:shadow-xl">
+              <div className="absolute left-0 w-full h-1 -top-px bg-gradient-to-r from-transparent via-purple-200 to-transparent"></div>
+              <div className="absolute z-10 -right-3 top-3">
+                <span className="px-3 py-1 text-xs font-semibold text-white rounded-l-full shadow-lg bg-gradient-to-r from-purple-600 to-purple-400 whitespace-nowrap">
                   Full-Service Bar & Restaurant Ready
                 </span>
               </div>
 
               <div className="flex-grow mt-8">
-                <h3 className="text-xl font-semibold mb-4">Full-Service Restaurant & Bar Bundle</h3>
+                <h3 className="mb-4 text-xl font-semibold">Full-Service Restaurant & Bar Bundle</h3>
                 <div className="flex items-baseline mb-2">
                   <span className="text-3xl font-bold">${activeTab === 'zero_processing' ? '179' : '129'}</span>
-                  <span className="text-sm text-gray-500 ml-2">/mo</span>
+                  <span className="ml-2 text-sm text-gray-500">/mo</span>
                 </div>
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="mb-4 text-sm text-gray-600">
                   {activeTab === 'zero_processing'
                     ? '0% Card Processing Plan'
                     : 'with Flat Rate Or Interchange Pricing'}
@@ -716,7 +716,7 @@ export default function Home() {
                       key={index}
                       className="flex items-center text-gray-600"
                     >
-                      <svg className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="flex-shrink-0 w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                       </svg>
                       {feature}
@@ -732,7 +732,7 @@ export default function Home() {
                     const contactSection = document.getElementById('contact');
                     contactSection?.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="w-full py-3 rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors font-semibold"
+                  className="w-full py-3 font-semibold text-gray-800 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200"
                 >
                   Get Started
                 </motion.button>
@@ -746,19 +746,19 @@ export default function Home() {
 
       {/* Solutions & Integrations Section */}
       <section className="py-20 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-6xl mx-auto px-4">
+        <div className="max-w-6xl px-4 mx-auto">
           {/* Header */}
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
               Solutions & Integrations
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="max-w-3xl mx-auto text-xl text-gray-600">
               A glimpse into our ever-expanding ecosystem of possibilities
             </p>
           </div>
 
           {/* Integration Categories */}
-          <div className="grid md:grid-cols-3 gap-8 mb-20">
+          <div className="grid gap-8 mb-20 md:grid-cols-3">
             {[
               {
                 title: "Food Service & Delivery",
@@ -798,7 +798,7 @@ export default function Home() {
                   delay: index * 0.2,
                   ease: "easeOut"
                 }}
-                className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300"
+                className="p-8 transition-all duration-300 bg-white border border-gray-100 shadow-sm rounded-xl hover:shadow-md"
               >
                 {/* Replace emoji with checkmark */}
                 <div className="mb-6">
@@ -814,14 +814,14 @@ export default function Home() {
                     <path d="M20 6L9 17L4 12" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold mb-6 text-gray-900">{category.title}</h3>
+                <h3 className="mb-6 text-xl font-semibold text-gray-900">{category.title}</h3>
                 <div className="space-y-3">
                   {category.solutions.map((solution, i) => (
                     <div key={i} className="flex items-center justify-between group">
-                      <span className="text-gray-800 group-hover:text-blue-600 transition-colors">
+                      <span className="text-gray-800 transition-colors group-hover:text-blue-600">
                         {solution.name}
                       </span>
-                      <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
+                      <span className="px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded-full">
                         {solution.tag}
                       </span>
                     </div>
@@ -832,7 +832,7 @@ export default function Home() {
           </div>
 
           {/* Features Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+          <div className="grid gap-8 mb-20 md:grid-cols-2 lg:grid-cols-4">
             {[
               {
                 icon: "⚡",
@@ -857,21 +857,21 @@ export default function Home() {
             ].map((feature, index) => (
               <div
                 key={index}
-                className="bg-white p-6 rounded-xl border border-gray-100 hover:shadow-sm transition-all"
+                className="p-6 transition-all bg-white border border-gray-100 rounded-xl hover:shadow-sm"
               >
-                <span className="text-3xl mb-4 block">{feature.icon}</span>
-                <h4 className="text-lg font-semibold mb-2 text-gray-900">{feature.title}</h4>
+                <span className="block mb-4 text-3xl">{feature.icon}</span>
+                <h4 className="mb-2 text-lg font-semibold text-gray-900">{feature.title}</h4>
                 <p className="text-gray-600">{feature.description}</p>
               </div>
             ))}
           </div>
 
           {/* Payment Methods Section */}
-          <div className="bg-white rounded-xl p-8 border border-gray-100 mb-20">
-            <h3 className="text-xl font-semibold mb-6 text-center text-gray-900">
+          <div className="p-8 mb-20 bg-white border border-gray-100 rounded-xl">
+            <h3 className="mb-6 text-xl font-semibold text-center text-gray-900">
               Supported Payment Methods
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div className="grid grid-cols-2 gap-4 text-center md:grid-cols-4">
               {[
                 "Credit & Debit Cards",
                 "Mobile Payments",
@@ -882,7 +882,7 @@ export default function Home() {
                 "Samsung Pay",
                 "Gift Cards"
               ].map((method, index) => (
-                <div key={index} className="px-4 py-3 bg-gray-50 rounded-lg text-gray-700 text-sm">
+                <div key={index} className="px-4 py-3 text-sm text-gray-700 rounded-lg bg-gray-50">
                   {method}
                 </div>
               ))}
@@ -891,7 +891,7 @@ export default function Home() {
 
           {/* Call to Action */}
           <div className="text-center">
-            <p className="text-gray-600 mb-6">
+            <p className="mb-6 text-gray-600">
               Looking for a specific integration? We're constantly expanding our capabilities.
             </p>
             <motion.button
@@ -901,11 +901,11 @@ export default function Home() {
                 const contactSection = document.getElementById('contact');
                 contactSection?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center space-x-2 group"
+              className="inline-flex items-center px-8 py-3 space-x-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 group"
             >
               <span>Discuss Your Integration Needs</span>
               <svg
-                className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                className="w-5 h-5 transition-transform group-hover:translate-x-1"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -917,87 +917,88 @@ export default function Home() {
         </div>
       </section>
       {/* Contact Section */}
-      <div className="relative py-20 px-4 bg-gradient-to-b from-gray-50 to-white" id="contact">
+            
+<div className="relative px-4 py-20 bg-gradient-to-b from-gray-50 to-white" id="contact">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">Local Comes First</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <div className="mb-12 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">Local Comes First</h2>
+            <p className="max-w-2xl mx-auto text-lg text-gray-600">
               Ready to transform your business? Fill out the form below and a local team member will get back to you within 24 hours.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12 items-start">
+          <div className="grid items-start gap-12 md:grid-cols-2">
             {/* Contact Form */}
-            <div className="bg-white rounded-xl shadow-sm p-8 border border-gray-100">
+            <div className="p-8 bg-white border border-gray-100 shadow-sm rounded-xl">
               <form onSubmit={handleDemoRequest} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid gap-6 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                    <label className="block mb-2 text-sm font-medium text-gray-700">First Name</label>
                     <input
                       type="text"
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="John"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                    <label className="block mb-2 text-sm font-medium text-gray-700">Last Name</label>
                     <input
                       type="text"
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Doe"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Business Email</label>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Business Email</label>
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="john@yourcompany.com"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Phone Number</label>
                   <input
                     type="tel"
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="(555) 123-4567"
                   />
                 </div>
 
                 {/* New Callback Schedule Fields */}
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid gap-6 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Call Date</label>
+                    <label className="block mb-2 text-sm font-medium text-gray-700">Preferred Call Date</label>
                     <input
                       type="date"
                       name="callDate"
                       value={formData.callDate}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Time</label>
+                    <label className="block mb-2 text-sm font-medium text-gray-700">Preferred Time</label>
                     <select
                       name="preferredTime"
                       value={formData.preferredTime}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="">Select a time</option>
                       <option value="morning">Morning (9AM - 12PM)</option>
@@ -1008,12 +1009,12 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Pricing Plan Preference?</label>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Pricing Plan Preference?</label>
                   <select
                     name="pricingPlan"
                     value={formData.pricingPlan}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Do you have a preferred pricing plan?</option>
                     <option value="onthego">0-On The Go</option>
@@ -1024,12 +1025,12 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Business Type</label>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Business Type</label>
                   <select
                     name="businessType"
                     value={formData.businessType}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Select a business type</option>
                     <option value="retail">Retail</option>
@@ -1040,12 +1041,12 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Estimated Monthly Volume</label>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Estimated Monthly Volume</label>
                   <select
                     name="monthlyVolume"
                     value={formData.monthlyVolume}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Select estimated monthly volume</option>
                     <option value="0-50,000">0-50,000</option>
@@ -1056,25 +1057,25 @@ export default function Home() {
                 </div>
 
                 <div className="space-y-4">
-                {/* Form submission status message */}
+                  {/* Form submission status message */}
                   {isLoading && (
-                    <div className="bg-blue-50 text-blue-600 p-4 rounded-lg flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <div className="flex items-center justify-center p-4 text-blue-600 rounded-lg bg-blue-50">
+                      <svg className="w-5 h-5 mr-3 -ml-1 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
                       Processing your request...
                     </div>
                   )}
-                  
-                 {submitStatus === 'success' && (
-                    <div className="bg-green-50 text-green-600 p-4 rounded-lg">
+
+                  {submitStatus === 'success' && (
+                    <div className="p-4 text-green-600 rounded-lg bg-green-50">
                       {submitMessage}
                     </div>
                   )}
 
                   {submitStatus === 'error' && (
-                    <div className="bg-red-50 text-red-600 p-4 rounded-lg">
+                    <div className="p-4 text-red-600 rounded-lg bg-red-50">
                       {submitMessage}
                     </div>
                   )}
@@ -1090,7 +1091,7 @@ export default function Home() {
                   >
                     {isLoading ? (
                       <span className="flex items-center">
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 mr-3 -ml-1 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
@@ -1103,11 +1104,10 @@ export default function Home() {
                 </div>
               </form>
             </div>
-
-            {/* Right Side Content */}
+              {/* Right Side Content */}
             <div className="space-y-8">
-              <div className="bg-white rounded-xl p-6 border border-gray-100">
-                <h3 className="text-xl font-semibold mb-4">Why Choose Star Accept?</h3>
+              <div className="p-6 bg-white border border-gray-100 rounded-xl">
+                <h3 className="mb-4 text-xl font-semibold">Why Choose Star Accept?</h3>
                 <div className="space-y-4">
                   {[
                     {
@@ -1126,11 +1126,11 @@ export default function Home() {
                       icon: '💬'
                     }
                   ].map((item, index) => (
-                    <div key={index} className="flex items-start space-x-4 p-4 rounded-lg bg-gray-50">
+                    <div key={index} className="flex items-start p-4 space-x-4 rounded-lg bg-gray-50">
                       <span className="text-2xl">{item.icon}</span>
                       <div>
                         <h4 className="font-semibold text-gray-900">{item.title}</h4>
-                        <p className="text-gray-600 text-sm">{item.description}</p>
+                        <p className="text-sm text-gray-600">{item.description}</p>
                       </div>
                     </div>
                   ))}
@@ -1138,20 +1138,20 @@ export default function Home() {
               </div>
 
               {/* Logo Section */}
-              <div className="bg-white rounded-xl p-8 border border-gray-100 flex items-center justify-center">
+              <div className="flex items-center justify-center p-8 bg-white border border-gray-100 rounded-xl">
                 <Image
                   src="/staracceptlogo.png"
                   alt="Star Accept Business Solutions"
                   width={300} // Adjust this value based on your preferred size
                   height={80}  // Adjust this value based on your preferred size
-                  className="h-auto w-auto" // This allows the image to maintain its aspect ratio
+                  className="w-auto h-auto" // This allows the image to maintain its aspect ratio
                   priority
                 />
               </div>
 
               {/* Direct Contact Info */}
-              <div className="bg-white rounded-xl p-6 border border-gray-100">
-                <h3 className="text-xl font-semibold mb-4">Direct Contact</h3>
+              <div className="p-6 bg-white border border-gray-100 rounded-xl">
+                <h3 className="mb-4 text-xl font-semibold">Direct Contact</h3>
                 <div className="space-y-4">
                   <a href="tel:+18888857333" className="flex items-center space-x-3 text-gray-600 hover:text-blue-600">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
