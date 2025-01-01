@@ -102,7 +102,7 @@ const faqs: FAQ[] = [
 export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('standard');
+  const [activeTab, setActiveTab] = useState('zero_processing'); // Set default to ZERO PROCESSING FEES
   const [selectedFAQ, setSelectedFAQ] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showChat, setShowChat] = useState(false);
@@ -122,14 +122,17 @@ export default function Home() {
     message: ''
   });
 
+  // State for hover effects on pricing cards
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prevState => {
-        const newState = {
+      const newState = {
         ...prevState,
         [name]: value
-        };
-         console.log('Updated Form Data:', newState); // Log the updated state
+      };
+      console.log('Updated Form Data:', newState); // Log the updated state
       return newState;
     });
   };
@@ -169,18 +172,18 @@ export default function Home() {
     setIsLoading(true);
     setSubmitStatus('idle');
     setSubmitMessage('');
-  
+
     // Basic validation
     const requiredFields = ['firstName', 'lastName', 'email', 'phone'];
     const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
-  
+
     if (missingFields.length > 0) {
       setSubmitStatus('error');
       setSubmitMessage('Please fill in all required fields: ' + missingFields.join(', '));
       setIsLoading(false);
       return;
     }
-  
+
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
@@ -189,18 +192,18 @@ export default function Home() {
       setIsLoading(false);
       return;
     }
-    
+
     try {
       const params = new URLSearchParams({
-          ...formData,
-          submitTime: new Date().toISOString()
-        });
-      const url = `https://hooks.zapier.com/hooks/catch/17465641/28qqau0?${params.toString()}`
+        ...formData,
+        submitTime: new Date().toISOString()
+      });
+      const url = `https://hooks.zapier.com/hooks/catch/17465641/28qqau0/?${params.toString()}`
       console.log("Generated URL:", url);
       const response = await fetch(url, {
         method: 'GET',
       });
-         
+
       if (response.ok) {
         setSubmitStatus('success');
         setSubmitMessage('Thank you! Your message has been sent successfully. We will contact you soon.');
@@ -218,13 +221,13 @@ export default function Home() {
         });
       } else {
         // Log the full response if the fetch fails
-         const errorBody = await response.text();
-         console.error(`Failed to send message: ${response.status} ${errorBody}`);
-  
+        const errorBody = await response.text();
+        console.error(`Failed to send message: ${response.status} ${errorBody}`);
+
         setSubmitStatus('error');
         setSubmitMessage(`Sorry, there was an error sending your message. Please try again or contact us directly. Status code: ${response.status}`);
-          }
-      
+      }
+
     } catch (error) {
       console.error('Submission error:', error);
       setSubmitStatus('error');
@@ -233,6 +236,16 @@ export default function Home() {
       setIsLoading(false);
     }
   };
+
+  const scrollToContactAndSelect = (planName: string) => {
+    const contactSection = document.getElementById('contact');
+    contactSection?.scrollIntoView({ behavior: 'smooth' });
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      pricingPlan: planName
+    }));
+  };
+
   return (
     <main>
       {/* Navigation */}
@@ -242,6 +255,7 @@ export default function Home() {
         animate={{ y: 0 }}
         transition={{ duration: 0.5 }}
       >
+        {/* ... Navigation code ... */}
         <div className="max-w-6xl px-4 mx-auto sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
@@ -323,6 +337,7 @@ export default function Home() {
 
       {/* Hero Section */}
       <div className="relative h-[600px] w-full max-w-[1920px] mx-auto pt-16">
+        {/* ... Hero section code ... */}
         <motion.div
           className="absolute inset-0 overflow-hidden"
           initial={{ opacity: 0 }}
@@ -416,6 +431,7 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         className="bg-white border-b border-gray-100 shadow-sm"
       >
+        {/* ... Quick info bar code ... */}
         <div className="max-w-6xl py-3 mx-auto">
           <div className="grid grid-cols-4 gap-2 px-4 md:px-0">
             {[
@@ -530,7 +546,13 @@ export default function Home() {
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
 
             {/* Virtual Terminal */}
-            <motion.div className="relative flex flex-col h-full p-6 transition-all bg-white border border-gray-200 rounded-xl hover:shadow-xl">
+            <motion.div
+              className={`relative flex flex-col h-full p-6 transition-all bg-white border ${
+                hoveredCard === 'onTheGo' ? 'border-blue-400 shadow-md' : 'border-gray-200'
+              } rounded-xl`}
+              onMouseEnter={() => setHoveredCard('onTheGo')}
+              onMouseLeave={() => setHoveredCard(null)}
+            >
               <div className="absolute left-0 w-full h-1 -top-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
 
               <div className="flex-grow">
@@ -569,10 +591,7 @@ export default function Home() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    const contactSection = document.getElementById('contact');
-                    contactSection?.scrollIntoView({ behavior: 'smooth' });
-                  }}
+                  onClick={() => scrollToContactAndSelect('On The Go')}
                   className="w-full py-3 font-semibold text-gray-800 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200"
                 >
                   Get Started
@@ -581,7 +600,13 @@ export default function Home() {
             </motion.div>
 
             {/* Advanced Mobile Package */}
-            <motion.div className="relative flex flex-col h-full p-6 transition-all bg-white border border-gray-200 rounded-xl hover:shadow-xl">
+            <motion.div
+              className={`relative flex flex-col h-full p-6 transition-all bg-white border ${
+                hoveredCard === 'mobilePro' ? 'border-blue-400 shadow-md' : 'border-gray-200'
+              } rounded-xl`}
+              onMouseEnter={() => setHoveredCard('mobilePro')}
+              onMouseLeave={() => setHoveredCard(null)}
+            >
               <div className="absolute left-0 w-full h-1 -top-px bg-gradient-to-r from-transparent via-cyan-200 to-transparent"></div>
 
               <div className="flex-grow">
@@ -621,10 +646,7 @@ export default function Home() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    const contactSection = document.getElementById('contact');
-                    contactSection?.scrollIntoView({ behavior: 'smooth' });
-                  }}
+                  onClick={() => scrollToContactAndSelect('Mobile Pro Bundle')}
                   className="w-full py-3 font-semibold text-gray-800 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200"
                 >
                   Get Started
@@ -633,7 +655,13 @@ export default function Home() {
             </motion.div>
 
             {/* Clover Station Duo 2 Bundle - Popular Choice */}
-            <motion.div className="relative flex flex-col h-full p-6 transition-all bg-white border-2 border-blue-500 rounded-xl hover:shadow-xl">
+            <motion.div
+              className={`relative flex flex-col h-full p-6 transition-all bg-white border-2 ${
+                hoveredCard === 'retailCounter' ? 'border-blue-500 shadow-md' : 'border-blue-500'
+              } rounded-xl hover:shadow-xl`}
+              onMouseEnter={() => setHoveredCard('retailCounter')}
+              onMouseLeave={() => setHoveredCard(null)}
+            >
               <div className="absolute left-0 w-full h-1 -top-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
               <div className="absolute z-10 transform -translate-x-1/2 -top-4 left-1/2">
                 <span className="px-4 py-1 text-sm font-semibold text-white rounded-full shadow-lg bg-gradient-to-r from-blue-600 to-blue-400">
@@ -679,10 +707,7 @@ export default function Home() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    const contactSection = document.getElementById('contact');
-                    contactSection?.scrollIntoView({ behavior: 'smooth' });
-                  }}
+                  onClick={() => scrollToContactAndSelect('Retail or Counter-Service Restaurant Bundle')}
                   className="w-full py-3 font-semibold text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
                 >
                   Get Started
@@ -691,7 +716,13 @@ export default function Home() {
             </motion.div>
 
             {/* Restaurant & Bar Bundle */}
-            <motion.div className="relative flex flex-col h-full p-6 transition-all bg-white border border-gray-200 rounded-xl hover:shadow-xl">
+             <motion.div
+              className={`relative flex flex-col h-full p-6 transition-all bg-white border ${
+                hoveredCard === 'fullService' ? 'border-blue-400 shadow-md' : 'border-gray-200'
+              } rounded-xl`}
+              onMouseEnter={() => setHoveredCard('fullService')}
+              onMouseLeave={() => setHoveredCard(null)}
+            >
               <div className="absolute left-0 w-full h-1 -top-px bg-gradient-to-r from-transparent via-purple-200 to-transparent"></div>
               <div className="absolute z-10 -right-3 top-3">
                 <span className="px-3 py-1 text-xs font-semibold text-white rounded-l-full shadow-lg bg-gradient-to-r from-purple-600 to-purple-400 whitespace-nowrap">
@@ -699,196 +730,193 @@ export default function Home() {
                 </span>
               </div>
 
-              <div className="flex-grow mt-8">
+              <div className="flex-grow mt-2">
                 <h3 className="mb-4 text-xl font-semibold">Full-Service Restaurant & Bar Bundle</h3>
                 <div className="flex items-baseline mb-2">
                   <span className="text-3xl font-bold">${activeTab === 'zero_processing' ? '179' : '129'}</span>
                   <span className="ml-2 text-sm text-gray-500">/mo</span>
-                </div>
-                <p className="mb-4 text-sm text-gray-600">
-                  {activeTab === 'zero_processing'
-                    ? '0% Card Processing Plan'
-                    : 'with Flat Rate Or Interchange Pricing'}
-                </p>
-                <ul className="space-y-4">
-                  {[
-                    'Full POS system with cash drawer & printer',
-                    'Restaurant-optimized interface',
-                    'Advanced inventory control',
-                    'Built-in payment processing',
-                    'Next-day deposits'
-                  ].map((feature, index) => (
-                    <motion.li
-                      key={index}
-                      className="flex items-center text-gray-600"
-                    >
-                      <svg className="flex-shrink-0 w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                      </svg>
-                      {feature}
-                    </motion.li>
-                  ))}
-                </ul>
               </div>
-              <div className="mt-6">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    const contactSection = document.getElementById('contact');
-                    contactSection?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  className="w-full py-3 font-semibold text-gray-800 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200"
+              <p className="mb-4 text-sm text-gray-600">
+                {activeTab === 'zero_processing'
+                  ? '0% Card Processing Plan'
+                  : 'with Flat Rate Or Interchange Pricing'}
+              </p>
+              <ul className="space-y-4">
+                {[
+                  'Full POS system with cash drawer & printer',
+                  'Restaurant-optimized interface',
+                  'Advanced inventory control',
+                  'Built-in payment processing',
+                  'Next-day deposits'
+                ].map((feature, index) => (
+                  <motion.li
+                    key={index}
+                    className="flex items-center text-gray-600"
+                  >
+                    <svg className="flex-shrink-0 w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {feature}
+                  </motion.li>
+                ))}
+              </ul>
+            </div>
+            <div className="mt-6">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => scrollToContactAndSelect('Full-Service Restaurant & Bar Bundle')}
+                className="w-full py-3 font-semibold text-gray-800 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200"
+              >
+                Get Started
+              </motion.button>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </motion.div>
+    <section id="solutions" className="py-20 bg-gradient-to-b from-white to-gray-50">
+    </section>
+
+    {/* Solutions & Integrations Section */}
+    <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+      <div className="max-w-6xl px-4 mx-auto">
+        {/* Header */}
+        <div className="mb-16 text-center">
+          <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
+            Solutions & Integrations
+          </h2>
+          <p className="max-w-3xl mx-auto text-xl text-gray-600">
+            A glimpse into our ever-expanding ecosystem of possibilities
+          </p>
+        </div>
+
+        {/* Integration Categories */}
+        <div className="grid gap-8 mb-20 md:grid-cols-3">
+          {[
+            {
+              title: "Food Service & Delivery",
+              solutions: [
+                { name: "GrubHub", tag: "Delivery" },
+                { name: "Uber Eats", tag: "Delivery" },
+                { name: "DoorDash", tag: "Delivery" },
+                { name: "Samsung Kiosk", tag: "POS" }
+              ]
+            },
+            {
+              title: "Financial & Operations",
+              solutions: [
+                { name: "QuickBooks", tag: "Accounting" },
+                { name: "Paychex", tag: "Payroll" },
+                { name: "ADP", tag: "HR" },
+                { name: "Gusto", tag: "Payroll" },
+                { name: "DAVO", tag: "Tax" }
+              ]
+            },
+            {
+              title: "E-Commerce & Retail",
+              solutions: [
+                { name: "Shopify", tag: "E-commerce" },
+                { name: "BigCommerce", tag: "E-commerce" },
+                { name: "Shopventory", tag: "Inventory" },
+                { name: "SKU IQ", tag: "Inventory" }
+              ]
+            }
+          ].map((category, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.6,
+                delay: index * 0.2,
+                ease: "easeOut"
+              }}
+              className="p-8 transition-all duration-300 bg-white border border-gray-100 shadow-sm rounded-xl hover:shadow-md"
+            >
+              {/* Replace emoji with checkmark */}
+              <div className="mb-6">
+                <svg
+                  className="w-12 h-12 text-amber-500"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  Get Started
-                </motion.button>
+                  <path d="M20 6L9 17L4 12" />
+                </svg>
+              </div>
+              <h3 className="mb-6 text-xl font-semibold text-gray-900">{category.title}</h3>
+              <div className="space-y-3">
+                {category.solutions.map((solution, i) => (
+                  <div key={i} className="flex items-center justify-between group">
+                    <span className="text-gray-800 transition-colors group-hover:text-blue-600">
+                      {solution.name}
+                    </span>
+                    <span className="px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded-full">
+                      {solution.tag}
+                    </span>
+                  </div>
+                ))}
               </div>
             </motion.div>
-          </div>
+          ))}
         </div>
-      </motion.div>
-      <section id="solutions" className="py-20 bg-gradient-to-b from-white to-gray-50">
-      </section>
 
-      {/* Solutions & Integrations Section */}
-      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-6xl px-4 mx-auto">
-          {/* Header */}
-          <div className="mb-16 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
-              Solutions & Integrations
-            </h2>
-            <p className="max-w-3xl mx-auto text-xl text-gray-600">
-              A glimpse into our ever-expanding ecosystem of possibilities
-            </p>
-          </div>
+        {/* Features Grid */}
+        <div className="grid gap-8 mb-20 md:grid-cols-2 lg:grid-cols-4">
+          {[
+            {
+              icon: "⚡",
+              title: "Quick Integration",
+              description: "Most integrations ready in minutes, not days"
+            },
+            {
+              icon: "🔄",
+              title: "Real-Time Sync",
+              description: "Automatic data synchronization across platforms"
+            },
+            {
+              icon: "🛡️",
+              title: "Enterprise Security",
+              description: "Bank-level encryption for all connections"
+            },
+            {
+              icon: "🔧",
+              title: "Custom Solutions",
+              description: "Tailored integrations for unique needs"
+            }
+          ].map((feature, index) => (
+            <div
+              key={index}
+              className="p-6 transition-all bg-white border border-gray-100 rounded-xl hover:shadow-sm"
+            >
+              <span className="block mb-4 text-3xl">{feature.icon}</span>
+              <h4 className="mb-2 text-lg font-semibold text-gray-900">{feature.title}</h4>
+              <p className="text-gray-600">{feature.description}</p>
+            </div>
+          ))}
+        </div>
 
-          {/* Integration Categories */}
-          <div className="grid gap-8 mb-20 md:grid-cols-3">
+        {/* Payment Methods Section */}
+        <div className="p-8 mb-20 bg-white border border-gray-100 rounded-xl">
+          <h3 className="mb-6 text-xl font-semibold text-center text-gray-900">
+            Supported Payment Methods
+          </h3>
+          <div className="grid grid-cols-2 gap-4 text-center md:grid-cols-4">
             {[
-              {
-                title: "Food Service & Delivery",
-                solutions: [
-                  { name: "GrubHub", tag: "Delivery" },
-                  { name: "Uber Eats", tag: "Delivery" },
-                  { name: "DoorDash", tag: "Delivery" },
-                  { name: "Samsung Kiosk", tag: "POS" }
-                ]
-              },
-              {
-                title: "Financial & Operations",
-                solutions: [
-                  { name: "QuickBooks", tag: "Accounting" },
-                  { name: "Paychex", tag: "Payroll" },
-                  { name: "ADP", tag: "HR" },
-                  { name: "Gusto", tag: "Payroll" },
-                  { name: "DAVO", tag: "Tax" }
-                ]
-              },
-              {
-                title: "E-Commerce & Retail",
-                solutions: [
-                  { name: "Shopify", tag: "E-commerce" },
-                  { name: "BigCommerce", tag: "E-commerce" },
-                  { name: "Shopventory", tag: "Inventory" },
-                  { name: "SKU IQ", tag: "Inventory" }
-                ]
-              }
-            ].map((category, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.6,
-                  delay: index * 0.2,
-                  ease: "easeOut"
-                }}
-                className="p-8 transition-all duration-300 bg-white border border-gray-100 shadow-sm rounded-xl hover:shadow-md"
-              >
-                {/* Replace emoji with checkmark */}
-                <div className="mb-6">
-                  <svg
-                    className="w-12 h-12 text-amber-500"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M20 6L9 17L4 12" />
-                  </svg>
-                </div>
-                <h3 className="mb-6 text-xl font-semibold text-gray-900">{category.title}</h3>
-                <div className="space-y-3">
-                  {category.solutions.map((solution, i) => (
-                    <div key={i} className="flex items-center justify-between group">
-                      <span className="text-gray-800 transition-colors group-hover:text-blue-600">
-                        {solution.name}
-                      </span>
-                      <span className="px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded-full">
-                        {solution.tag}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Features Grid */}
-          <div className="grid gap-8 mb-20 md:grid-cols-2 lg:grid-cols-4">
-            {[
-              {
-                icon: "⚡",
-                title: "Quick Integration",
-                description: "Most integrations ready in minutes, not days"
-              },
-              {
-                icon: "🔄",
-                title: "Real-Time Sync",
-                description: "Automatic data synchronization across platforms"
-              },
-              {
-                icon: "🛡️",
-                title: "Enterprise Security",
-                description: "Bank-level encryption for all connections"
-              },
-              {
-                icon: "🔧",
-                title: "Custom Solutions",
-                description: "Tailored integrations for unique needs"
-              }
-            ].map((feature, index) => (
-              <div
-                key={index}
-                className="p-6 transition-all bg-white border border-gray-100 rounded-xl hover:shadow-sm"
-              >
-                <span className="block mb-4 text-3xl">{feature.icon}</span>
-                <h4 className="mb-2 text-lg font-semibold text-gray-900">{feature.title}</h4>
-                <p className="text-gray-600">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Payment Methods Section */}
-          <div className="p-8 mb-20 bg-white border border-gray-100 rounded-xl">
-            <h3 className="mb-6 text-xl font-semibold text-center text-gray-900">
-              Supported Payment Methods
-            </h3>
-            <div className="grid grid-cols-2 gap-4 text-center md:grid-cols-4">
-              {[
-                "Credit & Debit Cards",
-                "Mobile Payments",
-                "Digital Wallets",
-                "Contactless",
-                "Apple Pay",
-                "Google Pay",
-                "Samsung Pay",
-                "Gift Cards"
-              ].map((method, index) => (
-                <div key={index} className="px-4 py-3 text-sm text-gray-700 rounded-lg bg-gray-50">
+              "Credit & Debit Cards",
+              "Mobile Payments",
+              "Digital Wallets",
+              "Contactless",
+              "Apple Pay",
+              "Google Pay",
+              "Samsung Pay",
+              "Gift Cards"
+            ].map((method, index) => (
+              <div key={index} className="px-4 py-3 text-sm text-gray-700 rounded-lg bg-gray-50">
                   {method}
                 </div>
               ))}
