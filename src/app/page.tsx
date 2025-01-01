@@ -1043,7 +1043,7 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">Pricing Plan Preference?</label>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Select Plan</label>
                   <select
                     name="pricingPlan"
                     value={formData.pricingPlan}
