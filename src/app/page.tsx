@@ -1045,7 +1045,7 @@ export default function Home() {
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700">Select Plan</label>
                   <select
-                    name="pricingPlan"
+                    name="selectplan"
                     value={formData.pricingPlan}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
