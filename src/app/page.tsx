@@ -123,15 +123,16 @@ export default function Home() {
     message: ''
   });
 <Head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-2D18CMVZEF"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-2D18CMVZEF');
-</script>
+  {/* Google tag (gtag.js) */}
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2D18CMVZEF"></script>
+  <script dangerouslySetInnerHTML={{
+    __html: `
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-2D18CMVZEF');
+    `,
+  }} />
 </Head>
   // State for hover effects on pricing cards
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
