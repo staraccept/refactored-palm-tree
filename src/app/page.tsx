@@ -150,13 +150,17 @@ export default function Home() {
   };
 
   const images = [
-    {
-      src: '/qsrduo2.png',
-      alt: 'QSR Duo POS System'
+        {
+      src: '/retailflex3.png',
+      alt: 'Flexible Payment Terminal'
     },
     {
       src: '/retailduo2.jpg',
       alt: 'Advanced POS Terminal'
+    },
+         {
+      src: '/qsrduo2.png',
+      alt: 'QSR Duo POS System'
     },
     {
       src: '/qsrmini3.png',
