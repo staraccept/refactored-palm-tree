@@ -976,7 +976,7 @@ export default function Home() {
           <div className="grid items-start gap-12 md:grid-cols-2">
 {/* Contact Form */}
 <div className="p-8 bg-white border border-gray-100 shadow-sm rounded-xl">
-  <form action="YOUR_FORMSPREE_ENDPOINT_URL" method="POST" className="space-y-6">
+  <form action="https://formspree.io/f/mzzzyddy" method="POST" className="space-y-6">
     <div className="grid gap-6 md:grid-cols-2">
       <div>
         <label className="block mb-2 text-sm font-medium text-gray-700">First Name</label>
