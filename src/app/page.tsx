@@ -154,17 +154,9 @@ export default function Home() {
       src: '/retailflex3.png',
       alt: 'Flexible Payment Terminal'
     },
-    {
-      src: '/retailduo2.jpg',
-      alt: 'Advanced POS Terminal'
-    },
          {
       src: '/qsrduo2.png',
       alt: 'QSR Duo POS System'
-    },
-    {
-      src: '/qsrmini3.png',
-      alt: 'Compact POS Solution'
     },
     {
       src: '/retailmini3.png',
