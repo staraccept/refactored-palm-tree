@@ -1,5 +1,6 @@
       
 'use client';
+import Head from 'next/head';
 import React, { useState, useEffect, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
