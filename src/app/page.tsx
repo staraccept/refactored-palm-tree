@@ -167,10 +167,6 @@ export default function Home() {
       alt: 'Compact POS Solution'
     },
     {
-      src: '/retailflex3.png',
-      alt: 'Flexible Payment Terminal'
-    },
-    {
       src: '/retailmini3.png',
       alt: 'Retail Mini POS'
     }
