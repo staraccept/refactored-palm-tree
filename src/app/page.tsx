@@ -401,28 +401,26 @@ export default function Home() {
               </motion.p>
 
               <motion.div className="flex flex-wrap gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-6 py-3 text-sm font-semibold text-white transition-colors rounded-lg bg-amber-500 hover:bg-amber-600"
-                  onClick={() => {
-                    const contactSection = document.getElementById('contact');
-                    contactSection?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
-                  Get Started
-                </motion.button>
+                <motion.a href="https://onboarding.tillpayments.com/signup/6748abe55b6362feca0a75f3" target="_blank" rel="noopener noreferrer">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-6 py-3 text-sm font-semibold text-white transition-colors rounded-lg bg-amber-500 hover:bg-amber-600"
+                  >
+                    Apply now
+                  </motion.button>
+                </motion.a>
 
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="px-6 py-3 text-sm font-semibold text-white transition-colors border-2 border-white rounded-lg hover:bg-white hover:text-amber-500"
                   onClick={() => {
-                    const pricingSection = document.getElementById('pricing');
-                    pricingSection?.scrollIntoView({ behavior: 'smooth' });
+                    const contactSection = document.getElementById('contact');
+                    contactSection?.scrollIntoView({ behavior: 'smooth' });
                   }}
                 >
-                  See Pricing
+                  Contact sales
                 </motion.button>
               </motion.div>
             </motion.div>
