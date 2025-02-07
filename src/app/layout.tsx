@@ -1,7 +1,10 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Inter } from 'next/font/google';
 import Head from 'next/head'; // Import the Head component
 import "./globals.css";
+import { ThemeProvider } from './components/ThemeProvider'; // Import ThemeProvider
+
 
 const inter = Inter({
   subsets: ['latin'],
@@ -24,13 +27,13 @@ const zapierCode = `
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <Head>
-        {/* Google tag (gtag.js) */}
+       <Head>
+        {/* Google tag (gtag.js) - This is CORRECT placement within <Head> */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-2D18CMVZEF"></script>
         <script
           dangerouslySetInnerHTML={{
@@ -44,7 +47,9 @@ export default function RootLayout({
         />
       </Head>
       <body className={`${inter.variable} font-sans antialiased`}>
-        {children}
+        <ThemeProvider> {/* Wrap the children with ThemeProvider */}
+          {children}
+        </ThemeProvider>
         <div dangerouslySetInnerHTML={{ __html: zapierCode }} />
       </body>
     </html>
