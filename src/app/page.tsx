@@ -1330,24 +1330,24 @@ export default function Home() {
                   href="#"
                   className="text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
                 >
-                  Terms of Service
+                  
                 </a>
                 <a
                   href="#"
                   className="text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
                 >
-                  Privacy Policy
+                 
                 </a>
                 <a
                   href="#"
                   className="text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
                 >
-                  Contact Us
+                
                 </a>
               </div>
               <div className="mt-4">
                 <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-                  Star Accept is a registered ISO of Fifth Third Bank, N.A., Cincinnati, OH and Wells Fargo Bank, N.A., Concord, CA
+              
                 </p>
               </div>
             </div>
