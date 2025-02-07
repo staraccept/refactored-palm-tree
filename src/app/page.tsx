@@ -3,13 +3,15 @@ import React, { useState, useEffect, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Head from 'next/head';
-import { FaCheckCircle, FaClock, FaUsers, FaStar } from 'react-icons/fa';
+// We import additional icons for the new stats:
+import { FaCheckCircle, FaClock, FaStar, FaGlobe, FaPuzzlePiece } from 'react-icons/fa';
+// Our theme provider (adjust import path as needed):
 import { ThemeProvider, useTheme } from './components/ThemeProvider';
 
 interface ProductSelectorData {
   businessType: string;
-  softwareNeeds: string[]; // "full-service" or "quick-service" if restaurant
-  onlineOrdering: boolean; // If not restaurant, user can choose online ordering
+  softwareNeeds: string[]; 
+  onlineOrdering: boolean;
   fullServicePosQty: number;
   barServicePosQty: number;
   miniPosQty: number;
@@ -41,16 +43,22 @@ const initialSelectorData: ProductSelectorData = {
 };
 
 export default function Home() {
+  // Mobile menu toggle
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Hero image carousel
   const [currentImage, setCurrentImage] = useState(0);
+
+  // Wizard
   const [wizardStep, setWizardStep] = useState(1);
   const [selectorData, setSelectorData] = useState<ProductSelectorData>(initialSelectorData);
 
+  // Submission states for wizard
   const [isLoading, setIsLoading] = useState(false);
   const [selectorSubmitStatus, setSelectorSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [selectorSubmitMessage, setSelectorSubmitMessage] = useState('');
 
-  // Optional separate contact form
+  // Separate contact form (optional)
   const [contactFormData, setContactFormData] = useState({
     firstName: '',
     lastName: '',
@@ -65,16 +73,17 @@ export default function Home() {
   const [contactSubmitStatus, setContactSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [contactSubmitMessage, setContactSubmitMessage] = useState('');
 
-  // Theme
+  // Dark mode
   const { darkMode, toggleDarkMode } = useTheme();
 
-  // Hero carousel images
+  // Hero images
   const images = [
     { src: '/retailflex3.png', alt: 'Flexible Payment Terminal' },
     { src: '/qsrduo2.png', alt: 'QSR Duo POS System' },
     { src: '/retailmini3.png', alt: 'Retail Mini POS' },
   ];
 
+  // Rotate hero images
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % images.length);
@@ -82,15 +91,15 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  // ---------- WIZARD LOGIC ----------
+  // Smooth scroll to wizard top
   const scrollWizardToTop = () => {
-    // Ensures the wizard is visible after each step
     const wizardSection = document.getElementById('product-selector');
     wizardSection?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Wizard steps next/prev
   const handleNextStep = () => {
-    // Basic validations
+    // Basic checks
     if (wizardStep === 1 && !selectorData.businessType) {
       alert('Please select a business type.');
       return;
@@ -104,7 +113,6 @@ export default function Home() {
       return;
     }
     if (wizardStep === 3) {
-      // e.g. require at least one device
       const totalDevices =
         selectorData.fullServicePosQty +
         selectorData.barServicePosQty +
@@ -133,7 +141,7 @@ export default function Home() {
 
     setWizardStep((prev) => {
       const newStep = Math.min(prev + 1, 5);
-      setTimeout(scrollWizardToTop, 50); // Wait a moment, then scroll
+      setTimeout(scrollWizardToTop, 50);
       return newStep;
     });
   };
@@ -146,18 +154,19 @@ export default function Home() {
     });
   };
 
+  // Handler for changes in wizard inputs
   const handleSelectorInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     deviceType?: keyof ProductSelectorData
   ) => {
     const { name, value, type } = e.target;
-    // Checkboxes
     if (type === 'checkbox') {
+      // For "onlineOrdering" or "softwareNeeds"
       if (name === 'onlineOrdering') {
         setSelectorData((prev) => ({ ...prev, onlineOrdering: !prev.onlineOrdering }));
         return;
       }
-      // For "softwareNeeds"
+      // For restaurant softwareNeeds
       const checkValue = value;
       setSelectorData((prevData) => ({
         ...prevData,
@@ -168,17 +177,18 @@ export default function Home() {
       return;
     }
 
-    // Device quantity changes
+    // For device quantity
     if (deviceType) {
       const qty = parseInt(value, 10) || 0;
       setSelectorData((prevData) => ({ ...prevData, [deviceType]: qty }));
       return;
     }
 
-    // Otherwise, normal text/select
+    // Generic text/select
     setSelectorData((prevData) => ({ ...prevData, [name]: value }));
   };
 
+  // Device increment
   const handleQuantityChange = (deviceType: keyof ProductSelectorData, increment: number) => {
     setSelectorData((prevData) => {
       const newQty = Math.max(0, (prevData[deviceType] as number) + increment);
@@ -186,6 +196,7 @@ export default function Home() {
     });
   };
 
+  // Wizard final submission
   const handleSelectorSubmit = async () => {
     setIsLoading(true);
     setSelectorSubmitStatus('idle');
@@ -209,8 +220,10 @@ export default function Home() {
         phone,
       } = selectorData;
 
+      // Use same webhook as contact form
       const params = new URLSearchParams({
-        formType: 'productSelector',
+        // We'll keep them separate with formType for clarity, but it's the same endpoint
+        formType: 'contactPage',
         businessType,
         softwareNeeds: softwareNeeds.join(','),
         onlineOrdering: onlineOrdering ? 'yes' : 'no',
@@ -252,9 +265,10 @@ export default function Home() {
     }
   };
 
-  // Renders wizard step content
+  // Render wizard steps
   const renderStepContent = () => {
     switch (wizardStep) {
+      // Step 1: Business type with new images
       case 1:
         return (
           <div className="text-gray-900 dark:text-white">
@@ -279,10 +293,17 @@ export default function Home() {
                     : 'border-gray-200 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800'
                 }`}
               >
-                <div className="mb-2 flex justify-center">
-                  <Image src="/storefront.svg" alt="Retail" width={40} height={40} />
+                <div className="flex justify-center mb-4">
+                  <Image
+                    src="/retail.jpg"
+                    alt="Retail"
+                    width={200}
+                    height={200}
+                    style={{ objectFit: 'cover' }}
+                    className="rounded"
+                  />
                 </div>
-                <h4 className="text-lg font-semibold">Retail</h4>
+                <h4 className="text-lg font-semibold text-center">Retail</h4>
               </motion.button>
 
               {/* Restaurant */}
@@ -303,10 +324,17 @@ export default function Home() {
                     : 'border-gray-200 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800'
                 }`}
               >
-                <div className="mb-2 flex justify-center">
-                  <Image src="/restaurant-table.svg" alt="Restaurant" width={40} height={40} />
+                <div className="flex justify-center mb-4">
+                  <Image
+                    src="/restaurant.jpg"
+                    alt="Restaurant"
+                    width={200}
+                    height={200}
+                    style={{ objectFit: 'cover' }}
+                    className="rounded"
+                  />
                 </div>
-                <h4 className="text-lg font-semibold">Restaurant</h4>
+                <h4 className="text-lg font-semibold text-center">Restaurant</h4>
               </motion.button>
 
               {/* Services */}
@@ -327,10 +355,17 @@ export default function Home() {
                     : 'border-gray-200 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800'
                 }`}
               >
-                <div className="mb-2 flex justify-center">
-                  <Image src="/toolbox.svg" alt="Services" width={40} height={40} />
+                <div className="flex justify-center mb-4">
+                  <Image
+                    src="/services.jpg"
+                    alt="Services"
+                    width={200}
+                    height={200}
+                    style={{ objectFit: 'cover' }}
+                    className="rounded"
+                  />
                 </div>
-                <h4 className="text-lg font-semibold">Services</h4>
+                <h4 className="text-lg font-semibold text-center">Services</h4>
               </motion.button>
 
               {/* Other */}
@@ -351,15 +386,23 @@ export default function Home() {
                     : 'border-gray-200 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800'
                 }`}
               >
-                <div className="mb-2 flex justify-center">
-                  <Image src="/coffee-shop.svg" alt="Other" width={40} height={40} />
+                <div className="flex justify-center mb-4">
+                  <Image
+                    src="/other.jpg"
+                    alt="Other"
+                    width={200}
+                    height={200}
+                    style={{ objectFit: 'cover' }}
+                    className="rounded"
+                  />
                 </div>
-                <h4 className="text-lg font-semibold">Other</h4>
+                <h4 className="text-lg font-semibold text-center">Other</h4>
               </motion.button>
             </div>
           </div>
         );
 
+      // Step 2: If restaurant -> choose software type. Otherwise -> online ordering.
       case 2:
         if (selectorData.businessType === 'restaurant') {
           return (
@@ -379,7 +422,7 @@ export default function Home() {
                     const updatedNeeds = selectorData.softwareNeeds.includes('full-service')
                       ? selectorData.softwareNeeds.filter((item) => item !== 'full-service')
                       : [...selectorData.softwareNeeds, 'full-service'];
-                    setSelectorData({ ...selectorData, softwareNeeds: updatedNeeds });
+                    setSelectorData((prev) => ({ ...prev, softwareNeeds: updatedNeeds }));
                   }}
                 >
                   <input
@@ -401,7 +444,7 @@ export default function Home() {
                     const updatedNeeds = selectorData.softwareNeeds.includes('quick-service')
                       ? selectorData.softwareNeeds.filter((item) => item !== 'quick-service')
                       : [...selectorData.softwareNeeds, 'quick-service'];
-                    setSelectorData({ ...selectorData, softwareNeeds: updatedNeeds });
+                    setSelectorData((prev) => ({ ...prev, softwareNeeds: updatedNeeds }));
                   }}
                 >
                   <input
@@ -416,7 +459,7 @@ export default function Home() {
             </div>
           );
         }
-        // Non-restaurant
+        // Non-restaurant business => online ordering
         return (
           <div className="text-gray-900 dark:text-white">
             <h3 className="mb-4 text-xl font-semibold">Do you need online ordering capabilities?</h3>
@@ -442,13 +485,13 @@ export default function Home() {
           </div>
         );
 
+      // Step 3: Device selection
       case 3:
-        // Device selection
         return (
           <div className="text-gray-900 dark:text-white">
             <h3 className="mb-4 text-xl font-semibold">Select Your POS & Hardware</h3>
             <p className="mb-6 text-gray-600 dark:text-gray-400">
-              How many of each device do you need? (Use the plus/minus or type the quantity)
+              How many of each device do you need? (Use plus/minus or type the quantity)
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {/* Full-Service POS */}
@@ -720,8 +763,8 @@ export default function Home() {
           </div>
         );
 
+      // Step 4: Contact info
       case 4:
-        // Contact info
         return (
           <div className="text-gray-900 dark:text-white">
             <h3 className="mb-4 text-xl font-semibold">Almost done!</h3>
@@ -789,8 +832,8 @@ export default function Home() {
           </div>
         );
 
+      // Step 5: Summary & Submit
       case 5:
-        // Summary & Submit
         return (
           <div className="text-gray-900 dark:text-white">
             {selectorSubmitStatus === 'success' ? (
@@ -860,7 +903,7 @@ export default function Home() {
                     className="px-8 py-3 text-white transition-colors bg-blue-600 dark:bg-blue-400 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-300"
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Submitting...' : 'Submit'}
+                    {isLoading ? 'Submitting...' : 'Send Message'}
                   </motion.button>
                 </div>
               </>
@@ -873,6 +916,7 @@ export default function Home() {
     }
   };
 
+  // Wizard step indicators
   const renderProgressIndicator = () => {
     const totalSteps = 5;
     return (
@@ -912,7 +956,7 @@ export default function Home() {
     );
   };
 
-  // -------------- Optional Contact Form --------------
+  // Contact form at bottom
   const handleContactInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setContactFormData((prev) => ({ ...prev, [name]: value }));
@@ -943,6 +987,7 @@ export default function Home() {
     }
 
     try {
+      // same webhook, formType = contactPage
       const params = new URLSearchParams({
         ...contactFormData,
         submitTime: new Date().toISOString(),
@@ -1010,6 +1055,7 @@ export default function Home() {
           >
             <div className="max-w-6xl px-4 mx-auto sm:px-6 lg:px-8">
               <div className="flex justify-between h-16">
+                {/* Logo */}
                 <div className="flex items-center">
                   <motion.div
                     className="flex items-center"
@@ -1030,19 +1076,25 @@ export default function Home() {
                   </motion.div>
                 </div>
 
-                {/* Mobile menu button */}
+                {/* Hamburger icon (mobile) */}
                 <div className="flex items-center md:hidden">
                   <button
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
                     className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none"
                   >
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
+                    {isMenuOpen ? (
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    ) : (
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                      </svg>
+                    )}
                   </button>
                 </div>
 
-                {/* Desktop menu & Dark Mode Toggle */}
+                {/* Desktop Menu & Dark Mode Toggle */}
                 <div className="items-center hidden space-x-8 md:flex">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -1064,6 +1116,7 @@ export default function Home() {
                   >
                     Contact
                   </motion.button>
+                  {/* Dark Mode */}
                   <button
                     onClick={toggleDarkMode}
                     className="p-2 text-gray-600 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none"
@@ -1082,6 +1135,42 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            {/* Mobile Menu content */}
+            {isMenuOpen && (
+              <motion.div
+                className="md:hidden bg-white dark:bg-gray-800 px-4 pt-2 pb-3 space-y-1"
+                initial={{ height: 0 }}
+                animate={{ height: 'auto' }}
+              >
+                <button
+                  className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    document.getElementById('product-selector')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  POS Wizard
+                </button>
+                <button
+                  className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  Contact
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    toggleDarkMode();
+                  }}
+                  className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Toggle Dark Mode
+                </button>
+              </motion.div>
+            )}
           </motion.nav>
 
           {/* HERO */}
@@ -1104,7 +1193,7 @@ export default function Home() {
                 <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/60 via-black/40 to-transparent"></div>
               </div>
             </motion.div>
-            {/* Carousel dots */}
+            {/* Carousel nav dots */}
             <div className="absolute z-20 flex space-x-2 transform -translate-x-1/2 bottom-8 left-1/2">
               {images.map((_, index) => (
                 <button
@@ -1116,6 +1205,7 @@ export default function Home() {
                 />
               ))}
             </div>
+            {/* Hero content */}
             <div className="absolute inset-0 flex items-center max-w-[1920px] mx-auto">
               <div className="relative z-20 max-w-6xl px-4 mx-auto mt-16">
                 <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl text-white">
@@ -1165,34 +1255,40 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Quick Stats Section */}
+          {/* New Stats Section with 5 items */}
           <section className="py-16 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">
             <div className="max-w-6xl mx-auto px-4">
               <h2 className="text-3xl font-bold text-center mb-12">Proven Results, Trusted Service</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                {/* Uptime */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+                {/* 99.99% Uptime */}
                 <div className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center">
                   <FaCheckCircle className="text-green-500 dark:text-green-400 text-4xl mb-2" />
-                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">99.9%</h3>
+                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">99.99%</h3>
                   <p className="mt-2 text-gray-600 dark:text-gray-300">Uptime</p>
                 </div>
-                {/* 24/7 */}
+                {/* 24/7 Support */}
                 <div className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center">
                   <FaClock className="text-blue-500 dark:text-blue-400 text-4xl mb-2" />
                   <h3 className="text-2xl font-bold text-gray-800 dark:text-white">24/7</h3>
                   <p className="mt-2 text-gray-600 dark:text-gray-300">Support</p>
                 </div>
-                {/* 100K+ */}
-                <div className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center">
-                  <FaUsers className="text-purple-500 dark:text-purple-400 text-4xl mb-2" />
-                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">100K+</h3>
-                  <p className="mt-2 text-gray-600 dark:text-gray-300">Users</p>
-                </div>
-                {/* 4.9 Rating */}
+                {/* 5/5 Rating */}
                 <div className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center">
                   <FaStar className="text-yellow-500 dark:text-yellow-400 text-4xl mb-2" />
-                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">4.9/5</h3>
+                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">5/5</h3>
                   <p className="mt-2 text-gray-600 dark:text-gray-300">Rating</p>
+                </div>
+                {/* 300+ Integrations */}
+                <div className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center">
+                  <FaPuzzlePiece className="text-purple-500 dark:text-purple-400 text-4xl mb-2" />
+                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">300+</h3>
+                  <p className="mt-2 text-gray-600 dark:text-gray-300">Integrations</p>
+                </div>
+                {/* Global Coverage */}
+                <div className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center">
+                  <FaGlobe className="text-green-600 dark:text-green-400 text-4xl mb-2" />
+                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">Global</h3>
+                  <p className="mt-2 text-gray-600 dark:text-gray-300">Coverage</p>
                 </div>
               </div>
             </div>
@@ -1265,7 +1361,7 @@ export default function Home() {
                 </p>
               </div>
               <div className="grid items-start gap-12 md:grid-cols-2">
-                {/* Left: Contact Form */}
+                {/* Contact Form */}
                 <div className="p-8 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 shadow-sm rounded-xl">
                   <form onSubmit={handleContactSubmit} className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
@@ -1316,7 +1412,7 @@ export default function Home() {
                         placeholder="(555) 123-4567"
                       />
                     </div>
-                    {/* Callback schedule fields */}
+                    {/* Call schedule fields */}
                     <div className="grid gap-6 md:grid-cols-2">
                       <div>
                         <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
@@ -1541,12 +1637,7 @@ export default function Home() {
                   Contact Us
                 </a>
               </div>
-              <div className="mt-4">
-                <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-                  Star Accept is a registered ISO of Fifth Third Bank, N.A., Cincinnati, OH and Wells Fargo Bank, N.A.,
-                  Concord, CA
-                </p>
-              </div>
+              {/* Removed the old ISO statement as requested */}
             </div>
 
             {/* Sticky CTA */}
