@@ -1194,10 +1194,10 @@ export default function Home() {
                   <h3 className="text-2xl font-bold text-gray-800 dark:text-white">100K+</h3>
                   <p className="mt-2 text-gray-600 dark:text-gray-300">Users</p>
                 </div>
-                {/* 4.9 Rating */}
+                {/*5. Rating */}
                 <div className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center">
                   <FaStar className="text-yellow-500 dark:text-yellow-400 text-4xl mb-2" />
-                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">4.9/5</h3>
+                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">5/5</h3>
                   <p className="mt-2 text-gray-600 dark:text-gray-300">Rating</p>
                 </div>
               </div>
