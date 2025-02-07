@@ -8,9 +8,8 @@ import { ThemeProvider, useTheme } from './components/ThemeProvider';
 
 interface ProductSelectorData {
   businessType: string;
-  softwareNeeds: string[]; // For "full-service" or "quick-service" if restaurant
-  onlineOrdering: boolean; // For non-restaurant
-  // Quantities for each device type:
+  softwareNeeds: string[]; // "full-service" or "quick-service" if restaurant
+  onlineOrdering: boolean; // If not restaurant, user can choose online ordering
   fullServicePosQty: number;
   barServicePosQty: number;
   miniPosQty: number;
@@ -18,8 +17,6 @@ interface ProductSelectorData {
   kitchenPrinterQty: number;
   kitchenDisplayQty: number;
   kioskQty: number;
-
-  // Contact info
   firstName: string;
   lastName: string;
   email: string;
@@ -30,8 +27,6 @@ const initialSelectorData: ProductSelectorData = {
   businessType: '',
   softwareNeeds: [],
   onlineOrdering: false,
-
-  // Devices
   fullServicePosQty: 0,
   barServicePosQty: 0,
   miniPosQty: 0,
@@ -39,8 +34,6 @@ const initialSelectorData: ProductSelectorData = {
   kitchenPrinterQty: 0,
   kitchenDisplayQty: 0,
   kioskQty: 0,
-
-  // Contact info
   firstName: '',
   lastName: '',
   email: '',
@@ -50,16 +43,14 @@ const initialSelectorData: ProductSelectorData = {
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
-  // Steps
   const [wizardStep, setWizardStep] = useState(1);
   const [selectorData, setSelectorData] = useState<ProductSelectorData>(initialSelectorData);
 
-  // Submission
   const [isLoading, setIsLoading] = useState(false);
   const [selectorSubmitStatus, setSelectorSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [selectorSubmitMessage, setSelectorSubmitMessage] = useState('');
 
-  // Basic contact form (separate from wizard)
+  // Optional separate contact form
   const [contactFormData, setContactFormData] = useState({
     firstName: '',
     lastName: '',
@@ -77,7 +68,7 @@ export default function Home() {
   // Theme
   const { darkMode, toggleDarkMode } = useTheme();
 
-  // Hero Carousel
+  // Hero carousel images
   const images = [
     { src: '/retailflex3.png', alt: 'Flexible Payment Terminal' },
     { src: '/qsrduo2.png', alt: 'QSR Duo POS System' },
@@ -91,9 +82,15 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  // ------------------ Wizard Logic ------------------
+  // ---------- WIZARD LOGIC ----------
+  const scrollWizardToTop = () => {
+    // Ensures the wizard is visible after each step
+    const wizardSection = document.getElementById('product-selector');
+    wizardSection?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const handleNextStep = () => {
-    // Simple validation for each step
+    // Basic validations
     if (wizardStep === 1 && !selectorData.businessType) {
       alert('Please select a business type.');
       return;
@@ -103,15 +100,11 @@ export default function Home() {
       selectorData.businessType === 'restaurant' &&
       selectorData.softwareNeeds.length === 0
     ) {
-      alert('Please select whether your restaurant is Full-Service or Quick-Service.');
+      alert('Please select if your restaurant is Full-Service or Quick-Service.');
       return;
     }
-    if (wizardStep === 2 && selectorData.businessType !== 'restaurant') {
-      // No strict requirement for setting 'onlineOrdering', user can skip it if they want
-      // If you want to require them to confirm yes/no, you could do so. 
-    }
     if (wizardStep === 3) {
-      // No special validation, but you could require at least 1 device total if you want
+      // e.g. require at least one device
       const totalDevices =
         selectorData.fullServicePosQty +
         selectorData.barServicePosQty +
@@ -131,7 +124,6 @@ export default function Home() {
         alert('Please fill in your contact information.');
         return;
       }
-      // Basic email check
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         alert('Please enter a valid email address.');
@@ -139,11 +131,19 @@ export default function Home() {
       }
     }
 
-    setWizardStep((prev) => Math.min(prev + 1, 5));
+    setWizardStep((prev) => {
+      const newStep = Math.min(prev + 1, 5);
+      setTimeout(scrollWizardToTop, 50); // Wait a moment, then scroll
+      return newStep;
+    });
   };
 
   const handlePreviousStep = () => {
-    setWizardStep((prev) => Math.max(prev - 1, 1));
+    setWizardStep((prev) => {
+      const newStep = Math.max(prev - 1, 1);
+      setTimeout(scrollWizardToTop, 50);
+      return newStep;
+    });
   };
 
   const handleSelectorInputChange = (
@@ -151,14 +151,13 @@ export default function Home() {
     deviceType?: keyof ProductSelectorData
   ) => {
     const { name, value, type } = e.target;
-    // For checkboxes
+    // Checkboxes
     if (type === 'checkbox') {
-      // For "onlineOrdering"
       if (name === 'onlineOrdering') {
         setSelectorData((prev) => ({ ...prev, onlineOrdering: !prev.onlineOrdering }));
         return;
       }
-      // For softwareNeeds if restaurant
+      // For "softwareNeeds"
       const checkValue = value;
       setSelectorData((prevData) => ({
         ...prevData,
@@ -168,17 +167,15 @@ export default function Home() {
       }));
       return;
     }
-    // For device quantities
+
+    // Device quantity changes
     if (deviceType) {
-      // "value" is the new quantity as string
       const qty = parseInt(value, 10) || 0;
-      setSelectorData((prevData) => ({
-        ...prevData,
-        [deviceType]: qty,
-      }));
+      setSelectorData((prevData) => ({ ...prevData, [deviceType]: qty }));
       return;
     }
-    // Normal text or select
+
+    // Otherwise, normal text/select
     setSelectorData((prevData) => ({ ...prevData, [name]: value }));
   };
 
@@ -212,7 +209,6 @@ export default function Home() {
         phone,
       } = selectorData;
 
-      // Construct URL params
       const params = new URLSearchParams({
         formType: 'productSelector',
         businessType,
@@ -240,6 +236,7 @@ export default function Home() {
         setSelectorSubmitMessage('Thank you! We will contact you soon.');
         setSelectorData(initialSelectorData);
         setWizardStep(1);
+        setTimeout(scrollWizardToTop, 50);
       } else {
         const errorBody = await response.text();
         console.error(`Failed to send data: ${response.status} ${errorBody}`);
@@ -255,10 +252,9 @@ export default function Home() {
     }
   };
 
-  // Wizard Steps
+  // Renders wizard step content
   const renderStepContent = () => {
     switch (wizardStep) {
-      // STEP 1: Business Type
       case 1:
         return (
           <div className="text-gray-900 dark:text-white">
@@ -274,6 +270,7 @@ export default function Home() {
                     ...prev,
                     businessType: 'retail',
                     softwareNeeds: [],
+                    onlineOrdering: false,
                   }))
                 }
                 className={`p-4 border rounded-lg transition-colors ${
@@ -288,7 +285,7 @@ export default function Home() {
                 <h4 className="text-lg font-semibold">Retail</h4>
               </motion.button>
 
-              {/* Restaurant (Full/Quick) */}
+              {/* Restaurant */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -296,7 +293,8 @@ export default function Home() {
                   setSelectorData((prev) => ({
                     ...prev,
                     businessType: 'restaurant',
-                    softwareNeeds: ['full-service'], // default
+                    softwareNeeds: ['full-service'],
+                    onlineOrdering: false,
                   }))
                 }
                 className={`p-4 border rounded-lg transition-colors ${
@@ -320,6 +318,7 @@ export default function Home() {
                     ...prev,
                     businessType: 'services',
                     softwareNeeds: [],
+                    onlineOrdering: false,
                   }))
                 }
                 className={`p-4 border rounded-lg transition-colors ${
@@ -343,6 +342,7 @@ export default function Home() {
                     ...prev,
                     businessType: 'other',
                     softwareNeeds: [],
+                    onlineOrdering: false,
                   }))
                 }
                 className={`p-4 border rounded-lg transition-colors ${
@@ -360,7 +360,6 @@ export default function Home() {
           </div>
         );
 
-      // STEP 2: Restaurant Type OR Online Ordering
       case 2:
         if (selectorData.businessType === 'restaurant') {
           return (
@@ -380,14 +379,14 @@ export default function Home() {
                     const updatedNeeds = selectorData.softwareNeeds.includes('full-service')
                       ? selectorData.softwareNeeds.filter((item) => item !== 'full-service')
                       : [...selectorData.softwareNeeds, 'full-service'];
-                    setSelectorData((prev) => ({ ...prev, softwareNeeds: updatedNeeds }));
+                    setSelectorData({ ...selectorData, softwareNeeds: updatedNeeds });
                   }}
                 >
                   <input
                     type="checkbox"
                     className="mr-3"
                     checked={selectorData.softwareNeeds.includes('full-service')}
-                    onChange={() => null} // handled above
+                    onChange={() => null}
                   />
                   <label className="cursor-pointer">Full-Service Dining</label>
                 </motion.div>
@@ -402,14 +401,14 @@ export default function Home() {
                     const updatedNeeds = selectorData.softwareNeeds.includes('quick-service')
                       ? selectorData.softwareNeeds.filter((item) => item !== 'quick-service')
                       : [...selectorData.softwareNeeds, 'quick-service'];
-                    setSelectorData((prev) => ({ ...prev, softwareNeeds: updatedNeeds }));
+                    setSelectorData({ ...selectorData, softwareNeeds: updatedNeeds });
                   }}
                 >
                   <input
                     type="checkbox"
                     className="mr-3"
                     checked={selectorData.softwareNeeds.includes('quick-service')}
-                    onChange={() => null} // handled above
+                    onChange={() => null}
                   />
                   <label className="cursor-pointer">Quick-Service</label>
                 </motion.div>
@@ -417,34 +416,34 @@ export default function Home() {
             </div>
           );
         }
-        // Not restaurant => ask about online ordering
+        // Non-restaurant
         return (
           <div className="text-gray-900 dark:text-white">
             <h3 className="mb-4 text-xl font-semibold">Do you need online ordering capabilities?</h3>
-            <p className="mb-6 text-gray-600 dark:text-gray-400">Select if you need online ordering.</p>
+            <p className="mb-6 text-gray-600 dark:text-gray-400">
+              Select if you need online ordering for your business.
+            </p>
             <motion.div
               className={`flex items-center p-3 border rounded-lg cursor-pointer ${
                 selectorData.onlineOrdering
                   ? 'bg-blue-50 border-blue-500 dark:bg-blue-900 dark:border-blue-700'
                   : 'hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-700'
               }`}
-              onClick={() =>
-                setSelectorData((prev) => ({ ...prev, onlineOrdering: !prev.onlineOrdering }))
-              }
+              onClick={() => setSelectorData({ ...selectorData, onlineOrdering: !selectorData.onlineOrdering })}
             >
               <input
                 type="checkbox"
                 className="mr-3"
                 checked={selectorData.onlineOrdering}
-                onChange={() => null} // handled in onClick
+                onChange={() => null}
               />
               <label className="cursor-pointer">Yes, I need online ordering</label>
             </motion.div>
           </div>
         );
 
-      // STEP 3: Device Selection
       case 3:
+        // Device selection
         return (
           <div className="text-gray-900 dark:text-white">
             <h3 className="mb-4 text-xl font-semibold">Select Your POS & Hardware</h3>
@@ -453,22 +452,20 @@ export default function Home() {
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {/* Full-Service POS */}
-              <div className="p-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg flex flex-col">
-                <div className="mb-4">
-                  {/* Placeholder image */}
-                  <div className="relative w-full h-32 bg-gray-100 dark:bg-gray-600">
-                    {/* Replace with your image below */}
-                    {/* e.g. <Image src="/my_full_service_pos.png" ... /> */}
-                    <p className="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-300">
-                      Full-Service POS Image
-                    </p>
-                  </div>
-                </div>
+              <div className="p-4 bg-white dark:bg-gray-700 border rounded-lg flex flex-col items-center">
+                <Image
+                  src="/full-service-pos.jpg"
+                  alt="Full-Service POS"
+                  width={200}
+                  height={200}
+                  style={{ objectFit: 'cover' }}
+                  className="mb-4 rounded"
+                />
                 <h4 className="text-lg font-semibold mb-2">Full-Service POS</h4>
-                <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
+                <p className="mb-4 text-sm text-gray-600 dark:text-gray-300 text-center">
                   Ideal for dine-in restaurants, table service, etc.
                 </p>
-                <div className="flex items-center mt-auto">
+                <div className="flex items-center">
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleQuantityChange('fullServicePosQty', -1)}
@@ -493,19 +490,20 @@ export default function Home() {
               </div>
 
               {/* Bar-Service POS */}
-              <div className="p-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg flex flex-col">
-                <div className="mb-4">
-                  <div className="relative w-full h-32 bg-gray-100 dark:bg-gray-600">
-                    <p className="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-300">
-                      Bar-Service POS Image
-                    </p>
-                  </div>
-                </div>
+              <div className="p-4 bg-white dark:bg-gray-700 border rounded-lg flex flex-col items-center">
+                <Image
+                  src="/bar-service-pos.jpg"
+                  alt="Bar-Service POS"
+                  width={200}
+                  height={200}
+                  style={{ objectFit: 'cover' }}
+                  className="mb-4 rounded"
+                />
                 <h4 className="text-lg font-semibold mb-2">Bar-Service POS</h4>
-                <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
+                <p className="mb-4 text-sm text-gray-600 dark:text-gray-300 text-center">
                   Suited for bars, nightlife, quick drink ordering.
                 </p>
-                <div className="flex items-center mt-auto">
+                <div className="flex items-center">
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleQuantityChange('barServicePosQty', -1)}
@@ -530,19 +528,20 @@ export default function Home() {
               </div>
 
               {/* Mini POS */}
-              <div className="p-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg flex flex-col">
-                <div className="mb-4">
-                  <div className="relative w-full h-32 bg-gray-100 dark:bg-gray-600">
-                    <p className="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-300">
-                      Mini POS Image
-                    </p>
-                  </div>
-                </div>
+              <div className="p-4 bg-white dark:bg-gray-700 border rounded-lg flex flex-col items-center">
+                <Image
+                  src="/minipos.jpg"
+                  alt="Mini POS"
+                  width={200}
+                  height={200}
+                  style={{ objectFit: 'cover' }}
+                  className="mb-4 rounded"
+                />
                 <h4 className="text-lg font-semibold mb-2">Mini POS</h4>
-                <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
-                  Compact terminal for smaller counters or kiosks.
+                <p className="mb-4 text-sm text-gray-600 dark:text-gray-300 text-center">
+                  Compact terminal for smaller counters.
                 </p>
-                <div className="flex items-center mt-auto">
+                <div className="flex items-center">
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleQuantityChange('miniPosQty', -1)}
@@ -567,19 +566,20 @@ export default function Home() {
               </div>
 
               {/* Handheld POS */}
-              <div className="p-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg flex flex-col">
-                <div className="mb-4">
-                  <div className="relative w-full h-32 bg-gray-100 dark:bg-gray-600">
-                    <p className="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-300">
-                      Handheld POS Image
-                    </p>
-                  </div>
-                </div>
+              <div className="p-4 bg-white dark:bg-gray-700 border rounded-lg flex flex-col items-center">
+                <Image
+                  src="/handheldpos.jpg"
+                  alt="Handheld POS"
+                  width={200}
+                  height={200}
+                  style={{ objectFit: 'cover' }}
+                  className="mb-4 rounded"
+                />
                 <h4 className="text-lg font-semibold mb-2">Handheld POS</h4>
-                <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
-                  Portable option for table-side ordering, line-busting, etc.
+                <p className="mb-4 text-sm text-gray-600 dark:text-gray-300 text-center">
+                  Portable device for table-side or line-busting.
                 </p>
-                <div className="flex items-center mt-auto">
+                <div className="flex items-center">
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleQuantityChange('handheldPosQty', -1)}
@@ -604,19 +604,20 @@ export default function Home() {
               </div>
 
               {/* Kitchen Printer */}
-              <div className="p-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg flex flex-col">
-                <div className="mb-4">
-                  <div className="relative w-full h-32 bg-gray-100 dark:bg-gray-600">
-                    <p className="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-300">
-                      Kitchen Printer Image
-                    </p>
-                  </div>
-                </div>
+              <div className="p-4 bg-white dark:bg-gray-700 border rounded-lg flex flex-col items-center">
+                <Image
+                  src="/kitchenprinter.jpg"
+                  alt="Kitchen Printer"
+                  width={200}
+                  height={200}
+                  style={{ objectFit: 'cover' }}
+                  className="mb-4 rounded"
+                />
                 <h4 className="text-lg font-semibold mb-2">Kitchen Printer</h4>
-                <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
+                <p className="mb-4 text-sm text-gray-600 dark:text-gray-300 text-center">
                   Traditional kitchen ticket printing.
                 </p>
-                <div className="flex items-center mt-auto">
+                <div className="flex items-center">
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleQuantityChange('kitchenPrinterQty', -1)}
@@ -641,19 +642,20 @@ export default function Home() {
               </div>
 
               {/* Kitchen Display System */}
-              <div className="p-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg flex flex-col">
-                <div className="mb-4">
-                  <div className="relative w-full h-32 bg-gray-100 dark:bg-gray-600">
-                    <p className="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-300">
-                      Kitchen Display Image
-                    </p>
-                  </div>
-                </div>
+              <div className="p-4 bg-white dark:bg-gray-700 border rounded-lg flex flex-col items-center">
+                <Image
+                  src="/kitchendisplay.jpg"
+                  alt="Kitchen Display"
+                  width={200}
+                  height={200}
+                  style={{ objectFit: 'cover' }}
+                  className="mb-4 rounded"
+                />
                 <h4 className="text-lg font-semibold mb-2">Kitchen Display System</h4>
-                <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
+                <p className="mb-4 text-sm text-gray-600 dark:text-gray-300 text-center">
                   Digital screen for order management.
                 </p>
-                <div className="flex items-center mt-auto">
+                <div className="flex items-center">
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleQuantityChange('kitchenDisplayQty', -1)}
@@ -678,19 +680,20 @@ export default function Home() {
               </div>
 
               {/* KIOSK */}
-              <div className="p-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg flex flex-col">
-                <div className="mb-4">
-                  <div className="relative w-full h-32 bg-gray-100 dark:bg-gray-600">
-                    <p className="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-300">
-                      Self-Order Kiosk
-                    </p>
-                  </div>
-                </div>
+              <div className="p-4 bg-white dark:bg-gray-700 border rounded-lg flex flex-col items-center">
+                <Image
+                  src="/kiosk.jpg"
+                  alt="Kiosk"
+                  width={200}
+                  height={200}
+                  style={{ objectFit: 'cover' }}
+                  className="mb-4 rounded"
+                />
                 <h4 className="text-lg font-semibold mb-2">KIOSK</h4>
-                <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
-                  Self-ordering kiosk for guests.
+                <p className="mb-4 text-sm text-gray-600 dark:text-gray-300 text-center">
+                  Self-order kiosk for guests.
                 </p>
-                <div className="flex items-center mt-auto">
+                <div className="flex items-center">
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleQuantityChange('kioskQty', -1)}
@@ -717,8 +720,8 @@ export default function Home() {
           </div>
         );
 
-      // STEP 4: Contact Info
       case 4:
+        // Contact info
         return (
           <div className="text-gray-900 dark:text-white">
             <h3 className="mb-4 text-xl font-semibold">Almost done!</h3>
@@ -786,8 +789,8 @@ export default function Home() {
           </div>
         );
 
-      // STEP 5: Summary & Submit
       case 5:
+        // Summary & Submit
         return (
           <div className="text-gray-900 dark:text-white">
             {selectorSubmitStatus === 'success' ? (
@@ -817,8 +820,6 @@ export default function Home() {
                       <strong>Online Ordering:</strong> Yes
                     </p>
                   )}
-
-                  {/* Show device quantities if > 0 */}
                   <p>
                     <strong>Full-Service POS:</strong> {selectorData.fullServicePosQty}
                   </p>
@@ -840,9 +841,7 @@ export default function Home() {
                   <p>
                     <strong>KIOSKs:</strong> {selectorData.kioskQty}
                   </p>
-
                   <hr className="my-2 border-gray-300 dark:border-gray-600" />
-
                   <p>
                     <strong>Name:</strong> {selectorData.firstName} {selectorData.lastName}
                   </p>
@@ -913,11 +912,12 @@ export default function Home() {
     );
   };
 
-  // ------------------ Separate Contact Form (Optional) ------------------
+  // -------------- Optional Contact Form --------------
   const handleContactInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setContactFormData((prev) => ({ ...prev, [name]: value }));
   };
+
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -1037,7 +1037,6 @@ export default function Home() {
                     className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none"
                   >
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      {/* If needed, render open/close icons conditionally */}
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                   </button>
@@ -1050,8 +1049,7 @@ export default function Home() {
                     whileTap={{ scale: 0.95 }}
                     className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
                     onClick={() => {
-                      const wizardSection = document.getElementById('product-selector');
-                      wizardSection?.scrollIntoView({ behavior: 'smooth' });
+                      document.getElementById('product-selector')?.scrollIntoView({ behavior: 'smooth' });
                     }}
                   >
                     POS Wizard
@@ -1061,8 +1059,7 @@ export default function Home() {
                     whileTap={{ scale: 0.95 }}
                     className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
                     onClick={() => {
-                      const contactSection = document.getElementById('contact');
-                      contactSection?.scrollIntoView({ behavior: 'smooth' });
+                      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
                     }}
                   >
                     Contact
@@ -1074,12 +1071,10 @@ export default function Home() {
                   >
                     {darkMode ? (
                       <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                        {/* Moon */}
                         <path d="M12 21a9 9 0 0 1-6.36-2.64C3.09 15.81 2 13 2 9.5 2 5.36 5.36 2 9.5 2c.9 0 1.78.12 2.6.34.82.22 1.6.56 2.28 1.02.68.46 1.24 1.08 1.68 1.8.44.72.78 1.56.98 2.46.2.9.3 1.82.3 2.78 0 3.5-2.54 6.43-5.99 7.6-1.5.53-3.09.8-4.73.8z" />
                       </svg>
                     ) : (
                       <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                        {/* Sun */}
                         <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" />
                       </svg>
                     )}
@@ -1109,7 +1104,7 @@ export default function Home() {
                 <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/60 via-black/40 to-transparent"></div>
               </div>
             </motion.div>
-            {/* Carousel Dots */}
+            {/* Carousel dots */}
             <div className="absolute z-20 flex space-x-2 transform -translate-x-1/2 bottom-8 left-1/2">
               {images.map((_, index) => (
                 <button
@@ -1159,8 +1154,7 @@ export default function Home() {
                       whileTap={{ scale: 0.95 }}
                       className="px-8 py-4 text-lg font-semibold text-white transition-colors border-2 border-white rounded-full hover:bg-white hover:text-amber-500"
                       onClick={() => {
-                        const contactSection = document.getElementById('contact');
-                        contactSection?.scrollIntoView({ behavior: 'smooth' });
+                        document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
                       }}
                     >
                       Talk to an Expert
@@ -1171,7 +1165,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Example Stats Section */}
+          {/* Quick Stats Section */}
           <section className="py-16 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">
             <div className="max-w-6xl mx-auto px-4">
               <h2 className="text-3xl font-bold text-center mb-12">Proven Results, Trusted Service</h2>
@@ -1182,35 +1176,33 @@ export default function Home() {
                   <h3 className="text-2xl font-bold text-gray-800 dark:text-white">99.9%</h3>
                   <p className="mt-2 text-gray-600 dark:text-gray-300">Uptime</p>
                 </div>
-                {/* 24/7 Support */}
+                {/* 24/7 */}
                 <div className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center">
                   <FaClock className="text-blue-500 dark:text-blue-400 text-4xl mb-2" />
                   <h3 className="text-2xl font-bold text-gray-800 dark:text-white">24/7</h3>
                   <p className="mt-2 text-gray-600 dark:text-gray-300">Support</p>
                 </div>
-                {/* 100k+ Users */}
+                {/* 100K+ */}
                 <div className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center">
                   <FaUsers className="text-purple-500 dark:text-purple-400 text-4xl mb-2" />
                   <h3 className="text-2xl font-bold text-gray-800 dark:text-white">100K+</h3>
                   <p className="mt-2 text-gray-600 dark:text-gray-300">Users</p>
                 </div>
-                {/*5. Rating */}
+                {/* 4.9 Rating */}
                 <div className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center">
                   <FaStar className="text-yellow-500 dark:text-yellow-400 text-4xl mb-2" />
-                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">5/5</h3>
+                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">4.9/5</h3>
                   <p className="mt-2 text-gray-600 dark:text-gray-300">Rating</p>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* PRODUCT SELECTOR WIZARD */}
+          {/* WIZARD */}
           <section className="py-20 bg-gray-50 dark:bg-gray-800" id="product-selector">
             <div className="max-w-6xl px-4 mx-auto">
               <div className="mb-12 text-center">
-                <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">
-                  Find Your Perfect POS Solution
-                </h2>
+                <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">Find Your Perfect POS Solution</h2>
                 <p className="max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">
                   Answer a few questions to get a personalized recommendation.
                 </p>
@@ -1263,10 +1255,7 @@ export default function Home() {
           </section>
 
           {/* CONTACT SECTION */}
-          <div
-            className="relative px-4 py-20 bg-gradient-to-b from-gray-50 dark:from-gray-800 to-white dark:to-gray-900"
-            id="contact"
-          >
+          <div className="relative px-4 py-20 bg-gradient-to-b from-gray-50 dark:from-gray-800 to-white dark:to-gray-900" id="contact">
             <div className="max-w-6xl mx-auto">
               <div className="mb-12 text-center">
                 <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">Local Comes First</h2>
@@ -1372,9 +1361,7 @@ export default function Home() {
                         <option value="retailorcounterservicerestaurantbundle">
                           Retail / Counter-Service
                         </option>
-                        <option value="fullservicerestaurantandbarbundle">
-                          Full-Service & Bar
-                        </option>
+                        <option value="fullservicerestaurantandbarbundle">Full-Service & Bar</option>
                       </select>
                     </div>
                     <div>
