@@ -241,7 +241,7 @@ export default function Home() {
         submitTime: new Date().toISOString(),
       });
 
-      const url = `https://hooks.zapier.com/hooks/catch/17465641/28qqau0/?${params.toString()}`;
+      const url = `https://hooks.zapier.com/hooks/catch/17465641/2awchwj/?${params.toString()}`;
       const response = await fetch(url, { method: 'GET' });
 
       if (response.ok) {
@@ -993,7 +993,7 @@ export default function Home() {
         submitTime: new Date().toISOString(),
         formType: 'contactPage',
       });
-      const url = `https://hooks.zapier.com/hooks/catch/17465641/28qqau0/?${params.toString()}`;
+      const url = `https://hooks.zapier.com/hooks/catch/17465641/2awchwj/?${params.toString()}`;
       const response = await fetch(url, { method: 'GET' });
       if (response.ok) {
         setContactSubmitStatus('success');
