@@ -3,15 +3,21 @@ import React, { useState, useEffect, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Head from 'next/head';
-// We import additional icons for the new stats:
-import { FaCheckCircle, FaClock, FaStar, FaGlobe, FaPuzzlePiece } from 'react-icons/fa';
-// Our theme provider (adjust import path as needed):
+import {
+  FaCheckCircle,
+  FaClock,
+  FaHandshake,
+  FaPuzzlePiece,
+  FaGlobe
+} from 'react-icons/fa';
 import { ThemeProvider, useTheme } from './components/ThemeProvider';
 
 interface ProductSelectorData {
   businessType: string;
-  softwareNeeds: string[]; 
+  softwareNeeds: string[];
   onlineOrdering: boolean;
+
+  // Device quantities
   fullServicePosQty: number;
   barServicePosQty: number;
   miniPosQty: number;
@@ -19,16 +25,24 @@ interface ProductSelectorData {
   kitchenPrinterQty: number;
   kitchenDisplayQty: number;
   kioskQty: number;
+
+  // Contact info
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
+
+  // New fields for consistency
+  numLocationsChoice: string;   // '1','2','3','4','5','plus'
+  numLocationsCustom: string;   // If user hits plus
+  monthlyVolume: string;        // '0-50K','50K-250K','250K-1MM','1MM+'
 }
 
 const initialSelectorData: ProductSelectorData = {
   businessType: '',
   softwareNeeds: [],
   onlineOrdering: false,
+
   fullServicePosQty: 0,
   barServicePosQty: 0,
   miniPosQty: 0,
@@ -36,29 +50,34 @@ const initialSelectorData: ProductSelectorData = {
   kitchenPrinterQty: 0,
   kitchenDisplayQty: 0,
   kioskQty: 0,
+
   firstName: '',
   lastName: '',
   email: '',
   phone: '',
+
+  numLocationsChoice: '1',
+  numLocationsCustom: '',
+  monthlyVolume: '0-50K',
 };
 
 export default function Home() {
   // Mobile menu toggle
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Hero image carousel
+  // Hero carousel
   const [currentImage, setCurrentImage] = useState(0);
 
-  // Wizard
+  // Wizard steps
   const [wizardStep, setWizardStep] = useState(1);
   const [selectorData, setSelectorData] = useState<ProductSelectorData>(initialSelectorData);
 
-  // Submission states for wizard
+  // Wizard submission
   const [isLoading, setIsLoading] = useState(false);
   const [selectorSubmitStatus, setSelectorSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [selectorSubmitMessage, setSelectorSubmitMessage] = useState('');
 
-  // Separate contact form (optional)
+  // Separate contact form
   const [contactFormData, setContactFormData] = useState({
     firstName: '',
     lastName: '',
@@ -66,14 +85,16 @@ export default function Home() {
     phone: '',
     callDate: '',
     preferredTime: '',
-    pricingPlan: '',
     businessType: '',
-    monthlyVolume: '',
+    // We apply the same location + monthlyVolume approach
+    numLocationsChoice: '1',
+    numLocationsCustom: '',
+    monthlyVolume: '0-50K',
   });
   const [contactSubmitStatus, setContactSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [contactSubmitMessage, setContactSubmitMessage] = useState('');
 
-  // Dark mode
+  // Theme
   const { darkMode, toggleDarkMode } = useTheme();
 
   // Hero images
@@ -91,15 +112,14 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  // Smooth scroll to wizard top
+  // Smooth scroll to the wizard top
   const scrollWizardToTop = () => {
     const wizardSection = document.getElementById('product-selector');
     wizardSection?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Wizard steps next/prev
+  // Wizard next step
   const handleNextStep = () => {
-    // Basic checks
     if (wizardStep === 1 && !selectorData.businessType) {
       alert('Please select a business type.');
       return;
@@ -109,7 +129,7 @@ export default function Home() {
       selectorData.businessType === 'restaurant' &&
       selectorData.softwareNeeds.length === 0
     ) {
-      alert('Please select if your restaurant is Full-Service or Quick-Service.');
+      alert('Please select whether your restaurant is Full-Service or Quick-Service.');
       return;
     }
     if (wizardStep === 3) {
@@ -127,11 +147,13 @@ export default function Home() {
       }
     }
     if (wizardStep === 4) {
+      // Validate name/email/phone
       const { firstName, lastName, email, phone } = selectorData;
       if (!firstName || !lastName || !email || !phone) {
         alert('Please fill in your contact information.');
         return;
       }
+      // Validate email
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         alert('Please enter a valid email address.');
@@ -146,6 +168,7 @@ export default function Home() {
     });
   };
 
+  // Wizard previous step
   const handlePreviousStep = () => {
     setWizardStep((prev) => {
       const newStep = Math.max(prev - 1, 1);
@@ -154,19 +177,21 @@ export default function Home() {
     });
   };
 
-  // Handler for changes in wizard inputs
+  // Update wizard fields
   const handleSelectorInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     deviceType?: keyof ProductSelectorData
   ) => {
     const { name, value, type } = e.target;
+
+    // For checkboxes
     if (type === 'checkbox') {
-      // For "onlineOrdering" or "softwareNeeds"
+      // onlineOrdering or softwareNeeds
       if (name === 'onlineOrdering') {
         setSelectorData((prev) => ({ ...prev, onlineOrdering: !prev.onlineOrdering }));
         return;
       }
-      // For restaurant softwareNeeds
+      // Restaurant softwareNeeds
       const checkValue = value;
       setSelectorData((prevData) => ({
         ...prevData,
@@ -177,18 +202,18 @@ export default function Home() {
       return;
     }
 
-    // For device quantity
+    // For device quantities
     if (deviceType) {
       const qty = parseInt(value, 10) || 0;
       setSelectorData((prevData) => ({ ...prevData, [deviceType]: qty }));
       return;
     }
 
-    // Generic text/select
+    // Normal text, select, or radio
     setSelectorData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  // Device increment
+  // For incrementing device counts
   const handleQuantityChange = (deviceType: keyof ProductSelectorData, increment: number) => {
     setSelectorData((prevData) => {
       const newQty = Math.max(0, (prevData[deviceType] as number) + increment);
@@ -203,6 +228,7 @@ export default function Home() {
     setSelectorSubmitMessage('');
 
     try {
+      // Flatten or gather data
       const {
         businessType,
         softwareNeeds,
@@ -218,14 +244,20 @@ export default function Home() {
         lastName,
         email,
         phone,
+        numLocationsChoice,
+        numLocationsCustom,
+        monthlyVolume
       } = selectorData;
 
-      // We'll keep them separate with formType for clarity, but it's the same endpoint
+      // Resolve final location count
+      let finalLocations = numLocationsChoice === 'plus' ? numLocationsCustom : numLocationsChoice;
+
       const params = new URLSearchParams({
-        formType: 'contactPage',
+        formType: 'contactPage', // same as contact form
         businessType,
         softwareNeeds: softwareNeeds.join(','),
         onlineOrdering: onlineOrdering ? 'yes' : 'no',
+
         fullServicePosQty: fullServicePosQty.toString(),
         barServicePosQty: barServicePosQty.toString(),
         miniPosQty: miniPosQty.toString(),
@@ -233,20 +265,25 @@ export default function Home() {
         kitchenPrinterQty: kitchenPrinterQty.toString(),
         kitchenDisplayQty: kitchenDisplayQty.toString(),
         kioskQty: kioskQty.toString(),
+
         firstName,
         lastName,
         email,
         phone,
+
+        numLocations: finalLocations,
+        monthlyVolume,
+
         submitTime: new Date().toISOString(),
       });
 
-      // ***** NEW WEBHOOK URL HERE *****
+      // Updated webhook
       const url = `https://hooks.zapier.com/hooks/catch/17465641/2awchwj/?${params.toString()}`;
       const response = await fetch(url, { method: 'GET' });
 
       if (response.ok) {
         setSelectorSubmitStatus('success');
-        setSelectorSubmitMessage('Thank you! We will contact you soon.');
+        setSelectorSubmitMessage("Thank you! We'll be in touch shortly to assist with your needs.");
         setSelectorData(initialSelectorData);
         setWizardStep(1);
         setTimeout(scrollWizardToTop, 50);
@@ -268,7 +305,7 @@ export default function Home() {
   // Render wizard steps
   const renderStepContent = () => {
     switch (wizardStep) {
-      // Step 1: Business type
+      // Step 1: Business Type
       case 1:
         return (
           <div className="text-gray-900 dark:text-white">
@@ -279,14 +316,7 @@ export default function Home() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() =>
-                  setSelectorData((prev) => ({
-                    ...prev,
-                    businessType: 'retail',
-                    softwareNeeds: [],
-                    onlineOrdering: false,
-                  }))
-                }
+                onClick={() => setSelectorData((prev) => ({ ...prev, businessType: 'retail', softwareNeeds: [], onlineOrdering: false }))}
                 className={`p-4 border rounded-lg transition-colors ${
                   selectorData.businessType === 'retail'
                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-700'
@@ -402,7 +432,7 @@ export default function Home() {
           </div>
         );
 
-      // Step 2: If restaurant -> choose software type. Otherwise -> online ordering.
+      // Step 2
       case 2:
         if (selectorData.businessType === 'restaurant') {
           return (
@@ -422,7 +452,7 @@ export default function Home() {
                     const updatedNeeds = selectorData.softwareNeeds.includes('full-service')
                       ? selectorData.softwareNeeds.filter((item) => item !== 'full-service')
                       : [...selectorData.softwareNeeds, 'full-service'];
-                    setSelectorData((prev) => ({ ...prev, softwareNeeds: updatedNeeds }));
+                    setSelectorData({ ...selectorData, softwareNeeds: updatedNeeds });
                   }}
                 >
                   <input
@@ -444,7 +474,7 @@ export default function Home() {
                     const updatedNeeds = selectorData.softwareNeeds.includes('quick-service')
                       ? selectorData.softwareNeeds.filter((item) => item !== 'quick-service')
                       : [...selectorData.softwareNeeds, 'quick-service'];
-                    setSelectorData((prev) => ({ ...prev, softwareNeeds: updatedNeeds }));
+                    setSelectorData({ ...selectorData, softwareNeeds: updatedNeeds });
                   }}
                 >
                   <input
@@ -459,7 +489,6 @@ export default function Home() {
             </div>
           );
         }
-        // Non-restaurant business => online ordering
         return (
           <div className="text-gray-900 dark:text-white">
             <h3 className="mb-4 text-xl font-semibold">Do you need online ordering capabilities?</h3>
@@ -494,19 +523,19 @@ export default function Home() {
               How many of each device do you need? (Use plus/minus or type the quantity)
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {/* Full-Service POS */}
+              {/* Full-Service POS: Clover Station Duo 2 */}
               <div className="p-4 bg-white dark:bg-gray-700 border rounded-lg flex flex-col items-center">
                 <Image
                   src="/full-service-pos.jpg"
-                  alt="Full-Service POS"
+                  alt="Clover Station Duo 2 Bundle"
                   width={200}
                   height={200}
                   style={{ objectFit: 'cover' }}
                   className="mb-4 rounded"
                 />
-                <h4 className="text-lg font-semibold mb-2">Full-Service POS</h4>
+                <h4 className="text-lg font-semibold mb-2">Clover Station Duo 2 Bundle</h4>
                 <p className="mb-4 text-sm text-gray-600 dark:text-gray-300 text-center">
-                  Ideal for dine-in restaurants, table service, etc.
+                  Ideal for busy restaurants needing front & back display.
                 </p>
                 <div className="flex items-center">
                   <motion.button
@@ -532,19 +561,19 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Bar-Service POS */}
+              {/* Bar-Service POS: Clover Station Solo */}
               <div className="p-4 bg-white dark:bg-gray-700 border rounded-lg flex flex-col items-center">
                 <Image
                   src="/bar-service-pos.jpg"
-                  alt="Bar-Service POS"
+                  alt="Clover Station Solo Bundle"
                   width={200}
                   height={200}
                   style={{ objectFit: 'cover' }}
                   className="mb-4 rounded"
                 />
-                <h4 className="text-lg font-semibold mb-2">Bar-Service POS</h4>
+                <h4 className="text-lg font-semibold mb-2">Clover Station Solo Bundle</h4>
                 <p className="mb-4 text-sm text-gray-600 dark:text-gray-300 text-center">
-                  Suited for bars, nightlife, quick drink ordering.
+                  Perfect for bars or smaller counters needing a single screen.
                 </p>
                 <div className="flex items-center">
                   <motion.button
@@ -570,19 +599,19 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Mini POS */}
+              {/* Mini POS: Mini 3 */}
               <div className="p-4 bg-white dark:bg-gray-700 border rounded-lg flex flex-col items-center">
                 <Image
                   src="/minipos.jpg"
-                  alt="Mini POS"
+                  alt="Mini 3"
                   width={200}
                   height={200}
                   style={{ objectFit: 'cover' }}
                   className="mb-4 rounded"
                 />
-                <h4 className="text-lg font-semibold mb-2">Mini POS</h4>
+                <h4 className="text-lg font-semibold mb-2">Mini 3</h4>
                 <p className="mb-4 text-sm text-gray-600 dark:text-gray-300 text-center">
-                  Compact terminal for smaller counters.
+                  Compact Clover Mini 3 for smaller counters or quick-serve.
                 </p>
                 <div className="flex items-center">
                   <motion.button
@@ -608,19 +637,19 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Handheld POS */}
+              {/* Handheld: Clover Flex 4 */}
               <div className="p-4 bg-white dark:bg-gray-700 border rounded-lg flex flex-col items-center">
                 <Image
                   src="/handheldpos.jpg"
-                  alt="Handheld POS"
+                  alt="Clover Flex 4 / Flex 4 Pocket"
                   width={200}
                   height={200}
                   style={{ objectFit: 'cover' }}
                   className="mb-4 rounded"
                 />
-                <h4 className="text-lg font-semibold mb-2">Handheld POS</h4>
+                <h4 className="text-lg font-semibold mb-2">Clover Flex 4 / Flex 4 Pocket</h4>
                 <p className="mb-4 text-sm text-gray-600 dark:text-gray-300 text-center">
-                  Portable device for table-side or line-busting.
+                  Portable handheld for table-side ordering or line-busting.
                 </p>
                 <div className="flex items-center">
                   <motion.button
@@ -646,19 +675,19 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Kitchen Printer */}
+              {/* Kitchen Printer: Star Kitchen Printer */}
               <div className="p-4 bg-white dark:bg-gray-700 border rounded-lg flex flex-col items-center">
                 <Image
                   src="/kitchenprinter.jpg"
-                  alt="Kitchen Printer"
+                  alt="Star Kitchen Printer"
                   width={200}
                   height={200}
                   style={{ objectFit: 'cover' }}
                   className="mb-4 rounded"
                 />
-                <h4 className="text-lg font-semibold mb-2">Kitchen Printer</h4>
+                <h4 className="text-lg font-semibold mb-2">Star Kitchen Printer</h4>
                 <p className="mb-4 text-sm text-gray-600 dark:text-gray-300 text-center">
-                  Traditional kitchen ticket printing.
+                  Reliable Star printer for kitchen tickets.
                 </p>
                 <div className="flex items-center">
                   <motion.button
@@ -684,17 +713,17 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Kitchen Display System */}
+              {/* Kitchen Display: Clover Kitchen Display System */}
               <div className="p-4 bg-white dark:bg-gray-700 border rounded-lg flex flex-col items-center">
                 <Image
                   src="/kitchendisplay.jpg"
-                  alt="Kitchen Display"
+                  alt="Clover Kitchen Display System"
                   width={200}
                   height={200}
                   style={{ objectFit: 'cover' }}
                   className="mb-4 rounded"
                 />
-                <h4 className="text-lg font-semibold mb-2">Kitchen Display System</h4>
+                <h4 className="text-lg font-semibold mb-2">Clover Kitchen Display System</h4>
                 <p className="mb-4 text-sm text-gray-600 dark:text-gray-300 text-center">
                   Digital screen for order management.
                 </p>
@@ -722,19 +751,19 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* KIOSK */}
+              {/* Kiosk: Clover Kiosk */}
               <div className="p-4 bg-white dark:bg-gray-700 border rounded-lg flex flex-col items-center">
                 <Image
                   src="/kiosk.jpg"
-                  alt="Kiosk"
+                  alt="Clover Kiosk"
                   width={200}
                   height={200}
                   style={{ objectFit: 'cover' }}
                   className="mb-4 rounded"
                 />
-                <h4 className="text-lg font-semibold mb-2">KIOSK</h4>
+                <h4 className="text-lg font-semibold mb-2">Clover Kiosk</h4>
                 <p className="mb-4 text-sm text-gray-600 dark:text-gray-300 text-center">
-                  Self-order kiosk for guests.
+                  Self-order Clover kiosk for modern service.
                 </p>
                 <div className="flex items-center">
                   <motion.button
@@ -763,14 +792,17 @@ export default function Home() {
           </div>
         );
 
-      // Step 4: Contact info
+      // Step 4: Contact info + number of locations + monthly volume
       case 4:
+        // We'll add the submarine-style location input and 4 monthly volume radio
         return (
           <div className="text-gray-900 dark:text-white">
             <h3 className="mb-4 text-xl font-semibold">Almost done!</h3>
             <p className="mb-6 text-gray-600 dark:text-gray-400">
-              Enter your contact details to receive your personalized quote.
+              Enter your contact details and business specifics to receive your personalized quote.
             </p>
+
+            {/* Basic contact */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block mb-1 text-sm font-medium">
@@ -801,6 +833,7 @@ export default function Home() {
                 />
               </div>
             </div>
+
             <div className="mt-4">
               <label htmlFor="email" className="block mb-1 text-sm font-medium">
                 Email
@@ -815,6 +848,7 @@ export default function Home() {
                 required
               />
             </div>
+
             <div className="mt-4">
               <label htmlFor="phone" className="block mb-1 text-sm font-medium">
                 Phone
@@ -829,86 +863,180 @@ export default function Home() {
                 required
               />
             </div>
+
+            {/* Number of locations: submarine-style */}
+            <div className="mt-6">
+              <label className="block mb-1 text-sm font-medium">Number of Locations</label>
+              <div className="flex items-center gap-2">
+                {['1','2','3','4','5'].map((opt) => (
+                  <motion.button
+                    key={opt}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() =>
+                      setSelectorData((prev) => ({
+                        ...prev,
+                        numLocationsChoice: opt,
+                        numLocationsCustom: '',
+                      }))
+                    }
+                    className={`px-3 py-2 rounded ${
+                      selectorData.numLocationsChoice === opt
+                        ? 'bg-blue-600 text-white dark:bg-blue-500'
+                        : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200'
+                    }`}
+                  >
+                    {opt}
+                  </motion.button>
+                ))}
+
+                {/* Plus button */}
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() =>
+                    setSelectorData((prev) => ({
+                      ...prev,
+                      numLocationsChoice: 'plus',
+                    }))
+                  }
+                  className={`px-3 py-2 rounded ${
+                    selectorData.numLocationsChoice === 'plus'
+                      ? 'bg-blue-600 text-white dark:bg-blue-500'
+                      : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200'
+                  }`}
+                >
+                  +
+                </motion.button>
+              </div>
+              {/* If user chooses plus, show custom input */}
+              {selectorData.numLocationsChoice === 'plus' && (
+                <div className="mt-3">
+                  <label className="block mb-1 text-sm text-gray-600 dark:text-gray-400">Enter custom number:</label>
+                  <input
+                    type="number"
+                    min="1"
+                    name="numLocationsCustom"
+                    value={selectorData.numLocationsCustom}
+                    onChange={handleSelectorInputChange}
+                    className="w-32 px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Monthly volume: 4 easy ranges */}
+            <div className="mt-6">
+              <label className="block mb-1 text-sm font-medium">Monthly Processing Volume</label>
+              <div className="flex flex-wrap gap-2">
+                {['0-50K','50K-250K','250K-1MM','1MM+'].map((range) => (
+                  <motion.button
+                    key={range}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setSelectorData((prev) => ({ ...prev, monthlyVolume: range }))}
+                    className={`px-4 py-2 rounded border ${
+                      selectorData.monthlyVolume === range
+                        ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500'
+                        : 'text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700'
+                    }`}
+                  >
+                    {range === '0-50K' && '$0-50K'}
+                    {range === '50K-250K' && '$50K-250K'}
+                    {range === '250K-1MM' && '$250K-1MM'}
+                    {range === '1MM+' && '$1MM+'}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
           </div>
         );
 
       // Step 5: Summary & Submit
       case 5:
+        if (selectorSubmitStatus === 'success') {
+          return (
+            <div className="text-center">
+              <h3 className="mb-4 text-2xl font-semibold">Thank You!</h3>
+              <p className="mb-4">{selectorSubmitMessage}</p>
+            </div>
+          );
+        }
+        if (selectorSubmitStatus === 'error') {
+          return (
+            <div className="text-center">
+              <h3 className="mb-4 text-2xl font-semibold text-red-600">Error</h3>
+              <p className="mb-4">{selectorSubmitMessage}</p>
+            </div>
+          );
+        }
+        // Normal summary
+        const { numLocationsChoice, numLocationsCustom } = selectorData;
+        const finalLocations = numLocationsChoice === 'plus' ? numLocationsCustom : numLocationsChoice;
         return (
-          <div className="text-gray-900 dark:text-white">
-            {selectorSubmitStatus === 'success' ? (
-              <div className="text-center">
-                <h3 className="mb-4 text-2xl font-semibold">Thank You!</h3>
-                <p className="mb-4">{selectorSubmitMessage}</p>
-              </div>
-            ) : selectorSubmitStatus === 'error' ? (
-              <div className="text-center">
-                <h3 className="mb-4 text-2xl font-semibold text-red-600">Error</h3>
-                <p className="mb-4">{selectorSubmitMessage}</p>
-              </div>
-            ) : (
-              <>
-                <h3 className="mb-4 text-xl font-semibold">Review Your Choices</h3>
-                <div className="space-y-2 text-gray-700 dark:text-gray-100">
-                  <p>
-                    <strong>Business Type:</strong> {selectorData.businessType}
-                  </p>
-                  {selectorData.businessType === 'restaurant' && (
-                    <p>
-                      <strong>Restaurant Type:</strong> {selectorData.softwareNeeds.join(', ')}
-                    </p>
-                  )}
-                  {selectorData.businessType !== 'restaurant' && selectorData.onlineOrdering && (
-                    <p>
-                      <strong>Online Ordering:</strong> Yes
-                    </p>
-                  )}
-                  <p>
-                    <strong>Full-Service POS:</strong> {selectorData.fullServicePosQty}
-                  </p>
-                  <p>
-                    <strong>Bar-Service POS:</strong> {selectorData.barServicePosQty}
-                  </p>
-                  <p>
-                    <strong>Mini POS:</strong> {selectorData.miniPosQty}
-                  </p>
-                  <p>
-                    <strong>Handheld POS:</strong> {selectorData.handheldPosQty}
-                  </p>
-                  <p>
-                    <strong>Kitchen Printers:</strong> {selectorData.kitchenPrinterQty}
-                  </p>
-                  <p>
-                    <strong>Kitchen Displays:</strong> {selectorData.kitchenDisplayQty}
-                  </p>
-                  <p>
-                    <strong>KIOSKs:</strong> {selectorData.kioskQty}
-                  </p>
-                  <hr className="my-2 border-gray-300 dark:border-gray-600" />
-                  <p>
-                    <strong>Name:</strong> {selectorData.firstName} {selectorData.lastName}
-                  </p>
-                  <p>
-                    <strong>Email:</strong> {selectorData.email}
-                  </p>
-                  <p>
-                    <strong>Phone:</strong> {selectorData.phone}
-                  </p>
-                </div>
-                <div className="mt-6 text-center">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleSelectorSubmit}
-                    className="px-8 py-3 text-white transition-colors bg-blue-600 dark:bg-blue-400 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-300"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Submitting...' : 'Send Message'}
-                  </motion.button>
-                </div>
-              </>
-            )}
-          </div>
+          <>
+            <h3 className="mb-4 text-xl font-semibold dark:text-white">Review Your Choices</h3>
+            <div className="space-y-2 text-gray-700 dark:text-gray-100">
+              <p>
+                <strong>Business Type:</strong> {selectorData.businessType}
+              </p>
+              {selectorData.businessType === 'restaurant' && (
+                <p>
+                  <strong>Restaurant Type:</strong> {selectorData.softwareNeeds.join(', ')}
+                </p>
+              )}
+              {selectorData.businessType !== 'restaurant' && selectorData.onlineOrdering && (
+                <p>
+                  <strong>Online Ordering:</strong> Yes
+                </p>
+              )}
+              <p>
+                <strong>Clover Station Duo 2:</strong> {selectorData.fullServicePosQty}
+              </p>
+              <p>
+                <strong>Clover Station Solo:</strong> {selectorData.barServicePosQty}
+              </p>
+              <p>
+                <strong>Mini 3:</strong> {selectorData.miniPosQty}
+              </p>
+              <p>
+                <strong>Clover Flex 4:</strong> {selectorData.handheldPosQty}
+              </p>
+              <p>
+                <strong>Star Kitchen Printer:</strong> {selectorData.kitchenPrinterQty}
+              </p>
+              <p>
+                <strong>Clover Kitchen Display:</strong> {selectorData.kitchenDisplayQty}
+              </p>
+              <p>
+                <strong>Clover Kiosk:</strong> {selectorData.kioskQty}
+              </p>
+              <hr className="my-2 border-gray-300 dark:border-gray-600" />
+              <p>
+                <strong>Name:</strong> {selectorData.firstName} {selectorData.lastName}
+              </p>
+              <p>
+                <strong>Email:</strong> {selectorData.email}
+              </p>
+              <p>
+                <strong>Phone:</strong> {selectorData.phone}
+              </p>
+              <p>
+                <strong>Number of Locations:</strong> {finalLocations || 'N/A'}
+              </p>
+              <p>
+                <strong>Monthly Volume:</strong> {selectorData.monthlyVolume}
+              </p>
+            </div>
+            <div className="mt-6 text-center">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleSelectorSubmit}
+                className="px-8 py-3 text-white transition-colors bg-blue-600 dark:bg-blue-400 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-300"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Submitting...' : 'Send Message'}
+              </motion.button>
+            </div>
+          </>
         );
 
       default:
@@ -916,7 +1044,7 @@ export default function Home() {
     }
   };
 
-  // Wizard step indicators
+  // Wizard progress indicator
   const renderProgressIndicator = () => {
     const totalSteps = 5;
     return (
@@ -956,8 +1084,10 @@ export default function Home() {
     );
   };
 
-  // Contact form at bottom
-  const handleContactInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  // Contact form
+  const handleContactInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setContactFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -986,20 +1116,35 @@ export default function Home() {
       return;
     }
 
+    // Resolve final location
+    let finalLocations =
+      contactFormData.numLocationsChoice === 'plus'
+        ? contactFormData.numLocationsCustom
+        : contactFormData.numLocationsChoice;
+
     try {
-      // Using the same new webhook, formType = contactPage
       const params = new URLSearchParams({
-        ...contactFormData,
+        firstName: contactFormData.firstName,
+        lastName: contactFormData.lastName,
+        email: contactFormData.email,
+        phone: contactFormData.phone,
+        callDate: contactFormData.callDate,
+        preferredTime: contactFormData.preferredTime,
+        businessType: contactFormData.businessType,
+        // unify location + monthlyVolume
+        numLocations: finalLocations || '',
+        monthlyVolume: contactFormData.monthlyVolume,
+
         submitTime: new Date().toISOString(),
         formType: 'contactPage',
       });
 
-      // ***** NEW WEBHOOK URL HERE *****
+      // Updated webhook
       const url = `https://hooks.zapier.com/hooks/catch/17465641/2awchwj/?${params.toString()}`;
       const response = await fetch(url, { method: 'GET' });
       if (response.ok) {
         setContactSubmitStatus('success');
-        setContactSubmitMessage('Thank you! We will contact you soon.');
+        setContactSubmitMessage("Thank you! We'll be in touch shortly to assist with your needs.");
         setContactFormData({
           firstName: '',
           lastName: '',
@@ -1007,9 +1152,10 @@ export default function Home() {
           phone: '',
           callDate: '',
           preferredTime: '',
-          pricingPlan: '',
           businessType: '',
-          monthlyVolume: '',
+          numLocationsChoice: '1',
+          numLocationsCustom: '',
+          monthlyVolume: '0-50K'
         });
       } else {
         const errorBody = await response.text();
@@ -1057,7 +1203,6 @@ export default function Home() {
           >
             <div className="max-w-6xl px-4 mx-auto sm:px-6 lg:px-8">
               <div className="flex justify-between h-16">
-                {/* Logo */}
                 <div className="flex items-center">
                   <motion.div
                     className="flex items-center"
@@ -1078,7 +1223,7 @@ export default function Home() {
                   </motion.div>
                 </div>
 
-                {/* Hamburger icon (mobile) */}
+                {/* Mobile menu button */}
                 <div className="flex items-center md:hidden">
                   <button
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -1096,7 +1241,7 @@ export default function Home() {
                   </button>
                 </div>
 
-                {/* Desktop Menu & Dark Mode Toggle */}
+                {/* Desktop menu & Dark Mode Toggle */}
                 <div className="items-center hidden space-x-8 md:flex">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -1118,7 +1263,6 @@ export default function Home() {
                   >
                     Contact
                   </motion.button>
-                  {/* Dark Mode */}
                   <button
                     onClick={toggleDarkMode}
                     className="p-2 text-gray-600 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none"
@@ -1195,7 +1339,7 @@ export default function Home() {
                 <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/60 via-black/40 to-transparent"></div>
               </div>
             </motion.div>
-            {/* Carousel nav dots */}
+            {/* Carousel Dots */}
             <div className="absolute z-20 flex space-x-2 transform -translate-x-1/2 bottom-8 left-1/2">
               {images.map((_, index) => (
                 <button
@@ -1207,7 +1351,6 @@ export default function Home() {
                 />
               ))}
             </div>
-            {/* Hero content */}
             <div className="absolute inset-0 flex items-center max-w-[1920px] mx-auto">
               <div className="relative z-20 max-w-6xl px-4 mx-auto mt-16">
                 <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl text-white">
@@ -1257,7 +1400,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* New Stats Section with 5 items */}
+          {/* Stats Section */}
           <section className="py-16 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">
             <div className="max-w-6xl mx-auto px-4">
               <h2 className="text-3xl font-bold text-center mb-12">Proven Results, Trusted Service</h2>
@@ -1274,11 +1417,13 @@ export default function Home() {
                   <h3 className="text-2xl font-bold text-gray-800 dark:text-white">24/7</h3>
                   <p className="mt-2 text-gray-600 dark:text-gray-300">Support</p>
                 </div>
-                {/* 5/5 Rating */}
+                {/* Direct Channel */}
                 <div className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center">
-                  <FaStar className="text-yellow-500 dark:text-yellow-400 text-4xl mb-2" />
-                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">5/5</h3>
-                  <p className="mt-2 text-gray-600 dark:text-gray-300">Rating</p>
+                  <FaHandshake className="text-orange-500 dark:text-orange-400 text-4xl mb-2" />
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-white">
+                    Direct Channel
+                  </h3>
+                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">No Middleman, No Hidden Fees</p>
                 </div>
                 {/* 300+ Integrations */}
                 <div className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center">
@@ -1296,11 +1441,13 @@ export default function Home() {
             </div>
           </section>
 
-          {/* WIZARD */}
+          {/* Wizard */}
           <section className="py-20 bg-gray-50 dark:bg-gray-800" id="product-selector">
             <div className="max-w-6xl px-4 mx-auto">
               <div className="mb-12 text-center">
-                <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">Find Your Perfect POS Solution</h2>
+                <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">
+                  Find Your Perfect POS Solution
+                </h2>
                 <p className="max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">
                   Answer a few questions to get a personalized recommendation.
                 </p>
@@ -1352,8 +1499,11 @@ export default function Home() {
             </div>
           </section>
 
-          {/* CONTACT SECTION */}
-          <div className="relative px-4 py-20 bg-gradient-to-b from-gray-50 dark:from-gray-800 to-white dark:to-gray-900" id="contact">
+          {/* Contact Section */}
+          <div
+            className="relative px-4 py-20 bg-gradient-to-b from-gray-50 dark:from-gray-800 to-white dark:to-gray-900"
+            id="contact"
+          >
             <div className="max-w-6xl mx-auto">
               <div className="mb-12 text-center">
                 <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">Local Comes First</h2>
@@ -1414,7 +1564,7 @@ export default function Home() {
                         placeholder="(555) 123-4567"
                       />
                     </div>
-                    {/* Call schedule fields */}
+                    {/* Callback schedule */}
                     <div className="grid gap-6 md:grid-cols-2">
                       <div>
                         <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
@@ -1445,55 +1595,94 @@ export default function Home() {
                         </select>
                       </div>
                     </div>
-                    <div>
-                      <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">Select plan</label>
-                      <select
-                        name="pricingPlan"
-                        value={contactFormData.pricingPlan}
-                        onChange={handleContactInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white"
-                      >
-                        <option value="">Select Plan</option>
-                        <option value="onthego">On The Go</option>
-                        <option value="mobilepro">Mobile Pro Bundle</option>
-                        <option value="retailorcounterservicerestaurantbundle">
-                          Retail / Counter-Service
-                        </option>
-                        <option value="fullservicerestaurantandbarbundle">Full-Service &amp; Bar</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">Business Type</label>
-                      <select
-                        name="businessType"
-                        value={contactFormData.businessType}
-                        onChange={handleContactInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white"
-                      >
-                        <option value="">Select a business type</option>
-                        <option value="retail">Retail</option>
-                        <option value="restaurant">Restaurant</option>
-                        <option value="service">Service Business</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
+
+                    {/* Submarine style for # of locations */}
                     <div>
                       <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
-                        Estimated Monthly Volume
+                        Number of Locations
                       </label>
-                      <select
-                        name="monthlyVolume"
-                        value={contactFormData.monthlyVolume}
-                        onChange={handleContactInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white"
-                      >
-                        <option value="">Select estimated monthly volume</option>
-                        <option value="0-50,000">0-50,000</option>
-                        <option value="50000-250000">50,000-250,000</option>
-                        <option value="250000-1000000">250,000-1,000,000</option>
-                        <option value="1000000+">1,000,000+</option>
-                      </select>
+                      <div className="flex items-center gap-2">
+                        {['1','2','3','4','5'].map((opt) => (
+                          <motion.button
+                            key={opt}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={(ev) => {
+                              ev.preventDefault();
+                              setContactFormData((prev) => ({
+                                ...prev,
+                                numLocationsChoice: opt,
+                                numLocationsCustom: '',
+                              }));
+                            }}
+                            className={`px-3 py-2 rounded ${
+                              contactFormData.numLocationsChoice === opt
+                                ? 'bg-blue-600 text-white dark:bg-blue-500'
+                                : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200'
+                            }`}
+                          >
+                            {opt}
+                          </motion.button>
+                        ))}
+                        {/* plus button */}
+                        <motion.button
+                          whileTap={{ scale: 0.95 }}
+                          onClick={(ev) => {
+                            ev.preventDefault();
+                            setContactFormData((prev) => ({ ...prev, numLocationsChoice: 'plus' }));
+                          }}
+                          className={`px-3 py-2 rounded ${
+                            contactFormData.numLocationsChoice === 'plus'
+                              ? 'bg-blue-600 text-white dark:bg-blue-500'
+                              : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200'
+                          }`}
+                        >
+                          +
+                        </motion.button>
+                      </div>
+                      {contactFormData.numLocationsChoice === 'plus' && (
+                        <div className="mt-3">
+                          <label className="block mb-1 text-sm text-gray-600 dark:text-gray-400">Enter custom number:</label>
+                          <input
+                            type="number"
+                            min="1"
+                            name="numLocationsCustom"
+                            value={contactFormData.numLocationsCustom}
+                            onChange={(e) => setContactFormData((prev) => ({ ...prev, numLocationsCustom: e.target.value }))}
+                            className="w-32 px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                          />
+                        </div>
+                      )}
                     </div>
+
+                    {/* 4 volume ranges */}
+                    <div>
+                      <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
+                        Monthly Processing Volume
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {['0-50K','50K-250K','250K-1MM','1MM+'].map((range) => (
+                          <motion.button
+                            key={range}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={(ev) => {
+                              ev.preventDefault();
+                              setContactFormData((prev) => ({ ...prev, monthlyVolume: range }));
+                            }}
+                            className={`px-4 py-2 rounded border ${
+                              contactFormData.monthlyVolume === range
+                                ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500'
+                                : 'text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700'
+                            }`}
+                          >
+                            {range === '0-50K' && '$0-50K'}
+                            {range === '50K-250K' && '$50K-250K'}
+                            {range === '250K-1MM' && '$250K-1MM'}
+                            {range === '1MM+' && '$1MM+'}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="space-y-4">
                       <motion.button
                         type="submit"
