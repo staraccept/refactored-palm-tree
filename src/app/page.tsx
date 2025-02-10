@@ -220,9 +220,8 @@ export default function Home() {
         phone,
       } = selectorData;
 
-      // Use same webhook as contact form
+      // We'll keep them separate with formType for clarity, but it's the same endpoint
       const params = new URLSearchParams({
-        // We'll keep them separate with formType for clarity, but it's the same endpoint
         formType: 'contactPage',
         businessType,
         softwareNeeds: softwareNeeds.join(','),
@@ -241,6 +240,7 @@ export default function Home() {
         submitTime: new Date().toISOString(),
       });
 
+      // ***** NEW WEBHOOK URL HERE *****
       const url = `https://hooks.zapier.com/hooks/catch/17465641/2awchwj/?${params.toString()}`;
       const response = await fetch(url, { method: 'GET' });
 
@@ -268,7 +268,7 @@ export default function Home() {
   // Render wizard steps
   const renderStepContent = () => {
     switch (wizardStep) {
-      // Step 1: Business type with new images
+      // Step 1: Business type
       case 1:
         return (
           <div className="text-gray-900 dark:text-white">
@@ -987,12 +987,14 @@ export default function Home() {
     }
 
     try {
-      // same webhook, formType = contactPage
+      // Using the same new webhook, formType = contactPage
       const params = new URLSearchParams({
         ...contactFormData,
         submitTime: new Date().toISOString(),
         formType: 'contactPage',
       });
+
+      // ***** NEW WEBHOOK URL HERE *****
       const url = `https://hooks.zapier.com/hooks/catch/17465641/2awchwj/?${params.toString()}`;
       const response = await fetch(url, { method: 'GET' });
       if (response.ok) {
@@ -1457,7 +1459,7 @@ export default function Home() {
                         <option value="retailorcounterservicerestaurantbundle">
                           Retail / Counter-Service
                         </option>
-                        <option value="fullservicerestaurantandbarbundle">Full-Service & Bar</option>
+                        <option value="fullservicerestaurantandbarbundle">Full-Service &amp; Bar</option>
                       </select>
                     </div>
                     <div>
@@ -1637,7 +1639,6 @@ export default function Home() {
                   Contact Us
                 </a>
               </div>
-              {/* Removed the old ISO statement as requested */}
             </div>
 
             {/* Sticky CTA */}
