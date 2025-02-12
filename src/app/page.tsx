@@ -128,12 +128,13 @@ function AiSearchOverlay() {
             throw new Error("Unexpected API response format");
           }
     
-          // ✅ Extracts recommendation text from OpenAI's response
-          if (!Array.isArray(data.recommendations)) {
-            console.error("Unexpected API response:", data);
-            setErrorMessage("Invalid response format. Please try again.");
-            return;
-        }
+          console.log("🛠 Full API Response:", data); // ✅ Log what the API is actually sending
+
+          if (!data || !data.recommendations || !Array.isArray(data.recommendations)) {
+              console.error("❌ Unexpected API response format:", data);
+              setErrorMessage("Invalid response format. Please try again.");
+              return;
+          }
         
         setRecommendations(data.recommendations);
         } catch (error: any) {
