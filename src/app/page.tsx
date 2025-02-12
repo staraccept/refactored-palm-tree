@@ -11,7 +11,10 @@ import {
     FaGlobe
 } from 'react-icons/fa';
 import { ThemeProvider, useTheme } from './components/ThemeProvider'; // adjust path if needed
-import { posProducts } from '@/lib/posProducts'; // adjust path if needed
+import { posProducts, /* we’ll import our local finder */ } from '@/lib/posProducts'; // adjust path if needed
+
+// If you integrated the splitted approach in posProducts, import it:
+import { findRelatedProducts as localFindProducts } from '@/lib/posProducts';
 
 interface ProductSelectorData {
     businessType: string;
@@ -53,26 +56,46 @@ const initialSelectorData: ProductSelectorData = {
     monthlyVolume: '0-50K',
 };
 
-// Simple helper: matches returned recommendation string to an actual product object
+/**
+ * Matches a recommendation string (like "Clover Flex") to the best product in posProducts.
+ * 1) Attempt exact match
+ * 2) If not found, do partial substring matching
+ * 3) If still not found, return minimal fallback object
+ */
 function matchRecommendedItem(recommendation: string) {
-    // Attempt exact find by name:
-    const matched = posProducts.find(
-        (p) => p.name.toLowerCase() === recommendation.toLowerCase()
+    const recLower = recommendation.trim().toLowerCase();
+
+    // 1) Try exact
+    let matched = posProducts.find(
+        (p) => p.name.toLowerCase() === recLower
     );
-    // If not found, just return a minimal object with the name
+
+    // 2) If no exact match, do a partial (substring) match
+    if (!matched) {
+        matched = posProducts.find(
+            (p) =>
+                p.name.toLowerCase().includes(recLower) ||
+                recLower.includes(p.name.toLowerCase())
+        );
+    }
+
+    // 3) Still none found => fallback
     if (!matched) {
         return {
             name: recommendation,
             image: null,
             features: [],
             bestFor: [],
-            tailoredDetails: '',
             cta: ''
         };
     }
     return matched;
 }
 
+/**
+ * AI-powered search overlay that calls Cloudflare Worker,
+ * but also falls back to local logic if needed.
+ */
 function AiSearchOverlay() {
     const sampleQueries = [
         "I own a coffee shop and need a fast checkout system",
@@ -93,23 +116,24 @@ function AiSearchOverlay() {
     const pauseAtEndOfSample = 2000;
     const cursorRef = useRef<HTMLSpanElement | null>(null);
 
+    // Simple blinking cursor effect
     useEffect(() => {
         if (cursorRef.current) {
             cursorRef.current.style.animation = "blink 1s infinite";
         }
     }, []);
 
-    // Typewriter effect on sample queries
+    // Typewriter effect for sample queries
     useEffect(() => {
         if (userQuery) return;
+        const text = sampleQueries[currentSampleIndex];
 
-        const currentFullText = sampleQueries[currentSampleIndex];
         const handleTyping = () => {
-            if (!isDeleting && typedText.length < currentFullText.length) {
-                setTypedText((prev) => prev + currentFullText.charAt(prev.length));
+            if (!isDeleting && typedText.length < text.length) {
+                setTypedText((prev) => prev + text.charAt(prev.length));
             } else if (isDeleting && typedText.length > 0) {
                 setTypedText((prev) => prev.slice(0, -1));
-            } else if (!isDeleting && typedText.length === currentFullText.length) {
+            } else if (!isDeleting && typedText.length === text.length) {
                 setTimeout(() => setIsDeleting(true), pauseAtEndOfSample);
             } else if (isDeleting && typedText.length === 0) {
                 setIsDeleting(false);
@@ -119,17 +143,11 @@ function AiSearchOverlay() {
 
         const timer = setTimeout(handleTyping, isDeleting ? typingSpeed / 2 : typingSpeed);
         return () => clearTimeout(timer);
-    }, [
-        typedText,
-        isDeleting,
-        currentSampleIndex,
-        pauseAtEndOfSample,
-        sampleQueries,
-        typingSpeed,
-        userQuery,
-    ]);
+    }, [typedText, isDeleting, currentSampleIndex, sampleQueries, typingSpeed, userQuery, pauseAtEndOfSample]);
 
-    // Fetch recommendations on userQuery change (debounced)
+    /**
+     * Fetch recommendations from Cloudflare Worker, or fall back to local search if needed.
+     */
     useEffect(() => {
         if (!userQuery) {
             setRecommendations([]);
@@ -137,6 +155,7 @@ function AiSearchOverlay() {
             return;
         }
 
+        // Debounce 600ms
         const timer = setTimeout(async () => {
             setIsLoading(true);
             setErrorMessage("");
@@ -148,17 +167,22 @@ function AiSearchOverlay() {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ query: userQuery }),
                 });
-
                 if (!res.ok) {
                     throw new Error(`Request failed with status ${res.status}`);
                 }
-
                 const data = await res.json();
-                if (!data.recommendations || !Array.isArray(data.recommendations)) {
-                    console.error("Unexpected API response format:", data);
-                    setErrorMessage("Invalid response format. Please try again.");
+                if (!data.recommendations || !Array.isArray(data.recommendations) || data.recommendations.length === 0) {
+                    // If Worker returns empty or invalid, do a local fallback
+                    const fallbackProducts = localFindProducts(userQuery, 3); // find up to 3 local matches
+                    if (fallbackProducts.length > 0) {
+                        // Convert them into array of product objects
+                        const localMatches = fallbackProducts.map((p) => p); // directly p
+                        setRecommendations(localMatches);
+                    } else {
+                        setErrorMessage("No recommendations found for your query.");
+                    }
                 } else {
-                    // Convert each recommendation string into a product object
+                    // If Worker returns strings, do partial matching
                     const matchedItems = data.recommendations.map((r: string) =>
                         matchRecommendedItem(r)
                     );
@@ -166,11 +190,17 @@ function AiSearchOverlay() {
                 }
             } catch (error: any) {
                 console.error("Error fetching recommendations:", error);
-                setErrorMessage("Could not fetch recommendations. Please try again.");
+                // Also do local fallback if Worker fails
+                const fallbackProducts = localFindProducts(userQuery, 3);
+                if (fallbackProducts.length > 0) {
+                    setRecommendations(fallbackProducts);
+                } else {
+                    setErrorMessage("Could not fetch recommendations. Please try again.");
+                }
             } finally {
                 setIsLoading(false);
             }
-        }, 500);
+        }, 600);
 
         return () => clearTimeout(timer);
     }, [userQuery]);
@@ -184,13 +214,13 @@ function AiSearchOverlay() {
         >
             <div className="text-gray-700 dark:text-gray-100 mb-2">
                 {!userQuery ? (
-                    <span>
+                    <>
                         {typedText}
                         <span
                             ref={cursorRef}
                             className="border-r-2 border-gray-900 dark:border-gray-100 ml-1"
                         />
-                    </span>
+                    </>
                 ) : (
                     "Type your question or needs..."
                 )}
@@ -222,11 +252,11 @@ function AiSearchOverlay() {
                             <div className="text-red-500 dark:text-red-300">{errorMessage}</div>
                         )}
 
-                        {/* Show each recommendation with bullet points & bigger thumbnail */}
                         {!isLoading && !errorMessage && recommendations.length > 0 && (
                             <div>
                                 {recommendations.map((item: any, idx: number) => (
                                     <div key={idx} className="mb-4 flex items-start space-x-4">
+                                        {/* Larger thumbnail: 150x150 */}
                                         {item.image && (
                                             <div className="flex-shrink-0">
                                                 <Image
@@ -242,13 +272,9 @@ function AiSearchOverlay() {
                                             <h4 className="font-semibold text-gray-800 dark:text-gray-100">
                                                 {item.name}
                                             </h4>
-
-                                            {/* Features as bullet points */}
                                             {item.features && item.features.length > 0 && (
                                                 <>
-                                                    <h5 className="mt-2 font-medium">
-                                                        Features
-                                                    </h5>
+                                                    <h5 className="mt-2 font-medium">Features</h5>
                                                     <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-300 mt-1 space-y-1">
                                                         {item.features.map((feat: string, fIdx: number) => (
                                                             <li key={fIdx}>{feat}</li>
@@ -256,13 +282,9 @@ function AiSearchOverlay() {
                                                     </ul>
                                                 </>
                                             )}
-
-                                            {/* Best For as bullet points */}
                                             {item.bestFor && item.bestFor.length > 0 && (
                                                 <>
-                                                    <h5 className="mt-2 font-medium">
-                                                        Best For
-                                                    </h5>
+                                                    <h5 className="mt-2 font-medium">Best For</h5>
                                                     <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-300 mt-1 space-y-1">
                                                         {item.bestFor.map((bf: string, bfIdx: number) => (
                                                             <li key={bfIdx}>{bf}</li>
@@ -270,8 +292,6 @@ function AiSearchOverlay() {
                                                     </ul>
                                                 </>
                                             )}
-
-                                            {/* CTA Link */}
                                             <div className="mt-3">
                                                 <button className="text-blue-600 dark:text-blue-400 hover:underline">
                                                     {item.cta || "View"}
@@ -281,13 +301,11 @@ function AiSearchOverlay() {
                                     </div>
                                 ))}
 
-                                {/* If API returns empty array */}
                                 {recommendations.length === 0 && (
                                     <div className="text-sm text-gray-600 dark:text-gray-300">
-                                        No recommendations found for your query.
+                                        No recommendations found.
                                     </div>
                                 )}
-
                                 <hr className="my-2 border-gray-200 dark:border-gray-600" />
                             </div>
                         )}
@@ -299,9 +317,6 @@ function AiSearchOverlay() {
 }
 
 export default function Home() {
-    // ...The rest of your wizard & contact form code remains unchanged...
-    // (keeping for completeness below)
-
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [currentImage, setCurrentImage] = useState(0);
     const [wizardStep, setWizardStep] = useState(1);
@@ -325,6 +340,7 @@ export default function Home() {
     const [contactSubmitMessage, setContactSubmitMessage] = useState('');
     const { darkMode, toggleDarkMode } = useTheme();
 
+    // Hero images
     const images = [
         { src: '/retailflex3.png', alt: 'Flexible Payment Terminal' },
         { src: '/qsrduo2.png', alt: 'QSR Duo POS System' },
@@ -431,6 +447,7 @@ export default function Home() {
         });
     };
 
+    // Wizard final submission
     const handleSelectorSubmit = async () => {
         setIsLoading(true);
         setSelectorSubmitStatus('idle');
@@ -457,8 +474,7 @@ export default function Home() {
                 monthlyVolume
             } = selectorData;
 
-            let finalLocations =
-                numLocationsChoice === 'plus' ? numLocationsCustom : numLocationsChoice;
+            let finalLocations = numLocationsChoice === 'plus' ? numLocationsCustom : numLocationsChoice;
 
             const params = new URLSearchParams({
                 formType: 'contactPage',
@@ -507,13 +523,14 @@ export default function Home() {
         }
     };
 
-    // Step content, unchanged except where your wizard originally displayed its data
+    // Renders each wizard step
     const renderStepContent = () => {
-        // ... your original wizard logic (steps 1-5) ...
-        // We'll skip re-pasting it here for brevity, but keep it in your code
-        return <div>Wizard Steps Go Here</div>
+        // ...Your original step1-5 logic as before...
+        // Keep or refine text as you wish
+        return <div>Wizard Steps Go Here...</div>;
     };
 
+    // Wizard top progress bar
     const renderProgressIndicator = () => {
         const totalSteps = 5;
         return (
@@ -565,6 +582,7 @@ export default function Home() {
         );
     };
 
+    // Contact form input handling
     const handleContactInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
     ) => {
@@ -998,8 +1016,9 @@ export default function Home() {
                             <div className="grid items-start gap-12 md:grid-cols-2">
                                 <div className="p-8 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 shadow-sm rounded-xl">
                                     <form onSubmit={handleContactSubmit} className="space-y-6">
-                                        {/* Contact fields, unchanged... */}
-                                        {/* ... */}
+                                        {/* Contact fields omitted for brevity, but keep them as-is */}
+                                        {/* e.g. firstName, lastName, email, phone, etc. */}
+
                                         <motion.button
                                             type="submit"
                                             className="w-full py-4 px-6 rounded-lg font-semibold text-white bg-blue-600 dark:bg-blue-400 hover:bg-blue-700 dark:hover:bg-blue-300 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
@@ -1023,7 +1042,7 @@ export default function Home() {
                                     </form>
                                 </div>
                                 <div className="space-y-8">
-                                    {/* Info blocks or logos, unchanged... */}
+                                    {/* Additional info/logos, unchanged */}
                                 </div>
                             </div>
                         </div>
