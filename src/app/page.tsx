@@ -136,10 +136,6 @@ function AiSearchOverlay() {
         }
         
         setRecommendations(data.recommendations);
-        
-
-    
-        setRecommendations(data.recommendations);
         } catch (error: any) {
           console.error("Error fetching recommendations:", error);
           setErrorMessage("Could not fetch recommendations. Please try again.");
