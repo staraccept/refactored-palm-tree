@@ -10,60 +10,46 @@ export interface PosProduct {
       useCase: string[]
       keywords: string[]
     }
-    relatedProducts: string[] // identifiers of complementary products
+    paymentTypes: {
+      swipe: boolean
+      chip: boolean
+      contactless: boolean
+      digitalWallet: boolean
+    }
+    environmentalFactors?: {
+      spillResistant?: boolean
+      highDurability?: boolean
+      fastPaced?: boolean
+      lowLighting?: boolean
+    }
+    complementaryProducts?: string[]
+    usageScenarios?: string[]
     primaryCategory: 'pos' | 'peripheral' | 'mobile' | 'selfservice'
     size: 'compact' | 'standard' | 'large'
-    priority: number // Used for ranking within matching results
+    priority?: number
     cta: string
     image?: string
-  }
-  
-  // Base features shared across most POS devices
-  const baseFeatures = {
-    connectivity: [
-      "WiFi Connectivity",
-      "4G LTE Support"
-    ],
-    payments: [
-      "Apple Pay, Google Pay, Samsung Pay Integration",
-      "Tap-to-Pay Capability",
-      "EMV (Chip) and Magstripe Support"
-    ],
-    hardware: [
-      "Built-in Barcode Scanner",
-      "Built-in Receipt Printer (supports text & email receipts)"
-    ],
-    system: [
-      "Modular Expandability with Live Sync to Online Dashboard"
-    ]
-  }
-  
-  const combineFeatures = (uniqueFeatures: string[] = []): string[] => {
-    return [
-      ...baseFeatures.connectivity,
-      ...baseFeatures.payments,
-      ...baseFeatures.hardware,
-      ...baseFeatures.system,
-      ...uniqueFeatures
-    ]
   }
   
   export const posProducts: PosProduct[] = [
     {
       name: "Clover Station Duo 2",
       identifier: "duo2",
+      primaryCategory: "pos",
+      size: "large",
       bestFor: [
         "High-Volume Full-Service Restaurants",
         "Multi-Station Restaurant Setups",
         "Fine Dining Establishments"
       ],
-      features: combineFeatures([
+      features: [
         "Dual-screen system with customer-facing display",
         "High-performance processor for peak hour operations",
         "Advanced inventory tracking and real-time reporting",
         "Staff management with role-based permissions",
-        "Table management and coursing support"
-      ]),
+        "Table management and coursing support",
+        "All payment methods supported"
+      ],
       searchTerms: {
         businessTypes: [
           "restaurant",
@@ -90,163 +76,253 @@ export interface PosProduct {
           "inventory"
         ]
       },
-      relatedProducts: ["kds", "starprinter"],
-      primaryCategory: "pos",
-      size: "large",
-      priority: 100, // Flagship product
-      cta: "Learn More",
+      paymentTypes: {
+        swipe: true,
+        chip: true,
+        contactless: true,
+        digitalWallet: true
+      },
+      environmentalFactors: {
+        spillResistant: true,
+        highDurability: true,
+        fastPaced: true,
+        lowLighting: false
+      },
+      complementaryProducts: ["flex4", "kds", "starprinter"],
+      usageScenarios: [
+        "Full-service restaurant operations",
+        "Fine dining experience",
+        "Multi-station kitchens",
+        "High-volume service periods"
+      ],
+      cta: "Get a Quote",
       image: "/full-service-pos.jpg"
     },
     {
       name: "Clover Station Solo",
       identifier: "solo",
+      primaryCategory: "pos",
+      size: "standard",
       bestFor: [
         "High-Volume Bars",
-        "Quick-Service Restaurants",
-        "Fast-Casual Dining"
+        "Sports Bars",
+        "Nightclubs"
       ],
-      features: combineFeatures([
+      features: [
         "Large 14-inch HD touchscreen",
         "Advanced tip management and split payment support",
         "Customizable quick-menu interface",
         "Bar tab management system",
-        "High-speed order processing"
-      ]),
+        "High-speed order processing",
+        "Magnetic stripe and chip reader",
+        "Durable design for busy bar environments",
+        "Spill-resistant construction"
+      ],
       searchTerms: {
         businessTypes: [
           "bar",
           "pub",
-          "quick service restaurant",
-          "fast casual",
-          "cafe",
-          "coffee shop",
-          "food truck"
+          "sports bar",
+          "nightclub",
+          "tavern",
+          "brewery"
         ],
         useCase: [
-          "quick service",
-          "counter service",
           "bar service",
           "tab management",
-          "fast paced",
-          "high volume"
+          "high volume alcohol sales",
+          "busy bar environment",
+          "card-present transactions",
+          "traditional payment methods"
         ],
         keywords: [
-          "single screen",
-          "tips",
+          "bar pos",
+          "tab management",
           "split payments",
-          "bar tabs",
-          "quick menu"
+          "card swipe",
+          "chip reader",
+          "spill resistant"
         ]
       },
-      relatedProducts: ["kds", "starprinter"],
-      primaryCategory: "pos",
-      size: "standard",
-      priority: 90,
-      cta: "Learn More",
+      paymentTypes: {
+        swipe: true,
+        chip: true,
+        contactless: false,
+        digitalWallet: false
+      },
+      environmentalFactors: {
+        spillResistant: true,
+        highDurability: true,
+        fastPaced: true,
+        lowLighting: true
+      },
+      complementaryProducts: ["starprinter"],
+      usageScenarios: [
+        "High-volume bar operations",
+        "Sports bar service",
+        "Nightclub transactions",
+        "Traditional payment processing"
+      ],
+      cta: "See Pricing",
       image: "/bar-service-pos.jpg"
     },
     {
       name: "Clover Mini 3",
       identifier: "mini3",
+      primaryCategory: "pos",
+      size: "compact",
       bestFor: [
-        "Space-Conscious Retail",
         "Coffee Shops",
-        "Small Service Businesses"
+        "Small Retail",
+        "Quick-Service Restaurants",
+        "Cafes"
       ],
-      features: combineFeatures([
+      features: [
         "Compact 7-inch HD display",
+        "All payment types supported",
         "Space-saving vertical design",
-        "Optional customer-facing display",
-        "Retail inventory management",
-        "Customer loyalty program integration"
-      ]),
+        "Customer-facing display",
+        "Quick-service optimized interface",
+        "Rapid checkout process"
+      ],
       searchTerms: {
         businessTypes: [
           "coffee shop",
           "cafe",
           "small retail",
           "boutique",
-          "salon",
-          "service business",
-          "small business"
+          "quick service",
+          "counter service"
         ],
         useCase: [
+          "quick service",
           "counter service",
           "retail checkout",
           "small space",
-          "single station",
-          "compact setup"
+          "fast transactions"
         ],
         keywords: [
-          "small",
           "compact",
-          "space saving",
-          "counter top",
-          "retail",
-          "loyalty"
+          "quick service",
+          "all payments",
+          "small footprint",
+          "contactless"
         ]
       },
-      relatedProducts: ["flex4"],
-      primaryCategory: "pos",
-      size: "compact",
-      priority: 80,
+      paymentTypes: {
+        swipe: true,
+        chip: true,
+        contactless: true,
+        digitalWallet: true
+      },
+      environmentalFactors: {
+        spillResistant: true,
+        highDurability: true,
+        fastPaced: true,
+        lowLighting: false
+      },
+      complementaryProducts: ["flex4", "kds"],
+      usageScenarios: [
+        "Coffee shop counter service",
+        "Quick-service restaurant",
+        "Small retail checkout",
+        "Cafe operations"
+      ],
       cta: "Learn More",
       image: "/minipos.jpg"
     },
     {
       name: "Clover Flex 4",
       identifier: "flex4",
+      primaryCategory: "mobile",
+      size: "compact",
       bestFor: [
-        "Mobile Food Service",
-        "Table-Side Ordering",
+        "Mobile POS Enhancement",
+        "Table Service Restaurants",
+        "Food Trucks",
         "Delivery Operations",
-        "Pop-Up Retail"
+        "Pop-Up Retail",
+        "Event Venues"
       ],
-      features: combineFeatures([
-        "5-inch portable touchscreen",
+      features: [
+        "5-inch HD portable touchscreen",
+        "All payment types supported (tap, swipe, chip, digital wallets)",
         "12+ hour battery life",
         "IP54 dust and water resistance",
         "Cellular backup connectivity",
-        "Built-in camera for inventory scanning"
-      ]),
+        "Built-in camera for inventory scanning",
+        "Wireless order sending to kitchen printers",
+        "Real-time sync with main POS system",
+        "Table management integration",
+        "Mobile checkout capability"
+      ],
       searchTerms: {
         businessTypes: [
+          "full service restaurant",
+          "casual dining",
+          "fine dining",
           "food truck",
-          "mobile business",
-          "restaurant",
-          "delivery service",
-          "pop up shop",
-          "event vendor",
-          "market vendor"
+          "cafe",
+          "coffee shop",
+          "quick service",
+          "retail store",
+          "boutique",
+          "event venue"
         ],
         useCase: [
-          "mobile",
-          "portable",
-          "tableside",
-          "delivery",
-          "outdoor",
-          "on the go",
-          "table service"
+          "mobile checkout",
+          "line busting",
+          "tableside ordering",
+          "tableside payment",
+          "outdoor service",
+          "delivery verification",
+          "inventory management",
+          "customer service enhancement",
+          "table management",
+          "order flexibility"
         ],
         keywords: [
-          "handheld",
-          "portable",
-          "battery",
-          "mobile",
+          "mobile pos",
           "wireless",
-          "camera"
+          "portable",
+          "all payment types",
+          "battery powered",
+          "flexible checkout",
+          "contactless",
+          "apple pay",
+          "google pay"
         ]
       },
-      relatedProducts: ["mini3"],
-      primaryCategory: "mobile",
-      size: "compact",
-      priority: 85,
+      paymentTypes: {
+        swipe: true,
+        chip: true,
+        contactless: true,
+        digitalWallet: true
+      },
+      environmentalFactors: {
+        spillResistant: true,
+        highDurability: true,
+        fastPaced: true,
+        lowLighting: false
+      },
+      complementaryProducts: ["duo2", "solo", "mini3", "starprinter", "kds"],
+      usageScenarios: [
+        "Primary mobile POS for food trucks",
+        "Secondary device for table service",
+        "Line busting during peak hours",
+        "Outdoor service extension",
+        "Mobile inventory management",
+        "Curbside pickup verification",
+        "Event ticket scanning"
+      ],
       cta: "Try a Demo",
       image: "/handheldpos.jpg"
     },
     {
       name: "Star Kitchen Printer",
       identifier: "starprinter",
+      primaryCategory: "peripheral",
+      size: "compact",
       bestFor: [
         "High-Volume Kitchen Operations",
         "Multi-Station Restaurants",
@@ -284,16 +360,33 @@ export interface PosProduct {
           "automation"
         ]
       },
-      relatedProducts: ["duo2", "solo", "kds"],
-      primaryCategory: "peripheral",
-      size: "compact",
-      priority: 60,
-      cta: "Learn More",
+      paymentTypes: {
+        swipe: false,
+        chip: false,
+        contactless: false,
+        digitalWallet: false
+      },
+      environmentalFactors: {
+        spillResistant: true,
+        highDurability: true,
+        fastPaced: true,
+        lowLighting: true
+      },
+      complementaryProducts: ["duo2", "solo", "mini3", "flex4", "kds"],
+      usageScenarios: [
+        "Kitchen order printing",
+        "Food preparation tracking",
+        "Multiple station coordination",
+        "Order routing"
+      ],
+      cta: "Get a Quote",
       image: "/kitchenprinter.jpg"
     },
     {
       name: "Clover Kitchen Display",
       identifier: "kds",
+      primaryCategory: "peripheral",
+      size: "standard",
       bestFor: [
         "High-Volume Restaurant Kitchens",
         "Multi-Station Food Preparation",
@@ -331,29 +424,47 @@ export interface PosProduct {
           "order tracking"
         ]
       },
-      relatedProducts: ["duo2", "solo", "starprinter"],
-      primaryCategory: "peripheral",
-      size: "standard",
-      priority: 70,
-      cta: "Learn More",
+      paymentTypes: {
+        swipe: false,
+        chip: false,
+        contactless: false,
+        digitalWallet: false
+      },
+      environmentalFactors: {
+        spillResistant: true,
+        highDurability: true,
+        fastPaced: true,
+        lowLighting: true
+      },
+      complementaryProducts: ["duo2", "solo", "mini3", "flex4", "starprinter"],
+      usageScenarios: [
+        "Digital order management",
+        "Kitchen workflow optimization",
+        "Multi-station coordination",
+        "Production timing"
+      ],
+      cta: "See Pricing",
       image: "/kitchendisplay.jpg"
     },
     {
       name: "Clover Kiosk",
       identifier: "kiosk",
+      primaryCategory: "selfservice",
+      size: "large",
       bestFor: [
         "Quick-Service Restaurants",
         "Fast-Casual Dining",
         "High-Traffic Retail"
       ],
-      features: combineFeatures([
+      features: [
         "22-inch HD touchscreen",
+        "All payment types supported",
         "ADA-compliant design",
         "Custom branding options",
         "Smart upsell prompts",
         "Multiple language support",
         "Customer loyalty integration"
-      ]),
+      ],
       searchTerms: {
         businessTypes: [
           "quick service restaurant",
@@ -378,71 +489,26 @@ export interface PosProduct {
           "self checkout"
         ]
       },
-      relatedProducts: ["starprinter", "kds"],
-      primaryCategory: "selfservice",
-      size: "large",
-      priority: 95,
-      cta: "Learn More",
+      paymentTypes: {
+        swipe: true,
+        chip: true,
+        contactless: true,
+        digitalWallet: true
+      },
+      environmentalFactors: {
+        spillResistant: true,
+        highDurability: true,
+        fastPaced: true,
+        lowLighting: false
+      },
+      complementaryProducts: ["starprinter", "kds"],
+      usageScenarios: [
+        "Self-service ordering",
+        "Peak hour queue management",
+        "Multilingual service",
+        "Automated upselling"
+      ],
+      cta: "Try a Demo",
       image: "/kiosk.jpg"
     }
   ]
-  
-  // Helper function to find related products for a search
-  export const findRelatedProducts = (
-    search: string,
-    maxResults: number = 3
-  ): PosProduct[] => {
-    const searchLower = search.toLowerCase()
-    
-    // Score each product based on search term matches
-    const scoredProducts = posProducts.map(product => {
-      let score = 0
-      
-      // Check business types
-      product.searchTerms.businessTypes.forEach(term => {
-        if (term.toLowerCase().includes(searchLower)) {
-          score += 3
-        }
-      })
-      
-      // Check use cases
-      product.searchTerms.useCase.forEach(term => {
-        if (term.toLowerCase().includes(searchLower)) {
-          score += 2
-        }
-      })
-      
-      // Check keywords
-      product.searchTerms.keywords.forEach(term => {
-        if (term.toLowerCase().includes(searchLower)) {
-          score += 1
-        }
-      })
-      
-      // Boost score based on product priority
-      score *= (product.priority / 50)
-      
-      return { product, score }
-    })
-    
-    // Sort by score and return top results
-    return scoredProducts
-      .filter(item => item.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, maxResults)
-      .map(item => item.product)
-  }
-  
-  // Helper function to get complementary products
-  export const getComplementaryProducts = (
-    productId: string,
-    maxResults: number = 2
-  ): PosProduct[] => {
-    const product = posProducts.find(p => p.identifier === productId)
-    if (!product) return []
-    
-    return product.relatedProducts
-      .map(id => posProducts.find(p => p.identifier === id))
-      .filter((p): p is PosProduct => p !== undefined)
-      .slice(0, maxResults)
-  }
