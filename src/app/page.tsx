@@ -64,7 +64,7 @@ const initialSelectorData: ProductSelectorData = {
     monthlyVolume: '0-50K',
 };
 
-export const AiSearchOverlay = () => {
+const AiSearchOverlay = () => {
     const sampleQueries = [
         "I need a POS for my full-service restaurant with table management",
         "Looking for a mobile POS system for my food truck",
