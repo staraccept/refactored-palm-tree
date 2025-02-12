@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-  console.log("POST request received!"); // VERY IMPORTANT - Check for this log
+  console.log("POST request received!"); // VERY IMPORTANT
   return NextResponse.json({ message: 'POST request successful!' });
 }
 
