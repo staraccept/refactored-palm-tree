@@ -10,20 +10,17 @@ export interface PosProduct {
       useCase: string[]
       keywords: string[]
     }
-    relatedProducts: string[] // identifiers of complementary products
+    relatedProducts: string[]
     primaryCategory: 'pos' | 'peripheral' | 'mobile' | 'selfservice'
     size: 'compact' | 'standard' | 'large'
-    priority: number // Used for ranking within matching results
+    priority: number
     cta: string
     image?: string
   }
   
   // Base features shared across most POS devices
   const baseFeatures = {
-    connectivity: [
-      "WiFi Connectivity",
-      "4G LTE Support"
-    ],
+    connectivity: ["WiFi Connectivity", "4G LTE Support"],
     payments: [
       "Apple Pay, Google Pay, Samsung Pay Integration",
       "Tap-to-Pay Capability",
@@ -33,9 +30,7 @@ export interface PosProduct {
       "Built-in Barcode Scanner",
       "Built-in Receipt Printer (supports text & email receipts)"
     ],
-    system: [
-      "Modular Expandability with Live Sync to Online Dashboard"
-    ]
+    system: ["Modular Expandability with Live Sync to Online Dashboard"]
   }
   
   const combineFeatures = (uniqueFeatures: string[] = []): string[] => {
@@ -146,7 +141,8 @@ export interface PosProduct {
       image: "/bar-service-pos.jpg"
     },
     {
-      name: "Clover Mini 3",
+      // Renamed from "Clover Mini 3" to "Clover Mini"
+      name: "Clover Mini",
       identifier: "mini3",
       bestFor: [
         "Space-Conscious Retail",
@@ -393,44 +389,44 @@ export interface PosProduct {
     maxResults: number = 3
   ): PosProduct[] => {
     const searchLower = search.toLowerCase()
-    
+  
     // Score each product based on search term matches
-    const scoredProducts = posProducts.map(product => {
+    const scoredProducts = posProducts.map((product) => {
       let score = 0
-      
+  
       // Check business types
-      product.searchTerms.businessTypes.forEach(term => {
+      product.searchTerms.businessTypes.forEach((term) => {
         if (term.toLowerCase().includes(searchLower)) {
           score += 3
         }
       })
-      
+  
       // Check use cases
-      product.searchTerms.useCase.forEach(term => {
+      product.searchTerms.useCase.forEach((term) => {
         if (term.toLowerCase().includes(searchLower)) {
           score += 2
         }
       })
-      
+  
       // Check keywords
-      product.searchTerms.keywords.forEach(term => {
+      product.searchTerms.keywords.forEach((term) => {
         if (term.toLowerCase().includes(searchLower)) {
           score += 1
         }
       })
-      
+  
       // Boost score based on product priority
-      score *= (product.priority / 50)
-      
+      score *= product.priority / 50
+  
       return { product, score }
     })
-    
+  
     // Sort by score and return top results
     return scoredProducts
-      .filter(item => item.score > 0)
+      .filter((item) => item.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, maxResults)
-      .map(item => item.product)
+      .map((item) => item.product)
   }
   
   // Helper function to get complementary products
@@ -438,11 +434,12 @@ export interface PosProduct {
     productId: string,
     maxResults: number = 2
   ): PosProduct[] => {
-    const product = posProducts.find(p => p.identifier === productId)
+    const product = posProducts.find((p) => p.identifier === productId)
     if (!product) return []
-    
+  
     return product.relatedProducts
-      .map(id => posProducts.find(p => p.identifier === id))
+      .map((id) => posProducts.find((p) => p.identifier === id))
       .filter((p): p is PosProduct => p !== undefined)
       .slice(0, maxResults)
   }
+  
