@@ -15,6 +15,9 @@ import { posProducts } from '@/lib/posProducts'; // adjust path if needed
 
 interface Recommendation {
   name: string;
+  image?: string;
+  description?: string;
+}
 
 interface ProductSelectorData {
   businessType: string;
