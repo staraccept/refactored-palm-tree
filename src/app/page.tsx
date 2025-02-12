@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Head from 'next/head';
@@ -83,7 +83,7 @@ const AiSearchOverlay = () => {
 
     useEffect(() => {
         if (userQuery) return;
-        
+
         const currentFullText = sampleQueries[currentSampleIndex];
         const typeSpeed = 80;
         const deleteSpeed = 40;
@@ -93,7 +93,7 @@ const AiSearchOverlay = () => {
             if (!isDeleting && typedText.length < currentFullText.length) {
                 setTypedText(prev => prev + currentFullText.charAt(prev.length));
                 return typeSpeed;
-            } 
+            }
             if (isDeleting && typedText.length > 0) {
                 setTypedText(prev => prev.slice(0, -1));
                 return deleteSpeed;
@@ -110,7 +110,7 @@ const AiSearchOverlay = () => {
         };
 
         const timer = setTimeout(
-            handleTyping, 
+            handleTyping,
             isDeleting ? deleteSpeed : typedText.length === currentFullText.length ? endDelay : typeSpeed
         );
         return () => clearTimeout(timer);
@@ -129,7 +129,7 @@ const AiSearchOverlay = () => {
                 const res = await fetch("/api/pos-recommend", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ 
+                    body: JSON.stringify({
                         query: userQuery,
                         context: {
                             previousRecommendations: recommendations,
@@ -152,10 +152,10 @@ const AiSearchOverlay = () => {
             }
         }, 500);
         return () => clearTimeout(searchTimer);
-    }, [userQuery]);
+    }, [userQuery, recommendations]); // Added recommendations to dependency array
 
     return (
-        <motion.div 
+        <motion.div
             className="mx-auto mt-8 w-full max-w-3xl"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -167,8 +167,8 @@ const AiSearchOverlay = () => {
                         <span className="flex items-center">
                             <span className="mr-2">💡</span>
                             {typedText}
-                            <span 
-                                ref={cursorRef} 
+                            <span
+                                ref={cursorRef}
                                 className="border-r-2 border-gray-900 dark:border-gray-100 ml-1 animate-blink"
                             />
                         </span>
