@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-      //Remove: runtime: 'nodejs', // ✅ Remove this line.
-  },
-  output: 'export', // ✅ Add this line.  This is the key fix.
+  output: 'export', // KEEP THIS LINE
 
   async headers() {
     return [
