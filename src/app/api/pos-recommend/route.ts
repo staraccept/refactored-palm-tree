@@ -1,4 +1,4 @@
-// app/api/pos-recommend/route.ts
+// app/api/pos-recommend/route.ts 
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { posProducts } from '@/lib/posProducts';
