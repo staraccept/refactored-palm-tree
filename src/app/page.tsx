@@ -130,12 +130,15 @@ function AiSearchOverlay() {
     
           console.log("🛠 Full API Response:", data); // ✅ Log what the API is actually sending
 
-          if (!data || !data.recommendations || !Array.isArray(data.recommendations)) {
-              console.error("❌ Unexpected API response format:", data);
-              setErrorMessage("Invalid response format. Please try again.");
-              return;
-          }
-        
+          console.log("🛠 Full API Response:", data); // ✅ Debugging Log
+
+if (data?.recommendations && Array.isArray(data.recommendations)) {
+    setRecommendations(data.recommendations); // ✅ Set recommendations correctly
+} else {
+    console.error("❌ Unexpected API response format:", data);
+    setErrorMessage("Invalid response format. Please try again.");
+}
+
         setRecommendations(data.recommendations);
         } catch (error: any) {
           console.error("Error fetching recommendations:", error);
