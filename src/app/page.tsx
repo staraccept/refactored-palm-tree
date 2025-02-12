@@ -11,9 +11,7 @@ import {
     FaGlobe
 } from 'react-icons/fa';
 import { ThemeProvider, useTheme } from './components/ThemeProvider'; // adjust path if needed
-import { posProducts, /* we’ll import our local finder */ } from '@/lib/posProducts'; // adjust path if needed
-
-// If you integrated the splitted approach in posProducts, import it:
+import { posProducts } from '@/lib/posProducts'; // adjust path if needed
 import { findRelatedProducts as localFindProducts } from '@/lib/posProducts';
 
 interface ProductSelectorData {
@@ -56,21 +54,9 @@ const initialSelectorData: ProductSelectorData = {
     monthlyVolume: '0-50K',
 };
 
-/**
- * Matches a recommendation string (like "Clover Flex") to the best product in posProducts.
- * 1) Attempt exact match
- * 2) If not found, do partial substring matching
- * 3) If still not found, return minimal fallback object
- */
 function matchRecommendedItem(recommendation: string) {
     const recLower = recommendation.trim().toLowerCase();
-
-    // 1) Try exact
-    let matched = posProducts.find(
-        (p) => p.name.toLowerCase() === recLower
-    );
-
-    // 2) If no exact match, do a partial (substring) match
+    let matched = posProducts.find((p) => p.name.toLowerCase() === recLower);
     if (!matched) {
         matched = posProducts.find(
             (p) =>
@@ -78,8 +64,6 @@ function matchRecommendedItem(recommendation: string) {
                 recLower.includes(p.name.toLowerCase())
         );
     }
-
-    // 3) Still none found => fallback
     if (!matched) {
         return {
             name: recommendation,
@@ -92,31 +76,25 @@ function matchRecommendedItem(recommendation: string) {
     return matched;
 }
 
-/**
- * AI-powered search overlay that calls Cloudflare Worker,
- * but also falls back to local logic if needed.
- */
 function AiSearchOverlay() {
     const sampleQueries = [
         "I own a coffee shop and need a fast checkout system",
         "I want a system that supports Apple Pay and QR codes",
         "I have two locations and need real-time inventory sync",
     ];
-
     const [currentSampleIndex, setCurrentSampleIndex] = useState(0);
     const [typedText, setTypedText] = useState("");
     const [isDeleting, setIsDeleting] = useState(false);
-
     const [userQuery, setUserQuery] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [recommendations, setRecommendations] = useState<any[]>([]);
     const [errorMessage, setErrorMessage] = useState("");
-
+    const [showResults, setShowResults] = useState(false);
     const typingSpeed = 80;
     const pauseAtEndOfSample = 2000;
     const cursorRef = useRef<HTMLSpanElement | null>(null);
+    const containerRef = useRef<HTMLDivElement | null>(null);
 
-    // Simple blinking cursor effect
     useEffect(() => {
         if (cursorRef.current) {
             cursorRef.current.style.animation = "blink 1s infinite";
@@ -127,7 +105,6 @@ function AiSearchOverlay() {
     useEffect(() => {
         if (userQuery) return;
         const text = sampleQueries[currentSampleIndex];
-
         const handleTyping = () => {
             if (!isDeleting && typedText.length < text.length) {
                 setTypedText((prev) => prev + text.charAt(prev.length));
@@ -140,22 +117,22 @@ function AiSearchOverlay() {
                 setCurrentSampleIndex((prev) => (prev + 1) % sampleQueries.length);
             }
         };
-
-        const timer = setTimeout(handleTyping, isDeleting ? typingSpeed / 2 : typingSpeed);
+        const timer = setTimeout(
+            handleTyping,
+            isDeleting ? typingSpeed / 2 : typingSpeed
+        );
         return () => clearTimeout(timer);
     }, [typedText, isDeleting, currentSampleIndex, sampleQueries, typingSpeed, userQuery, pauseAtEndOfSample]);
 
-    /**
-     * Fetch recommendations from Cloudflare Worker, or fall back to local search if needed.
-     */
+    // Fetch logic
     useEffect(() => {
         if (!userQuery) {
             setRecommendations([]);
             setErrorMessage("");
+            setShowResults(false);
             return;
         }
-
-        // Debounce 600ms
+        setShowResults(true);
         const timer = setTimeout(async () => {
             setIsLoading(true);
             setErrorMessage("");
@@ -171,18 +148,18 @@ function AiSearchOverlay() {
                     throw new Error(`Request failed with status ${res.status}`);
                 }
                 const data = await res.json();
-                if (!data.recommendations || !Array.isArray(data.recommendations) || data.recommendations.length === 0) {
-                    // If Worker returns empty or invalid, do a local fallback
-                    const fallbackProducts = localFindProducts(userQuery, 3); // find up to 3 local matches
+                if (
+                    !data.recommendations ||
+                    !Array.isArray(data.recommendations) ||
+                    data.recommendations.length === 0
+                ) {
+                    const fallbackProducts = localFindProducts(userQuery, 3);
                     if (fallbackProducts.length > 0) {
-                        // Convert them into array of product objects
-                        const localMatches = fallbackProducts.map((p) => p); // directly p
-                        setRecommendations(localMatches);
+                        setRecommendations(fallbackProducts.map((p) => p));
                     } else {
                         setErrorMessage("No recommendations found for your query.");
                     }
                 } else {
-                    // If Worker returns strings, do partial matching
                     const matchedItems = data.recommendations.map((r: string) =>
                         matchRecommendedItem(r)
                     );
@@ -190,7 +167,6 @@ function AiSearchOverlay() {
                 }
             } catch (error: any) {
                 console.error("Error fetching recommendations:", error);
-                // Also do local fallback if Worker fails
                 const fallbackProducts = localFindProducts(userQuery, 3);
                 if (fallbackProducts.length > 0) {
                     setRecommendations(fallbackProducts);
@@ -201,16 +177,39 @@ function AiSearchOverlay() {
                 setIsLoading(false);
             }
         }, 600);
-
         return () => clearTimeout(timer);
     }, [userQuery]);
 
+    // Click outside / Esc to close
+    useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (
+                containerRef.current &&
+                !containerRef.current.contains(e.target as Node)
+            ) {
+                setShowResults(false);
+            }
+        }
+        function handleEsc(e: KeyboardEvent) {
+            if (e.key === 'Escape') {
+                setShowResults(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener("keydown", handleEsc);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("keydown", handleEsc);
+        };
+    }, []);
+
     return (
         <motion.div
-            className="mx-auto mt-8 w-full max-w-3xl bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4"
+            className="mx-auto mt-8 w-full max-w-3xl bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 relative"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
+            ref={containerRef}
         >
             <div className="text-gray-700 dark:text-gray-100 mb-2">
                 {!userQuery ? (
@@ -230,13 +229,18 @@ function AiSearchOverlay() {
                 className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-700 dark:border-gray-600"
                 placeholder="e.g. I want a system that supports Apple Pay..."
                 value={userQuery}
+                onFocus={() => {
+                    if (userQuery || isLoading || errorMessage) {
+                        setShowResults(true);
+                    }
+                }}
                 onChange={(e) => setUserQuery(e.target.value)}
             />
 
             <AnimatePresence>
-                {(userQuery || isLoading || errorMessage) && (
+                {showResults && (userQuery || isLoading || errorMessage) && (
                     <motion.div
-                        className="mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow p-4"
+                        className="absolute z-50 left-0 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow p-4 max-h-[50vh] sm:max-h-[60vh] md:max-h-[70vh] overflow-y-auto top-full"
                         initial={{ opacity: 0, y: 0 }}
                         animate={{ opacity: 1, y: 5 }}
                         exit={{ opacity: 0, y: 0 }}
@@ -255,44 +259,52 @@ function AiSearchOverlay() {
                         {!isLoading && !errorMessage && recommendations.length > 0 && (
                             <div>
                                 {recommendations.map((item: any, idx: number) => (
-                                    <div key={idx} className="mb-4 flex items-start space-x-4">
-                                        {/* Larger thumbnail: 150x150 */}
+                                    <div
+                                        key={idx}
+                                        className="mb-6 flex flex-col md:flex-row md:space-x-4 border-b border-gray-200 dark:border-gray-600 pb-4 last:border-none"
+                                    >
+                                        {/* Left column: image */}
                                         {item.image && (
-                                            <div className="flex-shrink-0">
+                                            <div className="md:w-1/3 mb-4 md:mb-0 flex-shrink-0">
                                                 <Image
                                                     src={item.image}
                                                     alt={item.name}
-                                                    width={150}
-                                                    height={150}
-                                                    className="rounded object-cover"
+                                                    width={300}
+                                                    height={300}
+                                                    className="rounded object-cover w-full h-auto"
                                                 />
                                             </div>
                                         )}
-                                        <div>
-                                            <h4 className="font-semibold text-gray-800 dark:text-gray-100">
+                                        {/* Right column: name and details */}
+                                        <div className="md:w-2/3">
+                                            <h4 className="font-semibold text-gray-800 dark:text-gray-100 text-lg mb-2">
                                                 {item.name}
                                             </h4>
-                                            {item.features && item.features.length > 0 && (
-                                                <>
-                                                    <h5 className="mt-2 font-medium">Features</h5>
-                                                    <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-300 mt-1 space-y-1">
-                                                        {item.features.map((feat: string, fIdx: number) => (
-                                                            <li key={fIdx}>{feat}</li>
-                                                        ))}
-                                                    </ul>
-                                                </>
-                                            )}
-                                            {item.bestFor && item.bestFor.length > 0 && (
-                                                <>
-                                                    <h5 className="mt-2 font-medium">Best For</h5>
-                                                    <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-300 mt-1 space-y-1">
-                                                        {item.bestFor.map((bf: string, bfIdx: number) => (
-                                                            <li key={bfIdx}>{bf}</li>
-                                                        ))}
-                                                    </ul>
-                                                </>
-                                            )}
-                                            <div className="mt-3">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {/* Features */}
+                                                {item.features && item.features.length > 0 && (
+                                                    <div>
+                                                        <h5 className="font-medium">Features</h5>
+                                                        <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-300 mt-1 space-y-1">
+                                                            {item.features.map((feat: string, fIdx: number) => (
+                                                                <li key={fIdx}>{feat}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                                {/* Best For */}
+                                                {item.bestFor && item.bestFor.length > 0 && (
+                                                    <div>
+                                                        <h5 className="font-medium">Best For</h5>
+                                                        <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-300 mt-1 space-y-1">
+                                                            {item.bestFor.map((bf: string, bfIdx: number) => (
+                                                                <li key={bfIdx}>{bf}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="mt-4">
                                                 <button className="text-blue-600 dark:text-blue-400 hover:underline">
                                                     {item.cta || "View"}
                                                 </button>
@@ -306,7 +318,6 @@ function AiSearchOverlay() {
                                         No recommendations found.
                                     </div>
                                 )}
-                                <hr className="my-2 border-gray-200 dark:border-gray-600" />
                             </div>
                         )}
                     </motion.div>
@@ -340,7 +351,6 @@ export default function Home() {
     const [contactSubmitMessage, setContactSubmitMessage] = useState('');
     const { darkMode, toggleDarkMode } = useTheme();
 
-    // Hero images
     const images = [
         { src: '/retailflex3.png', alt: 'Flexible Payment Terminal' },
         { src: '/qsrduo2.png', alt: 'QSR Duo POS System' },
@@ -447,12 +457,10 @@ export default function Home() {
         });
     };
 
-    // Wizard final submission
     const handleSelectorSubmit = async () => {
         setIsLoading(true);
         setSelectorSubmitStatus('idle');
         setSelectorSubmitMessage('');
-
         try {
             const {
                 businessType,
@@ -473,9 +481,7 @@ export default function Home() {
                 numLocationsCustom,
                 monthlyVolume
             } = selectorData;
-
             let finalLocations = numLocationsChoice === 'plus' ? numLocationsCustom : numLocationsChoice;
-
             const params = new URLSearchParams({
                 formType: 'contactPage',
                 businessType,
@@ -496,10 +502,8 @@ export default function Home() {
                 monthlyVolume,
                 submitTime: new Date().toISOString(),
             });
-
             const url = `https://hooks.zapier.com/hooks/catch/17465641/2awchwj/?${params.toString()}`;
             const response = await fetch(url, { method: 'GET' });
-
             if (response.ok) {
                 setSelectorSubmitStatus('success');
                 setSelectorSubmitMessage("Thank you! We'll be in touch shortly to assist with your needs.");
@@ -523,15 +527,12 @@ export default function Home() {
         }
     };
 
-    // Renders each wizard step
-    const renderStepContent = () => {
-        // ...Your original step1-5 logic as before...
-        // Keep or refine text as you wish
+    function renderStepContent() {
+        // Replace or update with your actual step content
         return <div>Wizard Steps Go Here...</div>;
-    };
+    }
 
-    // Wizard top progress bar
-    const renderProgressIndicator = () => {
+    function renderProgressIndicator() {
         const totalSteps = 5;
         return (
             <div className="flex items-center justify-center my-6">
@@ -580,9 +581,8 @@ export default function Home() {
                 })}
             </div>
         );
-    };
+    }
 
-    // Contact form input handling
     const handleContactInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
     ) => {
@@ -595,7 +595,6 @@ export default function Home() {
         setIsLoading(true);
         setContactSubmitStatus('idle');
         setContactSubmitMessage('');
-
         const requiredFields = ['firstName', 'lastName', 'email', 'phone'];
         const missingFields = requiredFields.filter((field) => !contactFormData[field as keyof typeof contactFormData]);
         if (missingFields.length > 0) {
@@ -611,12 +610,10 @@ export default function Home() {
             setIsLoading(false);
             return;
         }
-
         let finalLocations =
             contactFormData.numLocationsChoice === 'plus'
                 ? contactFormData.numLocationsCustom
                 : contactFormData.numLocationsChoice;
-
         try {
             const params = new URLSearchParams({
                 firstName: contactFormData.firstName,
@@ -894,8 +891,6 @@ export default function Home() {
                                             Talk to an Expert
                                         </motion.button>
                                     </motion.div>
-
-                                    {/* AI-POWERED SEARCH BELOW HERO */}
                                     <AiSearchOverlay />
                                 </motion.div>
                             </div>
@@ -1016,9 +1011,164 @@ export default function Home() {
                             <div className="grid items-start gap-12 md:grid-cols-2">
                                 <div className="p-8 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 shadow-sm rounded-xl">
                                     <form onSubmit={handleContactSubmit} className="space-y-6">
-                                        {/* Contact fields omitted for brevity, but keep them as-is */}
-                                        {/* e.g. firstName, lastName, email, phone, etc. */}
-
+                                        <div>
+                                            <label
+                                                htmlFor="firstName"
+                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
+                                            >
+                                                First Name*
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="firstName"
+                                                name="firstName"
+                                                value={contactFormData.firstName}
+                                                onChange={handleContactInputChange}
+                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label
+                                                htmlFor="lastName"
+                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
+                                            >
+                                                Last Name*
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="lastName"
+                                                name="lastName"
+                                                value={contactFormData.lastName}
+                                                onChange={handleContactInputChange}
+                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label
+                                                htmlFor="email"
+                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
+                                            >
+                                                Email*
+                                            </label>
+                                            <input
+                                                type="email"
+                                                id="email"
+                                                name="email"
+                                                value={contactFormData.email}
+                                                onChange={handleContactInputChange}
+                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label
+                                                htmlFor="phone"
+                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
+                                            >
+                                                Phone*
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="phone"
+                                                name="phone"
+                                                value={contactFormData.phone}
+                                                onChange={handleContactInputChange}
+                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label
+                                                htmlFor="callDate"
+                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
+                                            >
+                                                Preferred Call Date
+                                            </label>
+                                            <input
+                                                type="date"
+                                                id="callDate"
+                                                name="callDate"
+                                                value={contactFormData.callDate}
+                                                onChange={handleContactInputChange}
+                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label
+                                                htmlFor="preferredTime"
+                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
+                                            >
+                                                Preferred Call Time
+                                            </label>
+                                            <input
+                                                type="time"
+                                                id="preferredTime"
+                                                name="preferredTime"
+                                                value={contactFormData.preferredTime}
+                                                onChange={handleContactInputChange}
+                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label
+                                                htmlFor="businessType"
+                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
+                                            >
+                                                Business Type
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="businessType"
+                                                name="businessType"
+                                                value={contactFormData.businessType}
+                                                onChange={handleContactInputChange}
+                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label
+                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
+                                            >
+                                                Number of Locations
+                                            </label>
+                                            <select
+                                                name="numLocationsChoice"
+                                                value={contactFormData.numLocationsChoice}
+                                                onChange={handleContactInputChange}
+                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
+                                            >
+                                                <option value="1">1</option>
+                                                <option value="2-5">2-5</option>
+                                                <option value="6-10">6-10</option>
+                                                <option value="plus">More than 10</option>
+                                            </select>
+                                            {contactFormData.numLocationsChoice === 'plus' && (
+                                                <input
+                                                    type="number"
+                                                    name="numLocationsCustom"
+                                                    value={contactFormData.numLocationsCustom}
+                                                    onChange={handleContactInputChange}
+                                                    placeholder="Enter exact number"
+                                                    className="mt-2 w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
+                                                />
+                                            )}
+                                        </div>
+                                        <div>
+                                            <label
+                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
+                                            >
+                                                Monthly Card Volume
+                                            </label>
+                                            <select
+                                                name="monthlyVolume"
+                                                value={contactFormData.monthlyVolume}
+                                                onChange={handleContactInputChange}
+                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
+                                            >
+                                                <option value="0-50K">0 - 50K</option>
+                                                <option value="50K-100K">50K - 100K</option>
+                                                <option value="100K-200K">100K - 200K</option>
+                                                <option value="200K+">200K +</option>
+                                            </select>
+                                        </div>
                                         <motion.button
                                             type="submit"
                                             className="w-full py-4 px-6 rounded-lg font-semibold text-white bg-blue-600 dark:bg-blue-400 hover:bg-blue-700 dark:hover:bg-blue-300 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
@@ -1042,7 +1192,7 @@ export default function Home() {
                                     </form>
                                 </div>
                                 <div className="space-y-8">
-                                    {/* Additional info/logos, unchanged */}
+                                    {/* Additional info/logos could go here */}
                                 </div>
                             </div>
                         </div>
@@ -1112,4 +1262,3 @@ export default function Home() {
         </ThemeProvider>
     );
 }
- 
