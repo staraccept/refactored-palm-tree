@@ -66,7 +66,7 @@ function AiSearchOverlay() {
 
     const [userQuery, setUserQuery] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [recommendations, setRecommendations] = useState<any[]>([]);
+    const [recommendations, setRecommendations] = useState<string[]>([]);
     const [errorMessage, setErrorMessage] = useState("");
 
     const typingSpeed = 80;
@@ -100,55 +100,39 @@ function AiSearchOverlay() {
     }, [typedText, isDeleting, currentSampleIndex, pauseAtEndOfSample, sampleQueries, typingSpeed, userQuery]);
 
     useEffect(() => {
-      if (!userQuery) {
-        setRecommendations([]);
-        setErrorMessage("");
-        return;
-      }
-    
-      const timer = setTimeout(async () => {
-        setIsLoading(true);
-        setErrorMessage("");
-        setRecommendations([]);
-    
-        try {
-          const res = await fetch("https://cold-bush-ec7b.pauljash.workers.dev/", { 
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query: userQuery }),
-          });
-    
-          if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
-    
-          const data = await res.json();
-          console.log("API Response:", data); // ✅ Logs response for debugging
-    
-          // ✅ Ensure we handle OpenAI's correct response structure
-          if (!data.choices || !Array.isArray(data.choices)) {
-            throw new Error("Unexpected API response format");
-          }
-    
-          console.log("🛠 Full API Response:", data); // ✅ Log what the API is actually sending
-
-          console.log("🛠 Full API Response:", data); // ✅ Debugging Log
-
-if (data?.recommendations && Array.isArray(data.recommendations)) {
-    setRecommendations(data.recommendations); // ✅ Set recommendations correctly
-} else {
-    console.error("❌ Unexpected API response format:", data);
-    setErrorMessage("Invalid response format. Please try again.");
-}
-
-        setRecommendations(data.recommendations);
-        } catch (error: any) {
-          console.error("Error fetching recommendations:", error);
-          setErrorMessage("Could not fetch recommendations. Please try again.");
-        } finally {
-          setIsLoading(false);
+        if (!userQuery) {
+            setRecommendations([]);
+            setErrorMessage("");
+            return;
         }
-      }, 500);
-    
-      return () => clearTimeout(timer);
+        const timer = setTimeout(async () => {
+            setIsLoading(true);
+            setErrorMessage("");
+            setRecommendations([]);
+
+            try {
+                const res = await fetch("https://cold-bush-ec7b.pauljash.workers.dev/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query: userQuery }),
+                });
+                if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
+
+                const data = await res.json();
+                console.log("API Response:", data);
+
+                if (!Array.isArray(data.recommendations)) {
+                    throw new Error("Unexpected API response format");
+                }
+                setRecommendations(data.recommendations);
+            } catch (error: any) {
+                console.error("Error fetching recommendations:", error);
+                setErrorMessage("Could not fetch recommendations. Please try again.");
+            } finally {
+                setIsLoading(false);
+            }
+        }, 500);
+        return () => clearTimeout(timer);
     }, [userQuery]);
 
     return (
@@ -196,48 +180,18 @@ if (data?.recommendations && Array.isArray(data.recommendations)) {
                         )}
                         {!isLoading && recommendations.length > 0 && (
                             <div>
-                                {recommendations.map((item: any, idx: number) => (
-                                    <div key={idx} className="mb-4 flex items-start">
-                                        {item.image && (
-                                            <div className="mr-4">
-                                                <Image
-                                                    src={item.image}
-                                                    alt={item.name}
-                                                    width={100}
-                                                    height={100}
-                                                    className="rounded"
-                                                    style={{ objectFit: 'cover' }}
-                                                />
-                                            </div>
-                                        )}
-                                        <div>
-                                            <h4 className="font-semibold text-gray-800 dark:text-gray-100">
-                                                {item.name}
-                                            </h4>
-                                            {item.features && (
-                                                <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                    Features: {item.features.join(", ")}
-                                                </p>
-                                            )}
-                                            {item.bestFor && (
-                                                <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                    Best for: {item.bestFor.join(", ")}
-                                                </p>
-                                            )}
-                                            {item.tailoredDetails && (
-                                                <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                    {item.tailoredDetails}
-                                                </p>
-                                            )}
-                                            <div className="mt-1">
-                                                <button className="text-blue-600 dark:text-blue-400 hover:underline">
-                                                    {item.cta || "View"}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                                <hr className="my-2 border-gray-200 dark:border-gray-600" />
+                                <ul className="list-disc list-inside text-gray-700 dark:text-gray-200">
+                                    {recommendations.map((rec, idx) => (
+                                        <li key={idx} className="my-1">
+                                            {rec}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                        {!isLoading && recommendations.length === 0 && userQuery && !errorMessage && (
+                            <div className="text-gray-600 dark:text-gray-300">
+                                No recommendations found for your query.
                             </div>
                         )}
                     </motion.div>
@@ -968,8 +922,8 @@ export default function Home() {
                                 className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${wizardStep > stepNum
                                     ? 'bg-blue-600 text-white dark:bg-blue-700'
                                     : wizardStep === stepNum
-                                        ? 'bg-blue-300 text-white dark:bg-blue-500'
-                                        : 'bg-gray-200 text-gray-500 dark:bg-gray-600 dark:text-gray-400'
+                                    ? 'bg-blue-300 text-white dark:bg-blue-500'
+                                    : 'bg-gray-200 text-gray-500 dark:bg-gray-600 dark:text-gray-400'
                                 }`}
                             >
                                 {wizardStep > stepNum ? (
