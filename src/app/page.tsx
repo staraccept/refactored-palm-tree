@@ -129,10 +129,17 @@ function AiSearchOverlay() {
           }
     
           // ✅ Extracts recommendation text from OpenAI's response
-          const recs = data.choices.map((choice: { message: { content: string } }) => choice.message.content);
+          if (!Array.isArray(data.recommendations)) {
+            console.error("Unexpected API response:", data);
+            setErrorMessage("Invalid response format. Please try again.");
+            return;
+        }
+        
+        setRecommendations(data.recommendations);
+        
 
     
-          setRecommendations(recs);
+        setRecommendations(data.recommendations);
         } catch (error: any) {
           console.error("Error fetching recommendations:", error);
           setErrorMessage("Could not fetch recommendations. Please try again.");
