@@ -72,7 +72,7 @@ Return ONLY the JSON array. No additional text or explanation.`
     // If "gpt-4o-mini" is an internal or fine-tuned model, ensure your environment can access it.
     // Also remove `response_format` if your version of openai library doesn't support it.
     const response = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo', // or "gpt-4" or your internal model
+      model: 'gpt-4o-mini', // or "gpt-4" or your internal model
       messages,
       max_tokens: 50,
       temperature: 0.3
