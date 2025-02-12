@@ -105,24 +105,34 @@ function AiSearchOverlay() {
         setErrorMessage("");
         return;
       }
+    
       const timer = setTimeout(async () => {
         setIsLoading(true);
         setErrorMessage("");
         setRecommendations([]);
+    
         try {
-          const res = await fetch("https://cold-bush-ec7b.pauljash.workers.dev/", {
+          const res = await fetch("https://cold-bush-ec7b.pauljash.workers.dev/", { 
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ query: userQuery }),
           });
+    
           if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
+    
           const data = await res.json();
-          const recs = data.recommendations;
-          if (recs && recs.length > 0) {
-            setRecommendations(recs);
-          } else {
-            setErrorMessage(data.error || "No recommendations found.");
+          console.log("API Response:", data); // ✅ Logs response for debugging
+    
+          // ✅ Ensure we handle OpenAI's correct response structure
+          if (!data.choices || !Array.isArray(data.choices)) {
+            throw new Error("Unexpected API response format");
           }
+    
+          // ✅ Extracts recommendation text from OpenAI's response
+          const recs = data.choices.map((choice: { message: { content: string } }) => choice.message.content);
+
+    
+          setRecommendations(recs);
         } catch (error: any) {
           console.error("Error fetching recommendations:", error);
           setErrorMessage("Could not fetch recommendations. Please try again.");
@@ -130,6 +140,7 @@ function AiSearchOverlay() {
           setIsLoading(false);
         }
       }, 500);
+    
       return () => clearTimeout(timer);
     }, [userQuery]);
 
