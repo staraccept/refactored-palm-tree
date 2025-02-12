@@ -110,7 +110,7 @@ function AiSearchOverlay() {
         setErrorMessage("");
         setRecommendations([]);
         try {
-          const res = await fetch("/api/pos-recommend", {
+          const res = await fetch("https://cold-bush-ec7b.pauljash.workers.dev/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ query: userQuery }),
