@@ -1,4 +1,4 @@
-// posProducts.ts
+// posProducts.ts 
 
 export interface PosProduct {
     name: string
