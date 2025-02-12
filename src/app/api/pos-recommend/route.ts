@@ -54,7 +54,7 @@ Return ONLY the JSON array. No additional text or explanation.`
         });
 
         const response = await openai.chat.completions.create({
-            model: "gpt-4o",
+            model: "gpt-4o-mini",
             messages: messages,
             max_tokens: 50,
             temperature: 0.3,
@@ -79,10 +79,13 @@ Return ONLY the JSON array. No additional text or explanation.`
                 else if (typeof parsed === 'object' && parsed !== null && Array.isArray(parsed.recommendations) && parsed.recommendations.every((item:any) => typeof item === 'string')) {
                      recommendedIds = parsed.recommendations;
                 }
-
+                // NEW: Check if the parsed response is an object with an 'identifier' property that is a string
+                else if (typeof parsed === 'object' && parsed !== null && typeof parsed.identifier === 'string') {
+                    recommendedIds = [parsed.identifier]; // Convert to an array
+                }
                 else {
-                    console.error("Invalid response format. Expected an array of strings or an object with an 'identifier' array.", parsed);
-                    return NextResponse.json({ error: "Invalid response format. Expected an array of strings or an object with an 'identifier' array." }, { status: 500 });
+                    console.error("Invalid response format. Expected an array of strings or an object with an 'identifier' property (string or array).", parsed);
+                    return NextResponse.json({ error: "Invalid response format. Expected an array of strings or an object with an 'identifier' property (string or array)." }, { status: 500 });
                 }
             } else {
                 console.error("OpenAI response missing content:", response);
