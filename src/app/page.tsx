@@ -33,18 +33,6 @@ interface ProductSelectorData {
     monthlyVolume: string;
 }
 
-interface Recommendation {
-  identifier: string;
-  image?: string;
-  name: string;
-  bestFor: string[];
-  searchTerms?: {
-      keywords?: string[];
-  };
-  cta?: string;
-  relatedProducts?: any[];
-}
-
 const initialSelectorData: ProductSelectorData = {
     businessType: '',
     softwareNeeds: [],
@@ -65,226 +53,181 @@ const initialSelectorData: ProductSelectorData = {
     monthlyVolume: '0-50K',
 };
 
-const AiSearchOverlay = () => {
-  const sampleQueries = [
-      "I need a POS for my full-service restaurant with table management",
-      "Looking for a mobile POS system for my food truck",
-      "I want a self-service kiosk for my quick service restaurant",
-      "Need a compact POS for my small retail shop"
-  ];
+function AiSearchOverlay() {
+    const sampleQueries = [
+        "I own a coffee shop and need a fast checkout system",
+        "I want a system that supports Apple Pay and QR codes",
+        "I have two locations and need real-time inventory sync",
+    ];
 
-  const [currentSampleIndex, setCurrentSampleIndex] = useState(0);
-  const [typedText, setTypedText] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [userQuery, setUserQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [errorMessage, setErrorMessage] = useState("");
-  const cursorRef = useRef(null);
+    const [currentSampleIndex, setCurrentSampleIndex] = useState(0);
+    const [typedText, setTypedText] = useState("");
+    const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
-      if (userQuery) return;
+    const [userQuery, setUserQuery] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [recommendations, setRecommendations] = useState<any[]>([]);
+    const [errorMessage, setErrorMessage] = useState("");
 
-      const currentFullText = sampleQueries[currentSampleIndex];
-      const typeSpeed = 80;
-      const deleteSpeed = 40;
-      const endDelay = 2000;
+    const typingSpeed = 80;
+    const pauseBetweenSamples = 1500;
+    const pauseAtEndOfSample = 2000;
+    const cursorRef = useRef<HTMLSpanElement | null>(null);
 
-      const handleTyping = () => {
-          if (!isDeleting && typedText.length < currentFullText.length) {
-              setTypedText(prev => prev + currentFullText.charAt(prev.length));
-              return typeSpeed;
-          }
-          if (isDeleting && typedText.length > 0) {
-              setTypedText(prev => prev.slice(0, -1));
-              return deleteSpeed;
-          }
-          if (!isDeleting && typedText.length === currentFullText.length) {
-              setIsDeleting(true);
-              return endDelay;
-          }
-          if (isDeleting && typedText.length === 0) {
-              setIsDeleting(false);
-              setCurrentSampleIndex(prev => (prev + 1) % sampleQueries.length);
-              return typeSpeed;
-          }
-      };
+    useEffect(() => {
+        if (cursorRef.current) {
+            cursorRef.current.style.animation = "blink 1s infinite";
+        }
+    }, []);
 
-      const timer = setTimeout(
-          handleTyping,
-          isDeleting ? deleteSpeed : typedText.length === currentFullText.length ? endDelay : typeSpeed
-      );
-      return () => clearTimeout(timer);
-  }, [typedText, isDeleting, currentSampleIndex, sampleQueries, userQuery]);
+    useEffect(() => {
+        if (userQuery) return;
+        const currentFullText = sampleQueries[currentSampleIndex];
+        const handleTyping = () => {
+            if (!isDeleting && typedText.length < currentFullText.length) {
+                setTypedText(prev => prev + currentFullText.charAt(prev.length));
+            } else if (isDeleting && typedText.length > 0) {
+                setTypedText(prev => prev.slice(0, -1));
+            } else if (!isDeleting && typedText.length === currentFullText.length) {
+                setTimeout(() => setIsDeleting(true), pauseAtEndOfSample);
+            } else if (isDeleting && typedText.length === 0) {
+                setIsDeleting(false);
+                setCurrentSampleIndex(prev => (prev + 1) % sampleQueries.length);
+            }
+        };
+        const timer = setTimeout(handleTyping, isDeleting ? typingSpeed / 2 : typingSpeed);
+        return () => clearTimeout(timer);
+    }, [typedText, isDeleting, currentSampleIndex, pauseAtEndOfSample, sampleQueries, typingSpeed, userQuery]);
 
-
-  useEffect(() => {
+    useEffect(() => {
       if (!userQuery) {
-          setRecommendations([]);
-          setErrorMessage("");
-          setIsLoading(false); // Reset loading state
-          return;
+        setRecommendations([]);
+        setErrorMessage("");
+        return;
       }
-
-      const searchTimer = setTimeout(async () => {
-          setIsLoading(true);
-          setErrorMessage(""); // Clear any previous error
-          setRecommendations([]); // Clear previous results
-
-          try {
-              const res = await fetch("/api/pos-recommend", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ query: userQuery }),
-              });
-
-              if (!res.ok) {
-                  // Get more detailed error information from the response
-                  const errorData = await res.json().catch(() => null); // Try to parse as JSON, but handle potential parsing errors
-                  const errorText = errorData?.error || `Request failed with status ${res.status}`;
-                  throw new Error(errorText); // Throw a more informative error
-              }
-
-              const data = await res.json();
-              console.log("API Response Data:", data); // Log the raw response data
-
-              if (data.recommendations?.length > 0) {
-                  setRecommendations(data.recommendations);
-              } else {
-                  setErrorMessage("No matching products found. Try adjusting your search terms.");
-              }
-          } catch (error:any) {
-              console.error("Search error:", error);
-              setErrorMessage(error.message || "Unable to process your search. Please try again."); // Use the error message from the caught error
-          } finally {
-              setIsLoading(false);
+      const timer = setTimeout(async () => {
+        setIsLoading(true);
+        setErrorMessage("");
+        setRecommendations([]);
+        try {
+          const res = await fetch("/api/pos-recommend", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query: userQuery }),
+          });
+          if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
+          const data = await res.json();
+          const recs = data.recommendations;
+          if (recs && recs.length > 0) {
+            setRecommendations(recs);
+          } else {
+            setErrorMessage(data.error || "No recommendations found.");
           }
+        } catch (error: any) {
+          console.error("Error fetching recommendations:", error);
+          setErrorMessage("Could not fetch recommendations. Please try again.");
+        } finally {
+          setIsLoading(false);
+        }
       }, 500);
+      return () => clearTimeout(timer);
+    }, [userQuery]);
 
-      return () => clearTimeout(searchTimer);
-  }, [userQuery]);
-
-
-  return (
-      <motion.div
-          className="mx-auto mt-8 w-full max-w-3xl"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-      >
-          <div className="backdrop-blur-md bg-white/90 dark:bg-gray-800/90 rounded-xl shadow-lg p-4">
-              <div className="text-gray-700 dark:text-gray-100 mb-2">
-                  {!userQuery ? (
-                      <span className="flex items-center">
-                          <span className="mr-2">💡</span>
-                          {typedText}
-                          <span
-                              ref={cursorRef}
-                              className="border-r-2 border-gray-900 dark:border-gray-100 ml-1 animate-blink"
-                          />
-                      </span>
-                  ) : (
-                      "Type your question or needs..."
-                  )}
-              </div>
-              <div className="relative">
-                  <input
-                      type="text"
-                      className="w-full px-4 py-3 border rounded-lg text-gray-900 dark:text-gray-200 
-                                 dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 
-                                 focus:border-transparent transition-all duration-200"
-                      placeholder="Describe your business needs..."
-                      value={userQuery}
-                      onChange={(e) => setUserQuery(e.target.value)}
-                  />
-                  {isLoading && (
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                          <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                      </div>
-                  )}
-              </div>
-              <AnimatePresence>
-                  {(userQuery || isLoading) && (
-                      <motion.div
-                          className="mt-4 bg-white dark:bg-gray-800 border border-gray-200 
-                                   dark:border-gray-600 rounded-lg shadow-lg overflow-hidden"
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.3 }}
-                      >
-                          {errorMessage && (
-                              <div className="p-4 text-amber-600 dark:text-amber-400 text-sm">
-                                  {errorMessage}
-                              </div>
-                          )}
-                          {!isLoading && recommendations.length > 0 && recommendations.map((item) => (
-                              <motion.div
-                                  key={item.identifier}
-                                  initial={{ opacity: 0, x: -20 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ delay: 0.1 }}
-                                  className="p-4 border-b last:border-b-0 dark:border-gray-600 
-                                           hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                              >
-                                  <div className="flex gap-4">
-                                      {item.image && (
-                                          <div className="flex-shrink-0">
-                                              <Image
-                                                  src={item.image}
-                                                  alt={item.name}
-                                                  width={100}
-                                                  height={100}
-                                                  className="rounded-lg object-cover"
-                                              />
-                                          </div>
-                                      )}
-                                      <div className="flex-grow">
-                                          <h4 className="font-semibold text-gray-900 dark:text-gray-100">
-                                              {item.name}
-                                          </h4>
-                                          <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                                              Best for: {item.bestFor.join(", ")}
-                                          </p>
-                                          <div className="mt-2 flex flex-wrap gap-2">
-                                          {item.searchTerms?.keywords?.slice(0, 3).map((keyword: string, kidx: number) => (
-                                              <span
-                                                  key={kidx}
-                                                  className="px-2 py-1 text-xs rounded-full bg-blue-100 
-                                                           dark:bg-blue-900 text-blue-800 dark:text-blue-200"
-                                              >
-                                                  {keyword}
-                                              </span>
-                                          ))}
-                                          </div>
-                                          <div className="mt-3">
-                                              <button className="text-blue-600 dark:text-blue-400 
-                                                               hover:underline text-sm font-medium">
-                                                  {item.cta}
-                                              </button>
-                                          </div>
-                                      </div>
-                                  </div>
-                              </motion.div>
-                          ))}
-                          {!isLoading && recommendations.length === 0 && !errorMessage && (
-                               <div className="p-4 text-gray-600 dark:text-gray-400 text-sm">
-                                  Enter your query to see product recommendations.
-                              </div>
-                          )}
-
-                          {recommendations.length > 0 && (
-                              <div className="p-4 bg-gray-50 dark:bg-gray-700 text-sm text-gray-600 dark:text-gray-300">
-                                  Looking for something specific? Try being more specific about your business type or needs.
-                              </div>
-                          )}
-                      </motion.div>
-                  )}
-              </AnimatePresence>
-          </div>
-      </motion.div>
-  );
-};
+    return (
+        <motion.div
+            className="mx-auto mt-8 w-full max-w-3xl bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+        >
+            <div className="text-gray-700 dark:text-gray-100 mb-2">
+                {!userQuery ? (
+                    <span>
+                        {typedText}
+                        <span ref={cursorRef} className="border-r-2 border-gray-900 dark:border-gray-100 ml-1" />
+                    </span>
+                ) : (
+                    "Type your question or needs..."
+                )}
+            </div>
+            <input
+                type="text"
+                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-700 dark:border-gray-600"
+                placeholder="e.g. I want a system that supports Apple Pay..."
+                value={userQuery}
+                onChange={(e) => setUserQuery(e.target.value)}
+            />
+            <AnimatePresence>
+                {(userQuery || isLoading || errorMessage) && (
+                    <motion.div
+                        className="mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow p-4"
+                        initial={{ opacity: 0, y: 0 }}
+                        animate={{ opacity: 1, y: 5 }}
+                        exit={{ opacity: 0, y: 0 }}
+                    >
+                        {isLoading && (
+                            <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
+                                <div className="w-4 h-4 border-2 border-t-transparent border-gray-400 rounded-full animate-spin"></div>
+                                <span>Fetching recommendations...</span>
+                            </div>
+                        )}
+                        {!isLoading && errorMessage && (
+                            <div className="text-red-500 dark:text-red-300">
+                                {errorMessage}
+                            </div>
+                        )}
+                        {!isLoading && recommendations.length > 0 && (
+                            <div>
+                                {recommendations.map((item: any, idx: number) => (
+                                    <div key={idx} className="mb-4 flex items-start">
+                                        {item.image && (
+                                            <div className="mr-4">
+                                                <Image
+                                                    src={item.image}
+                                                    alt={item.name}
+                                                    width={100}
+                                                    height={100}
+                                                    className="rounded"
+                                                    style={{ objectFit: 'cover' }}
+                                                />
+                                            </div>
+                                        )}
+                                        <div>
+                                            <h4 className="font-semibold text-gray-800 dark:text-gray-100">
+                                                {item.name}
+                                            </h4>
+                                            {item.features && (
+                                                <p className="text-sm text-gray-600 dark:text-gray-300">
+                                                    Features: {item.features.join(", ")}
+                                                </p>
+                                            )}
+                                            {item.bestFor && (
+                                                <p className="text-sm text-gray-600 dark:text-gray-300">
+                                                    Best for: {item.bestFor.join(", ")}
+                                                </p>
+                                            )}
+                                            {item.tailoredDetails && (
+                                                <p className="text-sm text-gray-600 dark:text-gray-300">
+                                                    {item.tailoredDetails}
+                                                </p>
+                                            )}
+                                            <div className="mt-1">
+                                                <button className="text-blue-600 dark:text-blue-400 hover:underline">
+                                                    {item.cta || "View"}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                                <hr className="my-2 border-gray-200 dark:border-gray-600" />
+                            </div>
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </motion.div>
+    );
+}
 
 export default function Home() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -1060,6 +1003,7 @@ export default function Home() {
             setIsLoading(false);
             return;
         }
+
         let finalLocations =
             contactFormData.numLocationsChoice === 'plus'
                 ? contactFormData.numLocationsCustom

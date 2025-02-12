@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export', // KEEP THIS LINE
-
+  images: {
+    unoptimized: true,
+  },
   async headers() {
     return [
       {
