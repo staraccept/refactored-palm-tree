@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
         const productInfo = posProducts.map(product => ({
             name: product.name,
-            identifier: product.identifier, // Include the identifier
+            identifier: product.identifier,
             bestFor: product.bestFor,
             businessTypes: product.searchTerms.businessTypes,
             useCases: product.searchTerms.useCase,
@@ -54,33 +54,50 @@ Return ONLY the JSON array. No additional text or explanation.`
         });
 
         const response = await openai.chat.completions.create({
-            model: "gpt-4o",  // Keep gpt-4o
+            model: "gpt-4o",
             messages: messages,
             max_tokens: 50,
-            temperature: 0.3, // Lower temperature for more deterministic output
-            response_format: { type: "json_object" } // Add back response_format
+            temperature: 0.3,
+            response_format: { type: "json_object" }
         });
 
-        let recommendedIds: string[];
+        let recommendedIds: string[] = []; // Initialize as an empty array
+
         try {
             if (response.choices[0]?.message?.content) {
                 const parsed = JSON.parse(response.choices[0].message.content.trim());
-                recommendedIds = Array.isArray(parsed) ? parsed : parsed.recommendations;
+
+                // Check if the parsed response is an array of strings
+                if (Array.isArray(parsed) && parsed.every(item => typeof item === 'string')) {
+                    recommendedIds = parsed;
+                }
+                // Check if the parsed response is an object with an 'identifier' property that is an array of strings
+                else if (typeof parsed === 'object' && parsed !== null && Array.isArray(parsed.identifier) && parsed.identifier.every((item: any) => typeof item === 'string')) {
+                    recommendedIds = parsed.identifier;
+                }
+                // Check if the parsed response is an object with a 'recommendations' property
+                else if (typeof parsed === 'object' && parsed !== null && Array.isArray(parsed.recommendations) && parsed.recommendations.every((item:any) => typeof item === 'string')) {
+                     recommendedIds = parsed.recommendations;
+                }
+
+                else {
+                    console.error("Invalid response format. Expected an array of strings or an object with an 'identifier' array.", parsed);
+                    return NextResponse.json({ error: "Invalid response format. Expected an array of strings or an object with an 'identifier' array." }, { status: 500 });
+                }
             } else {
                 console.error("OpenAI response missing content:", response);
-                return NextResponse.json({ error: 'Invalid response format' }, { status: 500 });
+                return NextResponse.json({ error: 'OpenAI response missing content' }, { status: 500 });
             }
         } catch (parseError) {
             console.error("Error parsing OpenAI response:", parseError);
             console.error("Raw response:", response.choices[0]?.message?.content);
-            return NextResponse.json({ error: 'Failed to parse response' }, { status: 500 });
+            return NextResponse.json({ error: 'Failed to parse OpenAI response' }, { status: 500 });
         }
-      // Get full product details and related products
+
         const recommendations = recommendedIds.map((id: string) => {
             const product = posProducts.find(p => p.identifier === id);
             if (!product) return null;
 
-            // Get 1-2 complementary products
             const relatedProducts = (product.complementaryProducts || [])
                 .map((relatedId: string) => posProducts.find(p => p.identifier === relatedId))
                 .filter(Boolean)
@@ -92,9 +109,10 @@ Return ONLY the JSON array. No additional text or explanation.`
             };
         }).filter(Boolean);
 
+
         return NextResponse.json({
             recommendations,
-            query // Include original query for reference
+            query
         }, { status: 200 });
 
     } catch (error: any) {
@@ -102,7 +120,7 @@ Return ONLY the JSON array. No additional text or explanation.`
         return NextResponse.json({
             error: 'Failed to process recommendation',
             details: error.message,
-            fullError: error // Corrected duplicate property
+            fullError: error
         }, { status: 500 });
     }
 }
