@@ -1,4 +1,4 @@
-// app/api/pos-recommend/route.ts 
+// app/api/pos-recommend/route.ts
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { posProducts } from '@/lib/posProducts';
@@ -54,11 +54,11 @@ Return ONLY the JSON array. No additional text or explanation.`
         });
 
         const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
+            model: "gpt-4-1106-preview", // Use this model
             messages: messages,
             max_tokens: 50,
             temperature: 0.3,
-            response_format: { type: "json_object" }
+            response_format: { type: "json_object" } // Keep response_format
         });
 
         let recommendedIds: string[] = []; // Initialize as an empty array
@@ -79,7 +79,7 @@ Return ONLY the JSON array. No additional text or explanation.`
                 else if (typeof parsed === 'object' && parsed !== null && Array.isArray(parsed.recommendations) && parsed.recommendations.every((item:any) => typeof item === 'string')) {
                      recommendedIds = parsed.recommendations;
                 }
-                // NEW: Check if the parsed response is an object with an 'identifier' property that is a string
+                // Check if the parsed response is an object with an 'identifier' property that is a string
                 else if (typeof parsed === 'object' && parsed !== null && typeof parsed.identifier === 'string') {
                     recommendedIds = [parsed.identifier]; // Convert to an array
                 }
