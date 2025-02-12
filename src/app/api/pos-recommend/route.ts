@@ -49,7 +49,7 @@ If no products match, return an empty array.
         });
 
         const response = await openai.chat.completions.create({
-            model: "gpt-4o",
+            model: "gpt-4o-mini",
             messages: messages,
             max_tokens: 50,
             temperature: 0.5,
