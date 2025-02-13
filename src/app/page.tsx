@@ -1918,7 +1918,7 @@ export default function Home() {
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               transition={{ type: 'spring', stiffness: 100 }}
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.02 }} 
             >
               <div className="max-w-6xl mx-auto flex items-center justify-center">
                 <a
