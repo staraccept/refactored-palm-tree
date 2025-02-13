@@ -18,19 +18,20 @@ export interface PosProduct {
     image?: string
   }
   
-  // Base features shared across most POS devices
+  // Simplified base features
   const baseFeatures = {
-    connectivity: ["WiFi Connectivity", "4G LTE Support"],
+    connectivity: ["WiFi + 4G LTE"],
     payments: [
-      "Apple Pay, Google Pay, Samsung Pay Integration",
-      "Tap-to-Pay Capability",
-      "EMV (Chip) and Magstripe Support"
+      "Apple Pay, Google Pay, Samsung Pay",
+      "Tap-to-Pay, EMV, Magstripe"
     ],
     hardware: [
       "Built-in Barcode Scanner",
-      "Built-in Receipt Printer (supports text & email receipts)"
+      "Built-in Receipt Printer"
     ],
-    system: ["Modular Expandability with Live Sync to Online Dashboard"]
+    system: [
+      "Modular w/ Live Sync to Dashboard"
+    ]
   }
   
   const combineFeatures = (uniqueFeatures: string[] = []): string[] => {
@@ -48,16 +49,16 @@ export interface PosProduct {
       name: "Clover Station Duo 2",
       identifier: "duo2",
       bestFor: [
-        "High-Volume Full-Service Restaurants",
-        "Multi-Station Restaurant Setups",
-        "Fine Dining Establishments"
+        "High-Volume Full-Service",
+        "Multi-Station Restaurants",
+        "Fine Dining"
       ],
       features: combineFeatures([
-        "Dual-screen system with customer-facing display",
-        "High-performance processor for peak hour operations",
-        "Advanced inventory tracking and real-time reporting",
-        "Staff management with role-based permissions",
-        "Table management and coursing support"
+        "Dual screens (customer display)",
+        "Powerful processor for rush hours",
+        "Advanced reporting & inventory",
+        "Staff roles & permissions",
+        "Table management & coursing"
       ]),
       searchTerms: {
         businessTypes: [
@@ -74,10 +75,10 @@ export interface PosProduct {
           "high volume",
           "multi station",
           "table management",
-          "coursing",
           "inventory management"
         ],
         keywords: [
+          "duo",
           "dual screen",
           "customer display",
           "table tracking",
@@ -88,24 +89,25 @@ export interface PosProduct {
       relatedProducts: ["kds", "starprinter"],
       primaryCategory: "pos",
       size: "large",
-      priority: 100, // Flagship product
-      cta: "Get a Quote",
+      priority: 100,
+      cta: "Learn More",
+      // Ensure the filename matches what's in /public
       image: "/full-service-pos.jpg"
     },
     {
       name: "Clover Station Solo",
       identifier: "solo",
       bestFor: [
-        "High-Volume Bars",
+        "Busy Bars",
         "Quick-Service Restaurants",
         "Fast-Casual Dining"
       ],
       features: combineFeatures([
-        "Large 14-inch HD touchscreen",
-        "Advanced tip management and split payment support",
-        "Customizable quick-menu interface",
-        "Bar tab management system",
-        "High-speed order processing"
+        "14-inch HD touchscreen",
+        "Tip & split payments",
+        "Quick-menu customization",
+        "Bar tab management",
+        "Fast order processing"
       ]),
       searchTerms: {
         businessTypes: [
@@ -121,14 +123,13 @@ export interface PosProduct {
           "quick service",
           "counter service",
           "bar service",
-          "tab management",
           "fast paced",
           "high volume"
         ],
         keywords: [
+          "solo",
           "single screen",
           "tips",
-          "split payments",
           "bar tabs",
           "quick menu"
         ]
@@ -137,24 +138,23 @@ export interface PosProduct {
       primaryCategory: "pos",
       size: "standard",
       priority: 90,
-      cta: "See Pricing",
+      cta: "Learn More",
       image: "/bar-service-pos.jpg"
     },
     {
-      // Renamed from "Clover Mini 3" to "Clover Mini"
+      // Renamed for partial matching
       name: "Clover Mini",
       identifier: "mini3",
       bestFor: [
         "Space-Conscious Retail",
         "Coffee Shops",
-        "Small Service Businesses"
+        "Small Businesses"
       ],
       features: combineFeatures([
-        "Compact 7-inch HD display",
-        "Space-saving vertical design",
-        "Optional customer-facing display",
-        "Retail inventory management",
-        "Customer loyalty program integration"
+        "Compact 7-inch display",
+        "Optional customer-facing screen",
+        "Built-in loyalty integration",
+        "Simple inventory"
       ]),
       searchTerms: {
         businessTypes: [
@@ -174,10 +174,10 @@ export interface PosProduct {
           "compact setup"
         ],
         keywords: [
+          "mini",
           "small",
           "compact",
           "space saving",
-          "counter top",
           "retail",
           "loyalty"
         ]
@@ -190,20 +190,19 @@ export interface PosProduct {
       image: "/minipos.jpg"
     },
     {
+      // Named “Clover Flex 4,” but user might say “Clover Flex”
       name: "Clover Flex 4",
       identifier: "flex4",
       bestFor: [
         "Mobile Food Service",
         "Table-Side Ordering",
-        "Delivery Operations",
         "Pop-Up Retail"
       ],
       features: combineFeatures([
-        "5-inch portable touchscreen",
-        "12+ hour battery life",
-        "IP54 dust and water resistance",
-        "Cellular backup connectivity",
-        "Built-in camera for inventory scanning"
+        "5-inch handheld device",
+        "12-hour battery",
+        "Splash-resistant",
+        "Camera for barcode scans"
       ]),
       searchTerms: {
         businessTypes: [
@@ -220,16 +219,14 @@ export interface PosProduct {
           "portable",
           "tableside",
           "delivery",
-          "outdoor",
-          "on the go",
-          "table service"
+          "on the go"
         ],
         keywords: [
+          "flex",
           "handheld",
           "portable",
           "battery",
           "mobile",
-          "wireless",
           "camera"
         ]
       },
@@ -237,24 +234,23 @@ export interface PosProduct {
       primaryCategory: "mobile",
       size: "compact",
       priority: 85,
-      cta: "Try a Demo",
+      cta: "Learn More",
       image: "/handheldpos.jpg"
     },
     {
       name: "Star Kitchen Printer",
       identifier: "starprinter",
       bestFor: [
-        "High-Volume Kitchen Operations",
+        "High-Volume Kitchens",
         "Multi-Station Restaurants",
-        "Quick-Service Kitchens"
+        "Quick-Service Lines"
       ],
       features: [
-        "250mm/second print speed",
-        "Auto-cutter with partial cut",
-        "Heat and splash resistant",
-        "Direct thermal printing - no ink needed",
-        "Multiple print station support",
-        "Auto status monitoring"
+        "250mm/sec print speed",
+        "Auto-cutter & splash resistant",
+        "Thermal printing (no ink)",
+        "Multiple station support",
+        "Auto status alerts"
       ],
       searchTerms: {
         businessTypes: [
@@ -284,24 +280,23 @@ export interface PosProduct {
       primaryCategory: "peripheral",
       size: "compact",
       priority: 60,
-      cta: "Get a Quote",
+      cta: "Learn More",
       image: "/kitchenprinter.jpg"
     },
     {
       name: "Clover Kitchen Display",
       identifier: "kds",
       bestFor: [
-        "High-Volume Restaurant Kitchens",
-        "Multi-Station Food Preparation",
-        "Quick-Service Production Lines"
+        "High-Volume Kitchens",
+        "Multi-Station Food Prep",
+        "Quick-Service Production"
       ],
       features: [
-        "15-inch HD heat-resistant display",
-        "Real-time order management",
-        "Customizable station routing",
-        "Order timing and tracking",
+        "15-inch heat-resistant screen",
+        "Real-time order routing",
+        "Timing & tracking",
         "Recipe display integration",
-        "Production performance metrics"
+        "Performance metrics"
       ],
       searchTerms: {
         businessTypes: [
@@ -320,7 +315,7 @@ export interface PosProduct {
           "digital tickets"
         ],
         keywords: [
-          "KDS",
+          "kds",
           "kitchen display",
           "digital",
           "screen",
@@ -331,7 +326,7 @@ export interface PosProduct {
       primaryCategory: "peripheral",
       size: "standard",
       priority: 70,
-      cta: "See Pricing",
+      cta: "Learn More",
       image: "/kitchendisplay.jpg"
     },
     {
@@ -343,12 +338,11 @@ export interface PosProduct {
         "High-Traffic Retail"
       ],
       features: combineFeatures([
-        "22-inch HD touchscreen",
+        "22-inch touchscreen",
         "ADA-compliant design",
-        "Custom branding options",
         "Smart upsell prompts",
-        "Multiple language support",
-        "Customer loyalty integration"
+        "Multi-language support",
+        "Loyalty integration"
       ]),
       searchTerms: {
         businessTypes: [
@@ -378,68 +372,55 @@ export interface PosProduct {
       primaryCategory: "selfservice",
       size: "large",
       priority: 95,
-      cta: "Try a Demo",
+      cta: "learn More",
       image: "/kiosk.jpg"
     }
   ]
   
-  // Helper function to find related products for a search
-  export const findRelatedProducts = (
-    search: string,
-    maxResults: number = 3
-  ): PosProduct[] => {
-    const searchLower = search.toLowerCase()
+  // Revised to handle *each word* in the query so “bar” or “restaurant” are caught
+  export function findRelatedProducts(search: string, maxResults = 3): PosProduct[] {
+    const words = search.toLowerCase().split(/\s+/); // split on spaces
+    const scored = posProducts.map((product) => {
+      let score = 0;
+      for (const w of words) {
+        // if "bar" is found in "bar" or "bar and grill" we get a match
+        product.searchTerms.businessTypes.forEach((term) => {
+          if (term.toLowerCase().includes(w)) {
+            score += 3;
+          }
+        });
+        product.searchTerms.useCase.forEach((term) => {
+          if (term.toLowerCase().includes(w)) {
+            score += 2;
+          }
+        });
+        product.searchTerms.keywords.forEach((term) => {
+          if (term.toLowerCase().includes(w)) {
+            score += 1;
+          }
+        });
+      }
+      // Multiply final score by priority factor
+      score *= product.priority / 50;
+      return { product, score };
+    });
   
-    // Score each product based on search term matches
-    const scoredProducts = posProducts.map((product) => {
-      let score = 0
-  
-      // Check business types
-      product.searchTerms.businessTypes.forEach((term) => {
-        if (term.toLowerCase().includes(searchLower)) {
-          score += 3
-        }
-      })
-  
-      // Check use cases
-      product.searchTerms.useCase.forEach((term) => {
-        if (term.toLowerCase().includes(searchLower)) {
-          score += 2
-        }
-      })
-  
-      // Check keywords
-      product.searchTerms.keywords.forEach((term) => {
-        if (term.toLowerCase().includes(searchLower)) {
-          score += 1
-        }
-      })
-  
-      // Boost score based on product priority
-      score *= product.priority / 50
-  
-      return { product, score }
-    })
-  
-    // Sort by score and return top results
-    return scoredProducts
+    return scored
       .filter((item) => item.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, maxResults)
-      .map((item) => item.product)
+      .map((item) => item.product);
   }
   
-  // Helper function to get complementary products
-  export const getComplementaryProducts = (
+  export function getComplementaryProducts(
     productId: string,
     maxResults: number = 2
-  ): PosProduct[] => {
-    const product = posProducts.find((p) => p.identifier === productId)
-    if (!product) return []
-  
+  ): PosProduct[] {
+    const product = posProducts.find((p) => p.identifier === productId);
+    if (!product) return [];
     return product.relatedProducts
       .map((id) => posProducts.find((p) => p.identifier === id))
       .filter((p): p is PosProduct => p !== undefined)
-      .slice(0, maxResults)
+      .slice(0, maxResults);
   }
   
