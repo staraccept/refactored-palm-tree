@@ -1418,7 +1418,7 @@ export default function Home() {
                       <div className="max-w-6xl px-4 mx-auto">
                           <div className="mb-12 text-center">
                               <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">
-                                  Find Your Perfect POS Solution
+                              What's your industry?
                               </h2>
                               <p className="max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">
                                   Answer a few questions to get a personalized recommendation.
