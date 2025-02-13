@@ -935,8 +935,8 @@ export default function Home() {
                         </div>
                     </section>
 
-                    {/* Wizard Section */}
-                    <section className="py-20 bg-gray-50 dark:bg-gray-800" id="product-selector">
+                   {/* Wizard Section */}
+                   <section className="py-20 bg-gray-50 dark:bg-gray-800" id="product-selector">
                         <div className="max-w-6xl px-4 mx-auto">
                             <div className="mb-12 text-center">
                                 <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">
@@ -965,10 +965,9 @@ export default function Home() {
                                             type="button"
                                             onClick={handlePreviousStep}
                                             disabled={wizardStep === 1}
-                                            className={`px-6 py-2 text-gray-600 dark:text-gray-300 rounded-lg transition-colors ${
-                                                wizardStep === 1
-                                                    ? 'opacity-50 cursor-not-allowed bg-gray-200 dark:bg-gray-600'
-                                                    : 'hover:bg-gray-100 dark:hover:bg-gray-600 bg-gray-100 dark:bg-gray-600'
+                                            className={`px-6 py-2 text-gray-600 dark:text-gray-300 rounded-lg transition-colors ${wizardStep === 1
+                                                ? 'opacity-50 cursor-not-allowed bg-gray-200 dark:bg-gray-600'
+                                                : 'hover:bg-gray-100 dark:hover:bg-gray-600 bg-gray-100 dark:bg-gray-600'
                                             }`}
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
@@ -979,11 +978,8 @@ export default function Home() {
                                             type="button"
                                             onClick={handleNextStep}
                                             disabled={wizardStep === 5}
-                                            className={`px-6 py-2 text-white bg-blue-600 dark:bg-blue-400 rounded-lg transition-colors ${
-                                                wizardStep === 5
-                                                    ? 'opacity-50 cursor-not-allowed'
-                                                    : 'hover:bg-blue-700 dark:hover:bg-blue-300'
-                                            }`}
+                                            className={`px-6 py-2 text-white bg-blue-600 dark:bg-blue-400 rounded-lg transition-colors ${wizardStep === 5 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700 dark:hover:bg-blue-300'
+                                                }`}
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
                                         >
@@ -1011,179 +1007,179 @@ export default function Home() {
                             <div className="grid items-start gap-12 md:grid-cols-2">
                                 <div className="p-8 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 shadow-sm rounded-xl">
                                     <form onSubmit={handleContactSubmit} className="space-y-6">
-                                        <div>
-                                            <label
-                                                htmlFor="firstName"
-                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
-                                            >
-                                                First Name*
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="firstName"
-                                                name="firstName"
-                                                value={contactFormData.firstName}
-                                                onChange={handleContactInputChange}
-                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
-                                            />
+                                        <div className="grid gap-6 md:grid-cols-2">
+                                            <div>
+                                                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
+                                                    First Name
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="firstName"
+                                                    value={contactFormData.firstName}
+                                                    onChange={handleContactInputChange}
+                                                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white"
+                                                    placeholder="John"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">Last Name</label>
+                                                <input
+                                                    type="text"
+                                                    name="lastName"
+                                                    value={contactFormData.lastName}
+                                                    onChange={handleContactInputChange}
+                                                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white"
+                                                    placeholder="Doe"
+                                                />
+                                            </div>
                                         </div>
                                         <div>
-                                            <label
-                                                htmlFor="lastName"
-                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
-                                            >
-                                                Last Name*
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="lastName"
-                                                name="lastName"
-                                                value={contactFormData.lastName}
-                                                onChange={handleContactInputChange}
-                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label
-                                                htmlFor="email"
-                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
-                                            >
-                                                Email*
-                                            </label>
+                                            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">Business Email</label>
                                             <input
                                                 type="email"
-                                                id="email"
                                                 name="email"
                                                 value={contactFormData.email}
                                                 onChange={handleContactInputChange}
-                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
+                                                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white"
+                                                placeholder="john@yourcompany.com"
                                             />
                                         </div>
                                         <div>
-                                            <label
-                                                htmlFor="phone"
-                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
-                                            >
-                                                Phone*
-                                            </label>
+                                            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">Phone Number</label>
                                             <input
-                                                type="text"
-                                                id="phone"
+                                                type="tel"
                                                 name="phone"
                                                 value={contactFormData.phone}
                                                 onChange={handleContactInputChange}
-                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
+                                                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white"
+                                                placeholder="(555) 123-4567"
                                             />
                                         </div>
-                                        <div>
-                                            <label
-                                                htmlFor="callDate"
-                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
-                                            >
-                                                Preferred Call Date
-                                            </label>
-                                            <input
-                                                type="date"
-                                                id="callDate"
-                                                name="callDate"
-                                                value={contactFormData.callDate}
-                                                onChange={handleContactInputChange}
-                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
-                                            />
+                                        <div className="grid gap-6 md:grid-cols-2">
+                                            <div>
+                                                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
+                                                    Preferred Call Date
+                                                </label>
+                                                <input
+                                                    type="date"
+                                                    name="callDate"
+                                                    value={contactFormData.callDate}
+                                                    onChange={handleContactInputChange}
+                                                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
+                                                    Preferred Time
+                                                </label>
+                                                <select
+                                                    name="preferredTime"
+                                                    value={contactFormData.preferredTime}
+                                                    onChange={handleContactInputChange}
+                                                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white"
+                                                >
+                                                    <option value="">Select a time</option>
+                                                    <option value="morning">Morning (9AM - 12PM)</option>
+                                                    <option value="afternoon">Afternoon (12PM - 5PM)</option>
+                                                    <option value="evening">Evening (5PM - 8PM)</option>
+                                                </select>
+                                            </div>
                                         </div>
                                         <div>
-                                            <label
-                                                htmlFor="preferredTime"
-                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
-                                            >
-                                                Preferred Call Time
-                                            </label>
-                                            <input
-                                                type="time"
-                                                id="preferredTime"
-                                                name="preferredTime"
-                                                value={contactFormData.preferredTime}
-                                                onChange={handleContactInputChange}
-                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label
-                                                htmlFor="businessType"
-                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
-                                            >
-                                                Business Type
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="businessType"
-                                                name="businessType"
-                                                value={contactFormData.businessType}
-                                                onChange={handleContactInputChange}
-                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label
-                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
-                                            >
+                                            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
                                                 Number of Locations
                                             </label>
-                                            <select
-                                                name="numLocationsChoice"
-                                                value={contactFormData.numLocationsChoice}
-                                                onChange={handleContactInputChange}
-                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
-                                            >
-                                                <option value="1">1</option>
-                                                <option value="2-5">2-5</option>
-                                                <option value="6-10">6-10</option>
-                                                <option value="plus">More than 10</option>
-                                            </select>
+                                            <div className="flex items-center gap-2">
+                                                {['1', '2', '3', '4', '5'].map((opt) => (
+                                                    <motion.button
+                                                        key={opt}
+                                                        whileTap={{ scale: 0.95 }}
+                                                        onClick={(ev) => {
+                                                            ev.preventDefault();
+                                                            setContactFormData((prev) => ({
+                                                                ...prev,
+                                                                numLocationsChoice: opt,
+                                                                numLocationsCustom: '',
+                                                            }));
+                                                        }}
+                                                        className={`px-3 py-2 rounded ${contactFormData.numLocationsChoice === opt
+                                                            ? 'bg-blue-600 text-white dark:bg-blue-500'
+                                                            : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200'
+                                                        }`}
+                                                    >
+                                                        {opt}
+                                                    </motion.button>
+                                                ))}
+                                                <motion.button
+                                                    whileTap={{ scale: 0.95 }}
+                                                    onClick={(ev) => {
+                                                        ev.preventDefault();
+                                                        setContactFormData((prev) => ({ ...prev, numLocationsChoice: 'plus' }));
+                                                    }}
+                                                    className={`px-3 py-2 rounded ${contactFormData.numLocationsChoice === 'plus'
+                                                        ? 'bg-blue-600 text-white dark:bg-blue-500'
+                                                        : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200'
+                                                    }`}
+                                                >
+                                                    +
+                                                </motion.button>
+                                            </div>
                                             {contactFormData.numLocationsChoice === 'plus' && (
-                                                <input
-                                                    type="number"
-                                                    name="numLocationsCustom"
-                                                    value={contactFormData.numLocationsCustom}
-                                                    onChange={handleContactInputChange}
-                                                    placeholder="Enter exact number"
-                                                    className="mt-2 w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
-                                                />
+                                                <div className="mt-3">
+                                                    <label className="block mb-1 text-sm text-gray-600 dark:text-gray-400">Enter custom number:</label>
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        name="numLocationsCustom"
+                                                        value={contactFormData.numLocationsCustom}
+                                                        onChange={(e) => setContactFormData((prev) => ({ ...prev, numLocationsCustom: e.target.value }))}
+                                                        className="w-32 px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                                                    />
+                                                </div>
                                             )}
                                         </div>
                                         <div>
-                                            <label
-                                                className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200"
-                                            >
-                                                Monthly Card Volume
+                                            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
+                                                Monthly Processing Volume
                                             </label>
-                                            <select
-                                                name="monthlyVolume"
-                                                value={contactFormData.monthlyVolume}
-                                                onChange={handleContactInputChange}
-                                                className="w-full px-4 py-2 border rounded-lg text-gray-900 dark:text-gray-200 dark:bg-gray-600 dark:border-gray-500"
-                                            >
-                                                <option value="0-50K">0 - 50K</option>
-                                                <option value="50K-100K">50K - 100K</option>
-                                                <option value="100K-200K">100K - 200K</option>
-                                                <option value="200K+">200K +</option>
-                                            </select>
+                                            <div className="flex flex-wrap gap-2">
+                                                {['0-50K', '50K-250K', '250K-1MM', '1MM+'].map((range) => (
+                                                    <motion.button
+                                                        key={range}
+                                                        whileTap={{ scale: 0.95 }}
+                                                        onClick={(ev) => {
+                                                            ev.preventDefault();
+                                                            setContactFormData((prev) => ({ ...prev, monthlyVolume: range }));
+                                                        }}
+                                                        className={`px-4 py-2 rounded border ${contactFormData.monthlyVolume === range
+                                                            ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500'
+                                                            : 'text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700'
+                                                        }`}
+                                                    >
+                                                        {range === '0-50K' && '$0-50K'}
+                                                        {range === '50K-250K' && '$50K-250K'}
+                                                        {range === '250K-1MM' && '$250K-1MM'}
+                                                        {range === '1MM+' && '$1MM+'}
+                                                    </motion.button>
+                                                ))}
+                                            </div>
                                         </div>
-                                        <motion.button
-                                            type="submit"
-                                            className="w-full py-4 px-6 rounded-lg font-semibold text-white bg-blue-600 dark:bg-blue-400 hover:bg-blue-700 dark:hover:bg-blue-300 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
-                                            disabled={isLoading}
-                                        >
-                                            {isLoading ? 'Sending...' : 'Send Message'}
-                                        </motion.button>
+                                        <div className="space-y-4">
+                                            <motion.button
+                                                type="submit"
+                                                className="w-full py-4 px-6 rounded-lg font-semibold text-white bg-blue-600 dark:bg-blue-400 hover:bg-blue-700 dark:hover:bg-blue-300 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
+                                                disabled={isLoading}
+                                            >
+                                                {isLoading ? 'Sending...' : 'Send Message'}
+                                            </motion.button>
+                                        </div>
                                         {contactSubmitStatus !== 'idle' && (
                                             <div
-                                                className={`p-4 rounded-lg mt-2 ${
-                                                    contactSubmitStatus === 'success'
-                                                        ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200'
-                                                        : 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200'
+                                                className={`p-4 rounded-lg mt-2 ${contactSubmitStatus === 'success'
+                                                    ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200'
+                                                    : 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200'
                                                 }`}
                                             >
                                                 {contactSubmitMessage}
@@ -1192,7 +1188,82 @@ export default function Home() {
                                     </form>
                                 </div>
                                 <div className="space-y-8">
-                                    {/* Additional info/logos could go here */}
+                                    <div className="p-6 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-xl">
+                                        <h3 className="mb-4 text-xl font-semibold dark:text-white">Why Choose Star Accept?</h3>
+                                        <div className="space-y-4">
+                                            {[
+                                                {
+                                                    title: 'Enterprise-Grade Security',
+                                                    description: 'Your data is protected with industry-leading encryption',
+                                                    icon: '🔒',
+                                                },
+                                                {
+                                                    title: 'Quick Integration',
+                                                    description: 'Get up and running in days, not weeks',
+                                                    icon: '⚡',
+                                                },
+                                                {
+                                                    title: '24/7 Support',
+                                                    description: 'Our team is always here to help you succeed',
+                                                    icon: '💬',
+                                                },
+                                            ].map((item, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="flex items-start p-4 space-x-4 rounded-lg bg-gray-50 dark:bg-gray-800"
+                                                >
+                                                    <span className="text-2xl">{item.icon}</span>
+                                                    <div>
+                                                        <h4 className="font-semibold text-gray-900 dark:text-white">{item.title}</h4>
+                                                        <p className="text-sm text-gray-600 dark:text-gray-400">{item.description}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-center p-8 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-xl">
+                                        <Image
+                                            src="/staracceptlogo.png"
+                                            alt="Star Accept Business Solutions"
+                                            width={300}
+                                            height={80}
+                                            className="w-auto h-auto"
+                                            priority
+                                        />
+                                    </div>
+                                    <div className="p-6 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-xl">
+                                        <h3 className="mb-4 text-xl font-semibold dark:text-white">Direct Contact</h3>
+                                        <div className="space-y-4">
+                                            <a
+                                                href="tel:+18888857333"
+                                                className="flex items-center space-x-3 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth="2"
+                                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                                                    />
+                                                </svg>
+                                                <span>(888) 885-7333</span>
+                                            </a>
+                                            <a
+                                                href="mailto:support@staraccept.com"
+                                                className="flex items-center space-x-3 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth="2"
+                                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                                    />
+                                                </svg>
+                                                <span>support@staraccept.com</span>
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
