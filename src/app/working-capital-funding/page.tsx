@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { ThemeProvider, useTheme } from "../components/ThemeProvider"; // Adjust if needed
+import { ThemeProvider, useTheme } from "../components/ThemeProvider";
 import {
   FaMoneyBillWave,
   FaCheckCircle,
@@ -356,16 +356,14 @@ export default function WorkingCapitalFunding() {
                 Reach out to us directly. We’ll get the ball rolling so you can focus on growing your business.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="/#contact" className="inline-block">
-                  <motion.a
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  href="/#contact"
-                                  className="inline-block px-8 py-3 bg-amber-500 rounded-full font-semibold hover:bg-amber-600 transition-colors text-white"
-                                >
-                                  Contact Us
-                                </motion.a>
-                </a>
+                <motion.a
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  href="/#contact"
+                  className="inline-block px-8 py-3 bg-amber-500 rounded-full font-semibold hover:bg-amber-600 transition-colors text-white"
+                >
+                  Contact Us
+                </motion.a>
               </div>
             </div>
           </section>
@@ -390,9 +388,9 @@ export default function WorkingCapitalFunding() {
             {/* Optional pinned CTA for visual consistency, feel free to remove if undesired */}
             <motion.div
               className="fixed bottom-0 left-0 w-full p-4 bg-amber-500 transition-transform"
-              initial={{ y: '100%' }}
+              initial={{ y: "100%" }}
               animate={{ y: 0 }}
-              transition={{ type: 'spring', stiffness: 100 }}
+              transition={{ type: "spring", stiffness: 100 }}
               whileHover={{ scale: 1.02 }}
             >
               <div className="max-w-6xl mx-auto flex items-center justify-center">
