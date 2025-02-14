@@ -1,18 +1,16 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { ThemeProvider, useTheme } from '../components/ThemeProvider';
 
 export default function OnlineOrdering() {
   const { darkMode, toggleDarkMode } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Scroll to top functionality
   const [showScrollToTop, setShowScrollToTop] = useState(false);
-
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 300) setShowScrollToTop(true);
@@ -220,27 +218,35 @@ export default function OnlineOrdering() {
             )}
           </motion.nav>
 
-          {/* HERO HEADER */}
-          <div className="pt-24 pb-12 bg-gradient-to-r from-blue-600 to-blue-400 text-white text-center">
-            <div className="max-w-4xl mx-auto px-4">
+          {/* HERO SECTION (Matches Restaurant Page Style) */}
+          <section className="relative w-full min-h-[60vh] flex items-center justify-center pt-24">
+            {/* Replace '/online-ordering-hero.jpg' with any relevant image */}
+            <Image
+              src="/online-ordering-hero.jpg"
+              alt="Online Ordering Hero"
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-black/50"></div>
+            <div className="relative z-10 max-w-4xl mx-auto text-center text-white px-4">
               <motion.h1
                 className="text-3xl md:text-5xl font-extrabold mb-4"
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
               >
                 Seamless Online Ordering for Restaurants & Retail
               </motion.h1>
               <motion.p
                 className="text-lg md:text-xl text-white/90"
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
+                transition={{ delay: 0.2 }}
               >
                 Simplify your online presence and boost sales in as little as 1-2 days.
               </motion.p>
             </div>
-          </div>
+          </section>
 
           {/* MAIN CONTENT */}
           <section className="py-16 bg-gray-100 dark:bg-gray-800">
@@ -349,21 +355,21 @@ export default function OnlineOrdering() {
               </div>
             </motion.div>
           </footer>
-        </div>
 
-        {/* Scroll to top button */}
-        {showScrollToTop && (
-          <motion.button
-            className="fixed bottom-20 right-5 z-50 p-3 bg-amber-500 rounded-full text-white shadow-md hover:bg-amber-600 focus:outline-none"
-            onClick={scrollToTop}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            ↑
-          </motion.button>
-        )}
+          {/* Scroll to top button */}
+          {showScrollToTop && (
+            <motion.button
+              className="fixed bottom-20 right-5 z-50 p-3 bg-amber-500 rounded-full text-white shadow-md hover:bg-amber-600 focus:outline-none"
+              onClick={scrollToTop}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              ↑
+            </motion.button>
+          )}
+        </div>
       </main>
     </ThemeProvider>
   );
