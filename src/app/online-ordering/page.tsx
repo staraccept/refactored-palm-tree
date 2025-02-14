@@ -356,19 +356,7 @@ export default function OnlineOrdering() {
             </motion.div>
           </footer>
 
-          {/* Scroll to top button */}
-          {showScrollToTop && (
-            <motion.button
-              className="fixed bottom-20 right-5 z-50 p-3 bg-amber-500 rounded-full text-white shadow-md hover:bg-amber-600 focus:outline-none"
-              onClick={scrollToTop}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              ↑
-            </motion.button>
-          )}
+    
         </div>
       </main>
     </ThemeProvider>

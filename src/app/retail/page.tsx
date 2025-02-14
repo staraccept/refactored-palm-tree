@@ -420,18 +420,6 @@ export default function Retail() {
             </div>
           </section>
 
-          {/* SCROLL TO TOP BUTTON */}
-          {showScrollToTop && (
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={scrollToTop}
-              className="fixed bottom-24 right-5 p-3 rounded-full bg-amber-500 text-white shadow-lg"
-            >
-              ↑
-            </motion.button>
-          )}
-
           {/* FOOTER */}
           <footer className="py-12 bg-white dark:bg-gray-900 relative">
             <div className="max-w-6xl px-4 mx-auto text-center">
