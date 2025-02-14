@@ -106,7 +106,7 @@ export default function OnlineOrdering() {
                       className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       href="/working-capital-funding"
                     >
-                      Working Capital Funding
+                      Working Capital
                     </motion.a>
                     <motion.a
                       whileHover={{ scale: 1.05 }}
