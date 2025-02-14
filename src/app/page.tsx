@@ -1,12 +1,6 @@
 "use client";
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-  memo
-} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Head from 'next/head';
 import Image from 'next/image';
 import {
@@ -14,14 +8,17 @@ import {
   FaClock,
   FaHandshake,
   FaPuzzlePiece,
-  FaGlobe
+  FaGlobe,
+  FaCreditCard,
+  FaCog,
+  FaLaptop,
+  FaRegLightbulb,
+  FaTools
 } from 'react-icons/fa';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeProvider, useTheme } from './components/ThemeProvider'; // adjust path if needed
 import { posProducts } from '@/lib/posProducts'; // adjust path if needed
 import { findRelatedProducts as localFindProducts } from '@/lib/posProducts';
-
-type UserRole = 'admin' | 'manager' | 'cashier' | 'guest';
+import Link from 'next/link';
 
 interface ProductSelectorData {
   businessType: string;
@@ -85,7 +82,7 @@ function matchRecommendedItem(recommendation: string) {
   return matched;
 }
 
-const AiSearchOverlay = memo(function AiSearchOverlay() {
+function AiSearchOverlay() {
   const sampleQueries = [
     "I own a coffee shop and need a fast checkout system",
     "I want a system that supports Apple Pay and QR codes",
@@ -162,7 +159,7 @@ const AiSearchOverlay = memo(function AiSearchOverlay() {
         ) {
           const fallbackProducts = localFindProducts(userQuery, 3);
           if (fallbackProducts.length > 0) {
-            setRecommendations(fallbackProducts);
+            setRecommendations(fallbackProducts.map((p) => p));
           } else {
             setErrorMessage("No recommendations found for your query.");
           }
@@ -217,7 +214,7 @@ const AiSearchOverlay = memo(function AiSearchOverlay() {
       transition={{ duration: 0.5 }}
       ref={containerRef}
     >
-      <div className="text-gray-700 dark:text-gray-100 mb-2" aria-label="typing-prompt">
+      <div className="text-gray-700 dark:text-gray-100 mb-2">
         {!userQuery ? (
           <>
             {typedText}
@@ -241,8 +238,8 @@ const AiSearchOverlay = memo(function AiSearchOverlay() {
           }
         }}
         onChange={(e) => setUserQuery(e.target.value)}
-        aria-label="AI search input"
       />
+
       <AnimatePresence>
         {showResults && (userQuery || isLoading || errorMessage) && (
           <motion.div
@@ -253,13 +250,15 @@ const AiSearchOverlay = memo(function AiSearchOverlay() {
           >
             {isLoading && (
               <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
-                <div className="w-4 h-4 border-2 border-t-transparent border-gray-400 rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-t-transparent border-gray-400 rounded-full animate-spin"></div>
                 <span>Fetching recommendations...</span>
               </div>
             )}
+
             {!isLoading && errorMessage && (
               <div className="text-red-500 dark:text-red-300">{errorMessage}</div>
             )}
+
             {!isLoading && !errorMessage && recommendations.length > 0 && (
               <div>
                 {recommendations.map((item: any, idx: number) => (
@@ -305,13 +304,17 @@ const AiSearchOverlay = memo(function AiSearchOverlay() {
                         )}
                       </div>
                       <div className="mt-4">
-                        <button className="text-blue-600 dark:text-blue-400 hover:underline">
+                        <a
+                          href="/pos-placeholder"
+                          className="text-blue-600 dark:text-blue-400 hover:underline"
+                        >
                           {item.cta || "View"}
-                        </button>
+                        </a>
                       </div>
                     </div>
                   </div>
                 ))}
+
                 {recommendations.length === 0 && (
                   <div className="text-sm text-gray-600 dark:text-gray-300">
                     No recommendations found.
@@ -324,12 +327,9 @@ const AiSearchOverlay = memo(function AiSearchOverlay() {
       </AnimatePresence>
     </motion.div>
   );
-});
+}
 
-function HomePage() {
-  const { darkMode, toggleDarkMode } = useTheme();
-
-  const [userRole] = useState<UserRole>('manager');
+export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
   const [wizardStep, setWizardStep] = useState(1);
@@ -351,12 +351,13 @@ function HomePage() {
   });
   const [contactSubmitStatus, setContactSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [contactSubmitMessage, setContactSubmitMessage] = useState('');
+  const { darkMode, toggleDarkMode } = useTheme();
 
-  const images = useMemo(() => [
+  const images = [
     { src: '/retailflex3.png', alt: 'Flexible Payment Terminal' },
     { src: '/qsrduo2.png', alt: 'QSR Duo POS System' },
     { src: '/retailmini3.png', alt: 'Retail Mini POS' },
-  ], []);
+  ];
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -365,12 +366,12 @@ function HomePage() {
     return () => clearInterval(timer);
   }, [images]);
 
-  const scrollWizardToTop = useCallback(() => {
+  const scrollWizardToTop = () => {
     const wizardSection = document.getElementById('product-selector');
     wizardSection?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
+  };
 
-  const handleNextStep = useCallback(() => {
+  const handleNextStep = () => {
     if (wizardStep === 1 && !selectorData.businessType) {
       alert('Please select a business type.');
       return;
@@ -414,17 +415,17 @@ function HomePage() {
       setTimeout(scrollWizardToTop, 50);
       return newStep;
     });
-  }, [wizardStep, selectorData, scrollWizardToTop]);
+  };
 
-  const handlePreviousStep = useCallback(() => {
+  const handlePreviousStep = () => {
     setWizardStep((prev) => {
       const newStep = Math.max(prev - 1, 1);
       setTimeout(scrollWizardToTop, 50);
       return newStep;
     });
-  }, [scrollWizardToTop]);
+  };
 
-  const handleSelectorInputChange = useCallback((
+  const handleSelectorInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     deviceType?: keyof ProductSelectorData
   ) => {
@@ -449,16 +450,16 @@ function HomePage() {
       return;
     }
     setSelectorData((prevData) => ({ ...prevData, [name]: value }));
-  }, []);
+  };
 
-  const handleQuantityChange = useCallback((deviceType: keyof ProductSelectorData, increment: number) => {
+  const handleQuantityChange = (deviceType: keyof ProductSelectorData, increment: number) => {
     setSelectorData((prevData) => {
       const newQty = Math.max(0, (prevData[deviceType] as number) + increment);
       return { ...prevData, [deviceType]: newQty };
     });
-  }, []);
+  };
 
-  const handleSelectorSubmit = useCallback(async () => {
+  const handleSelectorSubmit = async () => {
     setIsLoading(true);
     setSelectorSubmitStatus('idle');
     setSelectorSubmitMessage('');
@@ -524,9 +525,9 @@ function HomePage() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectorData, scrollWizardToTop]);
+  };
 
-  const renderStepContent = useCallback(() => {
+  const renderStepContent = () => {
     switch (wizardStep) {
       case 1:
         return (
@@ -535,27 +536,23 @@ function HomePage() {
             <p className="mb-6 text-gray-600 dark:text-gray-400">So we can tailor the right POS solution for you.</p>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
               <motion.button
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.07 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() =>
-                  setSelectorData((prev) => ({
-                    ...prev,
-                    businessType: 'retail',
-                    softwareNeeds: [],
-                    onlineOrdering: false
-                  }))
-                }
-                className={`p-4 border rounded-lg transition-colors ${
-                  selectorData.businessType === 'retail'
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-700'
-                    : 'border-gray-200 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800'
+                onClick={() => setSelectorData((prev) => ({
+                  ...prev,
+                  businessType: 'retail',
+                  softwareNeeds: [],
+                  onlineOrdering: false
+                }))}
+                className={`p-4 border transition-colors rounded-3xl ${selectorData.businessType === 'retail'
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-700'
+                  : 'border-gray-200 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800'
                 }`}
-                aria-label="Retail business type"
               >
                 <div className="flex justify-center mb-4">
                   <Image
                     src="/retail.jpg"
-                    alt="Retail category"
+                    alt="Retail"
                     width={200}
                     height={200}
                     style={{ objectFit: 'cover' }}
@@ -565,27 +562,23 @@ function HomePage() {
                 <h4 className="text-lg font-semibold text-center">Retail</h4>
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.07 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() =>
-                  setSelectorData((prev) => ({
-                    ...prev,
-                    businessType: 'restaurant',
-                    softwareNeeds: ['full-service'],
-                    onlineOrdering: false
-                  }))
-                }
-                className={`p-4 border rounded-lg transition-colors ${
-                  selectorData.businessType === 'restaurant'
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-700'
-                    : 'border-gray-200 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800'
+                onClick={() => setSelectorData((prev) => ({
+                  ...prev,
+                  businessType: 'restaurant',
+                  softwareNeeds: ['full-service'],
+                  onlineOrdering: false
+                }))}
+                className={`p-4 border transition-colors rounded-3xl ${selectorData.businessType === 'restaurant'
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-700'
+                  : 'border-gray-200 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800'
                 }`}
-                aria-label="Restaurant business type"
               >
                 <div className="flex justify-center mb-4">
                   <Image
                     src="/restaurant.jpg"
-                    alt="Restaurant category"
+                    alt="Restaurant"
                     width={200}
                     height={200}
                     style={{ objectFit: 'cover' }}
@@ -595,27 +588,23 @@ function HomePage() {
                 <h4 className="text-lg font-semibold text-center">Restaurant</h4>
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.07 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() =>
-                  setSelectorData((prev) => ({
-                    ...prev,
-                    businessType: 'services',
-                    softwareNeeds: [],
-                    onlineOrdering: false
-                  }))
-                }
-                className={`p-4 border rounded-lg transition-colors ${
-                  selectorData.businessType === 'services'
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-700'
-                    : 'border-gray-200 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800'
+                onClick={() => setSelectorData((prev) => ({
+                  ...prev,
+                  businessType: 'services',
+                  softwareNeeds: [],
+                  onlineOrdering: false,
+                }))}
+                className={`p-4 border transition-colors rounded-3xl ${selectorData.businessType === 'services'
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-700'
+                  : 'border-gray-200 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800'
                 }`}
-                aria-label="Services business type"
               >
                 <div className="flex justify-center mb-4">
                   <Image
                     src="/services.jpg"
-                    alt="Services category"
+                    alt="Services"
                     width={200}
                     height={200}
                     style={{ objectFit: 'cover' }}
@@ -625,27 +614,23 @@ function HomePage() {
                 <h4 className="text-lg font-semibold text-center">Services</h4>
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.07 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() =>
-                  setSelectorData((prev) => ({
-                    ...prev,
-                    businessType: 'other',
-                    softwareNeeds: [],
-                    onlineOrdering: false
-                  }))
-                }
-                className={`p-4 border rounded-lg transition-colors ${
-                  selectorData.businessType === 'other'
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-700'
-                    : 'border-gray-200 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800'
+                onClick={() => setSelectorData((prev) => ({
+                  ...prev,
+                  businessType: 'other',
+                  softwareNeeds: [],
+                  onlineOrdering: false
+                }))}
+                className={`p-4 border transition-colors rounded-3xl ${selectorData.businessType === 'other'
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-700'
+                  : 'border-gray-200 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800'
                 }`}
-                aria-label="Other business type"
               >
                 <div className="flex justify-center mb-4">
                   <Image
                     src="/other.jpg"
-                    alt="Other category"
+                    alt="Other"
                     width={200}
                     height={200}
                     style={{ objectFit: 'cover' }}
@@ -667,10 +652,9 @@ function HomePage() {
               </p>
               <div className="space-y-4">
                 <motion.div
-                  className={`flex items-center p-3 border rounded-lg cursor-pointer mb-2 ${
-                    selectorData.softwareNeeds.includes('full-service')
-                      ? 'bg-blue-50 border-blue-500 dark:bg-blue-900 dark:border-blue-700'
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-700'
+                  className={`flex items-center p-3 border rounded-3xl cursor-pointer mb-2 ${selectorData.softwareNeeds.includes('full-service')
+                    ? 'bg-blue-50 border-blue-500 dark:bg-blue-900 dark:border-blue-700'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-700'
                   }`}
                   onClick={() => {
                     const updatedNeeds = selectorData.softwareNeeds.includes('full-service')
@@ -684,15 +668,13 @@ function HomePage() {
                     className="mr-3"
                     checked={selectorData.softwareNeeds.includes('full-service')}
                     onChange={() => null}
-                    aria-label="Full service restaurant option"
                   />
                   <label className="cursor-pointer">Full-Service Dining</label>
                 </motion.div>
                 <motion.div
-                  className={`flex items-center p-3 border rounded-lg cursor-pointer ${
-                    selectorData.softwareNeeds.includes('quick-service')
-                      ? 'bg-blue-50 border-blue-500 dark:bg-blue-900 dark:border-blue-700'
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-700'
+                  className={`flex items-center p-3 border rounded-3xl cursor-pointer ${selectorData.softwareNeeds.includes('quick-service')
+                    ? 'bg-blue-50 border-blue-500 dark:bg-blue-900 dark:border-blue-700'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-700'
                   }`}
                   onClick={() => {
                     const updatedNeeds = selectorData.softwareNeeds.includes('quick-service')
@@ -706,7 +688,6 @@ function HomePage() {
                     className="mr-3"
                     checked={selectorData.softwareNeeds.includes('quick-service')}
                     onChange={() => null}
-                    aria-label="Quick service restaurant option"
                   />
                   <label className="cursor-pointer">Quick-Service</label>
                 </motion.div>
@@ -721,21 +702,17 @@ function HomePage() {
               Select if you need online ordering for your business.
             </p>
             <motion.div
-              className={`flex items-center p-3 border rounded-lg cursor-pointer ${
-                selectorData.onlineOrdering
-                  ? 'bg-blue-50 border-blue-500 dark:bg-blue-900 dark:border-blue-700'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-700'
+              className={`flex items-center p-3 border rounded-3xl cursor-pointer ${selectorData.onlineOrdering
+                ? 'bg-blue-50 border-blue-500 dark:bg-blue-900 dark:border-blue-700'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-700'
               }`}
-              onClick={() =>
-                setSelectorData({ ...selectorData, onlineOrdering: !selectorData.onlineOrdering })
-              }
+              onClick={() => setSelectorData({ ...selectorData, onlineOrdering: !selectorData.onlineOrdering })}
             >
               <input
                 type="checkbox"
                 className="mr-3"
                 checked={selectorData.onlineOrdering}
                 onChange={() => null}
-                aria-label="Online ordering checkbox"
               />
               <label className="cursor-pointer">Yes, I need online ordering</label>
             </motion.div>
@@ -746,13 +723,13 @@ function HomePage() {
           <div className="text-gray-900 dark:text-white">
             <h3 className="mb-4 text-xl font-semibold">Select Your POS & Hardware</h3>
             <p className="mb-6 text-gray-600 dark:text-gray-400">
-              How many of each device do you need?
+              How many of each device do you need? (Use plus/minus or type the quantity)
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {posProducts.map((product) => (
                 <div
                   key={product.identifier}
-                  className="p-4 bg-white dark:bg-gray-700 border rounded-lg flex flex-col items-center"
+                  className="p-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-2xl flex flex-col items-center"
                 >
                   {product.image && (
                     <Image
@@ -796,11 +773,7 @@ function HomePage() {
                         break;
                     }
                     if (!deviceType) {
-                      return (
-                        <div className="text-sm text-gray-500">
-                          No quantity needed for this item
-                        </div>
-                      );
+                      return <div className="text-sm text-gray-500">No quantity needed for this item</div>;
                     }
                     const qtyVal = selectorData[deviceType] as number;
                     return (
@@ -808,23 +781,20 @@ function HomePage() {
                         <motion.button
                           whileTap={{ scale: 0.9 }}
                           onClick={() => handleQuantityChange(deviceType!, -1)}
-                          className="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded-full"
-                          aria-label={`Decrease quantity of ${product.name}`}
+                          className="px-3 py-2 bg-gray-200 dark:bg-gray-600 rounded-l-full"
                         >
                           -
                         </motion.button>
                         <input
                           type="number"
-                          className="w-16 mx-2 text-center border dark:border-gray-600 dark:bg-gray-800 rounded"
+                          className="w-16 mx-0 text-center border dark:border-gray-600 dark:bg-gray-800"
                           value={qtyVal}
                           onChange={(e) => handleSelectorInputChange(e, deviceType!)}
-                          aria-label={`Quantity of ${product.name}`}
                         />
                         <motion.button
                           whileTap={{ scale: 0.9 }}
                           onClick={() => handleQuantityChange(deviceType!, 1)}
-                          className="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded-full"
-                          aria-label={`Increase quantity of ${product.name}`}
+                          className="px-3 py-2 bg-gray-200 dark:bg-gray-600 rounded-r-full"
                         >
                           +
                         </motion.button>
@@ -841,7 +811,7 @@ function HomePage() {
           <div className="text-gray-900 dark:text-white">
             <h3 className="mb-4 text-xl font-semibold">Almost done!</h3>
             <p className="mb-6 text-gray-600 dark:text-gray-400">
-              Enter your contact details to receive your personalized quote.
+              Enter your contact details and business specifics to receive your personalized quote.
             </p>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -854,7 +824,7 @@ function HomePage() {
                   name="firstName"
                   value={selectorData.firstName}
                   onChange={handleSelectorInputChange}
-                  className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                  className="w-full px-4 py-2 border rounded-full dark:bg-gray-800 dark:border-gray-700"
                   required
                 />
               </div>
@@ -868,7 +838,7 @@ function HomePage() {
                   name="lastName"
                   value={selectorData.lastName}
                   onChange={handleSelectorInputChange}
-                  className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                  className="w-full px-4 py-2 border rounded-full dark:bg-gray-800 dark:border-gray-700"
                   required
                 />
               </div>
@@ -883,7 +853,7 @@ function HomePage() {
                 name="email"
                 value={selectorData.email}
                 onChange={handleSelectorInputChange}
-                className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                className="w-full px-4 py-2 border rounded-full dark:bg-gray-800 dark:border-gray-700"
                 required
               />
             </div>
@@ -897,7 +867,7 @@ function HomePage() {
                 name="phone"
                 value={selectorData.phone}
                 onChange={handleSelectorInputChange}
-                className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                className="w-full px-4 py-2 border rounded-full dark:bg-gray-800 dark:border-gray-700"
                 required
               />
             </div>
@@ -915,10 +885,9 @@ function HomePage() {
                         numLocationsCustom: '',
                       }))
                     }
-                    className={`px-3 py-2 rounded ${
-                      selectorData.numLocationsChoice === opt
-                        ? 'bg-blue-600 text-white dark:bg-blue-500'
-                        : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200'
+                    className={`px-3 py-2 rounded-full text-sm ${selectorData.numLocationsChoice === opt
+                      ? 'bg-blue-600 text-white dark:bg-blue-500'
+                      : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200'
                     }`}
                   >
                     {opt}
@@ -932,10 +901,9 @@ function HomePage() {
                       numLocationsChoice: 'plus',
                     }))
                   }
-                  className={`px-3 py-2 rounded ${
-                    selectorData.numLocationsChoice === 'plus'
-                      ? 'bg-blue-600 text-white dark:bg-blue-500'
-                      : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200'
+                  className={`px-3 py-2 rounded-full text-sm ${selectorData.numLocationsChoice === 'plus'
+                    ? 'bg-blue-600 text-white dark:bg-blue-500'
+                    : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200'
                   }`}
                 >
                   +
@@ -943,16 +911,14 @@ function HomePage() {
               </div>
               {selectorData.numLocationsChoice === 'plus' && (
                 <div className="mt-3">
-                  <label className="block mb-1 text-sm text-gray-600 dark:text-gray-400">
-                    Enter custom number:
-                  </label>
+                  <label className="block mb-1 text-sm text-gray-600 dark:text-gray-400">Enter custom number:</label>
                   <input
                     type="number"
                     min="1"
                     name="numLocationsCustom"
                     value={selectorData.numLocationsCustom}
                     onChange={handleSelectorInputChange}
-                    className="w-32 px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                    className="w-32 px-4 py-2 border rounded-full dark:bg-gray-800 dark:border-gray-700"
                   />
                 </div>
               )}
@@ -965,10 +931,9 @@ function HomePage() {
                     key={range}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectorData((prev) => ({ ...prev, monthlyVolume: range }))}
-                    className={`px-4 py-2 rounded border ${
-                      selectorData.monthlyVolume === range
-                        ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500'
-                        : 'text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700'
+                    className={`px-4 py-2 rounded-full border text-sm ${selectorData.monthlyVolume === range
+                      ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500'
+                      : 'text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700'
                     }`}
                   >
                     {range === '0-50K' && '$0-50K'}
@@ -1060,9 +1025,8 @@ function HomePage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleSelectorSubmit}
-                className="px-8 py-3 text-white transition-colors bg-blue-600 dark:bg-blue-400 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-300"
+                className="px-8 py-3 text-white transition-colors bg-blue-600 dark:bg-blue-400 rounded-full hover:bg-blue-700 dark:hover:bg-blue-300"
                 disabled={isLoading}
-                aria-label="Submit form"
               >
                 {isLoading ? 'Submitting...' : 'Send Message'}
               </motion.button>
@@ -1072,16 +1036,9 @@ function HomePage() {
       default:
         return null;
     }
-  }, [
-    wizardStep,
-    selectorData,
-    selectorSubmitStatus,
-    selectorSubmitMessage,
-    isLoading,
-    handleSelectorSubmit
-  ]);
+  };
 
-  const renderProgressIndicator = useCallback(() => {
+  const renderProgressIndicator = () => {
     const totalSteps = 5;
     return (
       <div className="flex items-center justify-center my-6">
@@ -1090,10 +1047,9 @@ function HomePage() {
           return (
             <React.Fragment key={index}>
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                  wizardStep > stepNum
-                    ? 'bg-blue-600 text-white dark:bg-blue-700'
-                    : wizardStep === stepNum
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${wizardStep > stepNum
+                  ? 'bg-blue-600 text-white dark:bg-blue-700'
+                  : wizardStep === stepNum
                     ? 'bg-blue-300 text-white dark:bg-blue-500'
                     : 'bg-gray-200 text-gray-500 dark:bg-gray-600 dark:text-gray-400'
                 }`}
@@ -1108,101 +1064,96 @@ function HomePage() {
               </div>
               {stepNum < totalSteps && (
                 <div
-                  className={`w-16 h-1 transition-colors ${
-                    wizardStep > stepNum ? 'bg-blue-600 dark:bg-blue-700' : 'bg-gray-200 dark:bg-gray-600'
+                  className={`w-16 h-1 transition-colors ${wizardStep > stepNum ? 'bg-blue-600 dark:bg-blue-700' : 'bg-gray-200 dark:bg-gray-600'
                   }`}
-                />
+                ></div>
               )}
             </React.Fragment>
           );
         })}
       </div>
     );
-  }, [wizardStep]);
+  };
 
-  const handleContactInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-      const { name, value } = e.target;
-      setContactFormData((prev) => ({ ...prev, [name]: value }));
-    },
-    []
-  );
+  const handleContactInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setContactFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const handleContactSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      setIsLoading(true);
-      setContactSubmitStatus('idle');
-      setContactSubmitMessage('');
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setContactSubmitStatus('idle');
+    setContactSubmitMessage('');
 
-      const requiredFields = ['firstName', 'lastName', 'email', 'phone'];
-      const missingFields = requiredFields.filter((field) => !contactFormData[field as keyof typeof contactFormData]);
-      if (missingFields.length > 0) {
-        setContactSubmitStatus('error');
-        setContactSubmitMessage('Please fill in all required fields: ' + missingFields.join(', '));
-        setIsLoading(false);
-        return;
-      }
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(contactFormData.email)) {
-        setContactSubmitStatus('error');
-        setContactSubmitMessage('Please enter a valid email address.');
-        setIsLoading(false);
-        return;
-      }
+    const requiredFields = ['firstName', 'lastName', 'email', 'phone'];
+    const missingFields = requiredFields.filter((field) => !contactFormData[field as keyof typeof contactFormData]);
+    if (missingFields.length > 0) {
+      setContactSubmitStatus('error');
+      setContactSubmitMessage('Please fill in all required fields: ' + missingFields.join(', '));
+      setIsLoading(false);
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(contactFormData.email)) {
+      setContactSubmitStatus('error');
+      setContactSubmitMessage('Please enter a valid email address.');
+      setIsLoading(false);
+      return;
+    }
 
-      let finalLocations =
-        contactFormData.numLocationsChoice === 'plus'
-          ? contactFormData.numLocationsCustom
-          : contactFormData.numLocationsChoice;
+    let finalLocations =
+      contactFormData.numLocationsChoice === 'plus'
+        ? contactFormData.numLocationsCustom
+        : contactFormData.numLocationsChoice;
 
-      try {
-        const params = new URLSearchParams({
-          firstName: contactFormData.firstName,
-          lastName: contactFormData.lastName,
-          email: contactFormData.email,
-          phone: contactFormData.phone,
-          callDate: contactFormData.callDate,
-          preferredTime: contactFormData.preferredTime,
-          businessType: contactFormData.businessType,
-          numLocations: finalLocations || '',
-          monthlyVolume: contactFormData.monthlyVolume,
-          submitTime: new Date().toISOString(),
-          formType: 'contactPage',
+    try {
+      const params = new URLSearchParams({
+        firstName: contactFormData.firstName,
+        lastName: contactFormData.lastName,
+        email: contactFormData.email,
+        phone: contactFormData.phone,
+        callDate: contactFormData.callDate,
+        preferredTime: contactFormData.preferredTime,
+        businessType: contactFormData.businessType,
+        numLocations: finalLocations || '',
+        monthlyVolume: contactFormData.monthlyVolume,
+        submitTime: new Date().toISOString(),
+        formType: 'contactPage',
+      });
+      const url = `https://hooks.zapier.com/hooks/catch/17465641/2awchwj/?${params.toString()}`;
+      const response = await fetch(url, { method: 'GET' });
+      if (response.ok) {
+        setContactSubmitStatus('success');
+        setContactSubmitMessage("Thank you! We'll be in touch shortly to assist with your needs.");
+        setContactFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          callDate: '',
+          preferredTime: '',
+          businessType: '',
+          numLocationsChoice: '1',
+          numLocationsCustom: '',
+          monthlyVolume: '0-50K'
         });
-        const url = `https://hooks.zapier.com/hooks/catch/17465641/2awchwj/?${params.toString()}`;
-        const response = await fetch(url, { method: 'GET' });
-        if (response.ok) {
-          setContactSubmitStatus('success');
-          setContactSubmitMessage("Thank you! We'll be in touch shortly to assist with your needs.");
-          setContactFormData({
-            firstName: '',
-            lastName: '',
-            email: '',
-            phone: '',
-            callDate: '',
-            preferredTime: '',
-            businessType: '',
-            numLocationsChoice: '1',
-            numLocationsCustom: '',
-            monthlyVolume: '0-50K'
-          });
-        } else {
-          const errorBody = await response.text();
-          console.error(`Failed: ${response.status} ${errorBody}`);
-          setContactSubmitStatus('error');
-          setContactSubmitMessage(`Error sending message. Please try again. Status: ${response.status}`);
-        }
-      } catch (error) {
-        console.error('Submission error:', error);
+      } else {
+        const errorBody = await response.text();
+        console.error(`Failed: ${response.status} ${errorBody}`);
         setContactSubmitStatus('error');
-        setContactSubmitMessage('Error sending message. Please try again.');
-      } finally {
-        setIsLoading(false);
+        setContactSubmitMessage(`Error sending message. Please try again or contact us. Status: ${response.status}`);
       }
-    },
-    [contactFormData]
-  );
+    } catch (error) {
+      console.error('Submission error:', error);
+      setContactSubmitStatus('error');
+      setContactSubmitMessage('Error sending message. Please try again or contact us.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <ThemeProvider>
@@ -1212,16 +1163,16 @@ function HomePage() {
             <title>StarAccept Business Solutions</title>
             <meta
               name="description"
-              content="Affordable, full-service credit card processing with modern POS features. Transform your business."
+              content="Affordable, full-service credit card processing with proven, cutting-edge technology. Transform your business."
             />
             <link rel="icon" href="/favicon.ico" />
             <script async src="https://www.googletagmanager.com/gtag/js?id=G-2D18CMVZEF"></script>
             <script
               dangerouslySetInnerHTML={{
                 __html: `window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
-                  gtag('js', new Date());
-                  gtag('config', 'G-2D18CMVZEF');`,
+                      function gtag(){dataLayer.push(arguments);}
+                      gtag('js', new Date());
+                      gtag('config', 'G-2D18CMVZEF');`,
               }}
             />
           </Head>
@@ -1232,10 +1183,11 @@ function HomePage() {
             initial={{ y: -100 }}
             animate={{ y: 0 }}
             transition={{ duration: 0.5 }}
+            style={{ fontFamily: 'Inter, sans-serif' }}
           >
-            <div className="max-w-6xl px-4 mx-auto sm:px-6 lg:px-8">
-              <div className="flex justify-between h-16">
-                <div className="flex items-center">
+            <div className="max-w-6xl px-2 mx-auto sm:px-4 lg:px-6">
+              <div className="flex justify-between items-center h-16">
+                <div className="flex items-center space-x-3">
                   <motion.div
                     className="flex items-center"
                     initial={{ opacity: 0 }}
@@ -1244,57 +1196,88 @@ function HomePage() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Image
-                      src="/staracceptlogo.png"
-                      alt="StarAccept Logo"
-                      width={187.5}
-                      height={50}
-                      className="transition-all duration-300 hover:brightness-110 dark:brightness-125"
-                      priority
-                    />
+                    <Link href="/">
+                      <Image
+                        src="/staracceptlogo.png"
+                        alt="staraccept"
+                        width={187.5}
+                        height={50}
+                        className="transition-all duration-300 hover:brightness-110 dark:brightness-150"
+                        priority
+                      />
+                    </Link>
                   </motion.div>
+                  <div className="hidden md:flex items-center text-sm space-x-4">
+                    <motion.a
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
+                      href="/restaurants"
+                      aria-label="Go to Restaurants page"
+                    >
+                      Restaurants
+                    </motion.a>
+                    <motion.a
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
+                      href="/retail"
+                      aria-label="Go to Retail page"
+                    >
+                      Retail
+                    </motion.a>
+                    <motion.a
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
+                      href="/services"
+                      aria-label="Go to Services page"
+                    >
+                      Services
+                    </motion.a>
+                    <motion.a
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
+                      href="/online-ordering"
+                      aria-label="Go to Online Ordering page"
+                    >
+                      Online Ordering
+                    </motion.a>
+                    <motion.a
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
+                      href="/working-capital-funding"
+                      aria-label="Go to Working Capital Funding page"
+                    >
+                      Working Capital
+                    </motion.a>
+                    <motion.a
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
+                      href="#contact"
+                      aria-label="Go to Contact section"
+                    >
+                      Contact
+                    </motion.a>
+                  </div>
                 </div>
-                <div className="flex items-center md:hidden">
-                  <button
-                    onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none"
-                    aria-label="Toggle menu"
-                  >
-                    {isMenuOpen ? (
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    ) : (
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-                <div className="items-center hidden space-x-8 md:flex">
+                <div className="flex items-center">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+                    className="hidden md:inline-block text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 mr-4"
                     onClick={() => {
                       document.getElementById('product-selector')?.scrollIntoView({ behavior: 'smooth' });
                     }}
                   >
                     POS Wizard
                   </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-                    onClick={() => {
-                      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                  >
-                    Contact
-                  </motion.button>
                   <button
                     onClick={toggleDarkMode}
-                    className="p-2 text-gray-600 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none"
+                    className="hidden md:inline-block p-2 text-gray-600 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none"
                     aria-label="Toggle Dark Mode"
                   >
                     {darkMode ? (
@@ -1307,53 +1290,94 @@ function HomePage() {
                       </svg>
                     )}
                   </button>
+                  <div className="md:hidden">
+                    <button
+                      onClick={() => setIsMenuOpen(!isMenuOpen)}
+                      className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none"
+                      aria-label="Toggle mobile menu"
+                    >
+                      {isMenuOpen ? (
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      ) : (
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
+            {isMenuOpen && (
+              <motion.div
+                className="md:hidden bg-white dark:bg-gray-800 px-4 pt-2 pb-3 space-y-1"
+                initial={{ height: 0 }}
+                animate={{ height: 'auto' }}
+                transition={{ duration: 0.3 }}
+              >
+                <Link
+                  className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  href="/restaurants"
+                >
+                  Restaurants
+                </Link>
+                <Link
+                  className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  href="/retail"
+                >
+                  Retail
+                </Link>
+                <Link
+                  className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  href="/services"
+                >
+                  Services
+                </Link>
+                <Link
+                  className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  href="/online-ordering"
+                >
+                  Online Ordering
+                </Link>
+                <Link
+                  className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  href="/working-capital-funding"
+                >
+                  Working Capital Funding
+                </Link>
+                <button
+                  className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    document.getElementById('product-selector')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  POS Wizard
+                </button>
+                <Link
+                  className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  href="#contact"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Contact
+                </Link>
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    toggleDarkMode();
+                  }}
+                  className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Toggle Dark Mode
+                </button>
+              </motion.div>
+            )}
           </motion.nav>
 
-          {/* Mobile Menu */}
-          {/* This is just a placeholder if you need the mobile menu to open/close */}
-          {/* If it’s not needed, remove it or set isMenuOpen to false */}
-          {isMenuOpen && (
-            <motion.div
-              className="md:hidden bg-white dark:bg-gray-800 px-4 pt-2 pb-3 space-y-1"
-              initial={{ height: 0 }}
-              animate={{ height: 'auto' }}
-              aria-label="Mobile menu"
-            >
-              <button
-                className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  document.getElementById('product-selector')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                POS Wizard
-              </button>
-              <button
-                className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                Contact
-              </button>
-              <button
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  toggleDarkMode();
-                }}
-                className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                Toggle Dark Mode
-              </button>
-            </motion.div>
-          )}
-
           {/* HERO */}
-          <div className="relative h-[70vh] md:h-[80vh] lg:h-[90vh] w-full max-w-[1920px] mx-auto pt-16 flex items-center justify-center">
+          <div className="relative h-[75vh] md:h-[80vh] lg:h-[90vh] w-full max-w-[1920px] mx-auto pt-24 flex items-center justify-center">
             <motion.div
               className="absolute inset-0 overflow-hidden"
               initial={{ opacity: 0 }}
@@ -1376,9 +1400,8 @@ function HomePage() {
               {images.map((_, index) => (
                 <button
                   key={index}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    currentImage === index ? 'bg-white w-4' : 'bg-white/50'
-                  }`}
+                  className={`w-2 h-2 rounded-full transition-all ${currentImage === index ? 'bg-white w-4' : 'bg-white/50'
+                    }`}
                   onClick={() => setCurrentImage(index)}
                   aria-label={`Slide ${index + 1}`}
                 />
@@ -1386,11 +1409,7 @@ function HomePage() {
             </div>
             <div className="absolute inset-0 flex items-center max-w-[1920px] mx-auto">
               <div className="relative z-20 max-w-6xl px-4 mx-auto mt-16">
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="max-w-3xl text-white"
-                >
+                <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl text-white">
                   <motion.h1
                     className="mb-6 text-4xl font-extrabold tracking-tight text-white md:text-5xl lg:text-6xl"
                     initial={{ opacity: 0, y: 20 }}
@@ -1432,7 +1451,6 @@ function HomePage() {
                       Talk to an Expert
                     </motion.button>
                   </motion.div>
-
                   <AiSearchOverlay />
                 </motion.div>
               </div>
@@ -1475,6 +1493,65 @@ function HomePage() {
             </div>
           </section>
 
+          {/* Flexible Solutions Section */}
+          <section className="py-16 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
+            <div className="max-w-6xl mx-auto px-4">
+              <div className="mb-12 text-center">
+                <h2 className="text-3xl font-bold">Flexible Solutions for Every Business</h2>
+                <p className="mt-2 text-gray-600 dark:text-gray-300">
+                  Powerful features and hardware options for wherever you are in your journey
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center mb-4">
+                    <FaCreditCard className="text-blue-600 dark:text-blue-300 text-3xl" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Payments</h3>
+                  <p className="mt-2 text-sm">
+                    Accept Apple Pay, Google Pay, Android Pay, Samsung Pay, Tap To Pay, and more.
+                  </p>
+                </div>
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center mb-4">
+                    <FaCog className="text-blue-600 dark:text-blue-300 text-3xl" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Software</h3>
+                  <p className="mt-2 text-sm">
+                    Manage tables, customize orders, control menus, handle online ordering, and more.
+                  </p>
+                </div>
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center mb-4">
+                    <FaTools className="text-blue-600 dark:text-blue-300 text-3xl" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Hardware</h3>
+                  <p className="mt-2 text-sm">
+                    Countertop stations, handheld devices, and KDS options for restaurants of any size.
+                  </p>
+                </div>
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center mb-4">
+                    <FaLaptop className="text-blue-600 dark:text-blue-300 text-3xl" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Applications</h3>
+                  <p className="mt-2 text-sm">
+                    Streamline online orders, reservations, loyalty programs, and more.
+                  </p>
+                </div>
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center mb-4">
+                    <FaRegLightbulb className="text-blue-600 dark:text-blue-300 text-3xl" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Tailored Solutions</h3>
+                  <p className="mt-2 text-sm">
+                    From ideas on a napkin to your 25th location, we’ll find the perfect fit for you.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* Wizard Section */}
           <section className="py-20 bg-gray-50 dark:bg-gray-800" id="product-selector">
             <div className="max-w-6xl px-4 mx-auto">
@@ -1505,14 +1582,12 @@ function HomePage() {
                       type="button"
                       onClick={handlePreviousStep}
                       disabled={wizardStep === 1}
-                      className={`px-6 py-2 text-gray-600 dark:text-gray-300 rounded-lg transition-colors ${
-                        wizardStep === 1
-                          ? 'opacity-50 cursor-not-allowed bg-gray-200 dark:bg-gray-600'
-                          : 'hover:bg-gray-100 dark:hover:bg-gray-600 bg-gray-100 dark:bg-gray-600'
+                      className={`px-6 py-2 text-gray-600 dark:text-gray-300 rounded-full transition-colors ${wizardStep === 1
+                        ? 'opacity-50 cursor-not-allowed bg-gray-200 dark:bg-gray-600'
+                        : 'hover:bg-gray-100 dark:hover:bg-gray-600 bg-gray-100 dark:bg-gray-600'
                       }`}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      aria-label="Previous step"
                     >
                       Previous
                     </motion.button>
@@ -1520,12 +1595,10 @@ function HomePage() {
                       type="button"
                       onClick={handleNextStep}
                       disabled={wizardStep === 5}
-                      className={`px-6 py-2 text-white bg-blue-600 dark:bg-blue-400 rounded-lg transition-colors ${
-                        wizardStep === 5 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700 dark:hover:bg-blue-300'
-                      }`}
+                      className={`px-6 py-2 text-white bg-blue-600 dark:bg-blue-400 rounded-full transition-colors ${wizardStep === 5 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700 dark:hover:bg-blue-300'
+                        }`}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      aria-label="Next step"
                     >
                       Next
                     </motion.button>
@@ -1550,7 +1623,7 @@ function HomePage() {
               </div>
               <div className="grid items-start gap-12 md:grid-cols-2">
                 <div className="p-8 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 shadow-sm rounded-xl">
-                  <form onSubmit={handleContactSubmit} className="space-y-6" aria-label="Contact form">
+                  <form onSubmit={handleContactSubmit} className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
                       <div>
                         <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
@@ -1561,9 +1634,8 @@ function HomePage() {
                           name="firstName"
                           value={contactFormData.firstName}
                           onChange={handleContactInputChange}
-                          className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white"
+                          className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-full bg-gray-50 dark:bg-gray-800 dark:text-white"
                           placeholder="John"
-                          required
                         />
                       </div>
                       <div>
@@ -1573,9 +1645,8 @@ function HomePage() {
                           name="lastName"
                           value={contactFormData.lastName}
                           onChange={handleContactInputChange}
-                          className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white"
+                          className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-full bg-gray-50 dark:bg-gray-800 dark:text-white"
                           placeholder="Doe"
-                          required
                         />
                       </div>
                     </div>
@@ -1586,9 +1657,8 @@ function HomePage() {
                         name="email"
                         value={contactFormData.email}
                         onChange={handleContactInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white"
+                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-full bg-gray-50 dark:bg-gray-800 dark:text-white"
                         placeholder="john@yourcompany.com"
-                        required
                       />
                     </div>
                     <div>
@@ -1598,9 +1668,8 @@ function HomePage() {
                         name="phone"
                         value={contactFormData.phone}
                         onChange={handleContactInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white"
+                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-full bg-gray-50 dark:bg-gray-800 dark:text-white"
                         placeholder="(555) 123-4567"
-                        required
                       />
                     </div>
                     <div className="grid gap-6 md:grid-cols-2">
@@ -1613,7 +1682,7 @@ function HomePage() {
                           name="callDate"
                           value={contactFormData.callDate}
                           onChange={handleContactInputChange}
-                          className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white"
+                          className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-full bg-gray-50 dark:bg-gray-800 dark:text-white"
                         />
                       </div>
                       <div>
@@ -1624,7 +1693,7 @@ function HomePage() {
                           name="preferredTime"
                           value={contactFormData.preferredTime}
                           onChange={handleContactInputChange}
-                          className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white"
+                          className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-full bg-gray-50 dark:bg-gray-800 dark:text-white"
                         >
                           <option value="">Select a time</option>
                           <option value="morning">Morning (9AM - 12PM)</option>
@@ -1650,10 +1719,9 @@ function HomePage() {
                                 numLocationsCustom: '',
                               }));
                             }}
-                            className={`px-3 py-2 rounded ${
-                              contactFormData.numLocationsChoice === opt
-                                ? 'bg-blue-600 text-white dark:bg-blue-500'
-                                : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200'
+                            className={`px-3 py-2 rounded-full text-sm ${contactFormData.numLocationsChoice === opt
+                              ? 'bg-blue-600 text-white dark:bg-blue-500'
+                              : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200'
                             }`}
                           >
                             {opt}
@@ -1665,10 +1733,9 @@ function HomePage() {
                             ev.preventDefault();
                             setContactFormData((prev) => ({ ...prev, numLocationsChoice: 'plus' }));
                           }}
-                          className={`px-3 py-2 rounded ${
-                            contactFormData.numLocationsChoice === 'plus'
-                              ? 'bg-blue-600 text-white dark:bg-blue-500'
-                              : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200'
+                          className={`px-3 py-2 rounded-full text-sm ${contactFormData.numLocationsChoice === 'plus'
+                            ? 'bg-blue-600 text-white dark:bg-blue-500'
+                            : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200'
                           }`}
                         >
                           +
@@ -1676,18 +1743,14 @@ function HomePage() {
                       </div>
                       {contactFormData.numLocationsChoice === 'plus' && (
                         <div className="mt-3">
-                          <label className="block mb-1 text-sm text-gray-600 dark:text-gray-400">
-                            Enter custom number:
-                          </label>
+                          <label className="block mb-1 text-sm text-gray-600 dark:text-gray-400">Enter custom number:</label>
                           <input
                             type="number"
                             min="1"
                             name="numLocationsCustom"
                             value={contactFormData.numLocationsCustom}
-                            onChange={(e) =>
-                              setContactFormData((prev) => ({ ...prev, numLocationsCustom: e.target.value }))
-                            }
-                            className="w-32 px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                            onChange={(e) => setContactFormData((prev) => ({ ...prev, numLocationsCustom: e.target.value }))}
+                            className="w-32 px-4 py-2 border rounded-full dark:bg-gray-800 dark:border-gray-700"
                           />
                         </div>
                       )}
@@ -1705,10 +1768,9 @@ function HomePage() {
                               ev.preventDefault();
                               setContactFormData((prev) => ({ ...prev, monthlyVolume: range }));
                             }}
-                            className={`px-4 py-2 rounded border ${
-                              contactFormData.monthlyVolume === range
-                                ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500'
-                                : 'text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700'
+                            className={`px-4 py-2 rounded-full border text-sm ${contactFormData.monthlyVolume === range
+                              ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500'
+                              : 'text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700'
                             }`}
                           >
                             {range === '0-50K' && '$0-50K'}
@@ -1722,21 +1784,19 @@ function HomePage() {
                     <div className="space-y-4">
                       <motion.button
                         type="submit"
-                        className="w-full py-4 px-6 rounded-lg font-semibold text-white bg-blue-600 dark:bg-blue-400 hover:bg-blue-700 dark:hover:bg-blue-300 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
+                        className="w-full py-4 px-6 rounded-full font-semibold text-white bg-blue-600 dark:bg-blue-400 hover:bg-blue-700 dark:hover:bg-blue-300 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         disabled={isLoading}
-                        aria-label="Send contact form"
                       >
                         {isLoading ? 'Sending...' : 'Send Message'}
                       </motion.button>
                     </div>
                     {contactSubmitStatus !== 'idle' && (
                       <div
-                        className={`p-4 rounded-lg mt-2 ${
-                          contactSubmitStatus === 'success'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200'
-                            : 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200'
+                        className={`p-4 rounded-lg mt-2 ${contactSubmitStatus === 'success'
+                          ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200'
+                          : 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200'
                         }`}
                       >
                         {contactSubmitMessage}
@@ -1835,31 +1895,14 @@ function HomePage() {
                   alt="staraccept"
                   width={187.5}
                   height={50}
-                  className="mx-auto transition-all duration-300 hover:brightness-110 dark:brightness-125"
+                  className="mx-auto transition-all duration-300 hover:brightness-110 dark:brightness-150"
                 />
               </div>
               <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
                 © {new Date().getFullYear()} Star Accept Business Solutions. All rights reserved.
               </p>
               <div className="flex flex-wrap items-center justify-center space-x-4">
-                <a
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-                >
-                  Terms of Service
-                </a>
-                <a
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-                >
-                  Privacy Policy
-                </a>
-                <a
-                  href="#"
-                  className="text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-                >
-                  Contact Us
-                </a>
+                {/* Additional quick links or social icons can go here */}
               </div>
             </div>
             <motion.div
@@ -1890,5 +1933,3 @@ function HomePage() {
     </ThemeProvider>
   );
 }
-
-export default memo(HomePage);
