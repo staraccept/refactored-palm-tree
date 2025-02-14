@@ -1,21 +1,21 @@
 // posProducts.ts
 
 export interface PosProduct {
-  name: string
-  identifier: string
-  bestFor: string[]
-  features: string[]
+  name: string;
+  identifier: string;
+  bestFor: string[];
+  features: string[];
   searchTerms: {
-    businessTypes: string[]
-    useCase: string[]
-    keywords: string[]
-  }
-  relatedProducts: string[]
-  primaryCategory: 'pos' | 'peripheral' | 'mobile' | 'selfservice'
-  size: 'compact' | 'standard' | 'large'
-  priority: number
-  cta: string
-  image?: string
+    businessTypes: string[];
+    useCase: string[];
+    keywords: string[];
+  };
+  relatedProducts: string[];
+  primaryCategory: 'pos' | 'peripheral' | 'mobile' | 'selfservice';
+  size: 'compact' | 'standard' | 'large';
+  priority: number;
+  cta: string;
+  image?: string;
 }
 
 // Expanded base features for broader applications
@@ -32,7 +32,7 @@ const baseFeatures = {
   system: [
     "Modular w/ Live Sync to Dashboard"
   ]
-}
+};
 
 const combineFeatures = (uniqueFeatures: string[] = []): string[] => {
   return [
@@ -41,12 +41,12 @@ const combineFeatures = (uniqueFeatures: string[] = []): string[] => {
     ...baseFeatures.hardware,
     ...baseFeatures.system,
     ...uniqueFeatures
-  ]
-}
+  ];
+};
 
 export const posProducts: PosProduct[] = [
   {
-    // Merged Clover Station Duo 2 with broader business types and use cases
+    // Clover Station Duo 2, merging old/new data
     name: "Clover Station Duo 2",
     identifier: "duo2",
     bestFor: [
@@ -62,39 +62,37 @@ export const posProducts: PosProduct[] = [
       "Table management & coursing"
     ]),
     searchTerms: {
+      // Merged business types & use cases from old/new
       businessTypes: [
-        // Union of old and new
-        "restaurant", 
-        "fine dining", 
-        "bar and grill", 
-        "catering", 
-        "bakery", 
-        "hotel restaurant", 
-        "autobody shop", 
-        "mechanic", 
+        "restaurant",
+        "fine dining",
+        "bar and grill",
+        "catering",
+        "bakery",
+        "hotel restaurant",
+        "autobody shop",
+        "mechanic",
         "tax accountant",
         "full service restaurant",
         "casual dining",
         "bistro"
       ],
       useCase: [
-        // Union of old and new
-        "table service", 
-        "full service", 
-        "multi station", 
-        "inventory management", 
-        "customer tracking", 
+        "table service",
+        "full service",
+        "multi station",
+        "inventory management",
+        "customer tracking",
         "high transaction volume",
         "high volume",
         "table management"
       ],
       keywords: [
-        // Union of old and new
-        "duo", 
-        "dual screen", 
-        "customer display", 
-        "table tracking", 
-        "staff management", 
+        "duo",
+        "dual screen",
+        "customer display",
+        "table tracking",
+        "staff management",
         "inventory",
         "restaurant pos"
       ]
@@ -155,7 +153,7 @@ export const posProducts: PosProduct[] = [
     image: "/bar-service-pos.jpg"
   },
   {
-    // Clover Mini from old data
+    // Clover Mini
     name: "Clover Mini",
     identifier: "mini3",
     bestFor: [
@@ -203,7 +201,7 @@ export const posProducts: PosProduct[] = [
     image: "/minipos.jpg"
   },
   {
-    // Merged Clover Flex 4 with broader business types and use cases
+    // Clover Flex 4, merging old/new data
     name: "Clover Flex 4",
     identifier: "flex4",
     bestFor: [
@@ -219,7 +217,6 @@ export const posProducts: PosProduct[] = [
     ]),
     searchTerms: {
       businessTypes: [
-        // Union of old and new
         "food truck",
         "mobile business",
         "event vendor",
@@ -234,7 +231,6 @@ export const posProducts: PosProduct[] = [
         "market vendor"
       ],
       useCase: [
-        // Union of old and new
         "mobile",
         "portable",
         "tableside",
@@ -245,7 +241,6 @@ export const posProducts: PosProduct[] = [
         "on the go"
       ],
       keywords: [
-        // Union of old and new
         "flex",
         "handheld",
         "portable",
@@ -263,7 +258,7 @@ export const posProducts: PosProduct[] = [
     image: "/handheldpos.jpg"
   },
   {
-    // Star Kitchen Printer from old data
+    // Star Kitchen Printer
     name: "Star Kitchen Printer",
     identifier: "starprinter",
     bestFor: [
@@ -310,7 +305,7 @@ export const posProducts: PosProduct[] = [
     image: "/kitchenprinter.jpg"
   },
   {
-    // Clover Kitchen Display from old data
+    // Clover Kitchen Display
     name: "Clover Kitchen Display",
     identifier: "kds",
     bestFor: [
@@ -357,7 +352,7 @@ export const posProducts: PosProduct[] = [
     image: "/kitchendisplay.jpg"
   },
   {
-    // Clover Kiosk from old data
+    // Clover Kiosk
     name: "Clover Kiosk",
     identifier: "kiosk",
     bestFor: [
@@ -400,52 +395,58 @@ export const posProducts: PosProduct[] = [
     primaryCategory: "selfservice",
     size: "large",
     priority: 95,
-    cta: "Learn More",
+    cta: "learn More",
     image: "/kiosk.jpg"
   }
-]
+];
 
-// Enhanced search function with broader business type handling (new weighting system)
+// ---- ENHANCED SEARCH FUNCTION ----
+// Preserves your new weighting logic (businessTypes = +4, useCase = +3, keywords = +2)
 export function findRelatedProducts(search: string, maxResults = 5): PosProduct[] {
-  const words = search.toLowerCase().split(/\s+/)
+  const words = search.toLowerCase().split(/\s+/);
   const scored = posProducts.map((product) => {
-    let score = 0
+    let score = 0;
     for (const w of words) {
+      // +4 for matching a businessType
       product.searchTerms.businessTypes.forEach((term) => {
         if (term.toLowerCase().includes(w)) {
-          score += 4 // Increased weight for business types
+          score += 4;
         }
-      })
+      });
+      // +3 for matching a useCase
       product.searchTerms.useCase.forEach((term) => {
         if (term.toLowerCase().includes(w)) {
-          score += 3 // Medium weight for use cases
+          score += 3;
         }
-      })
+      });
+      // +2 for matching a keyword
       product.searchTerms.keywords.forEach((term) => {
         if (term.toLowerCase().includes(w)) {
-          score += 2 // Lower weight for keywords
+          score += 2;
         }
-      })
+      });
     }
-    score *= product.priority / 50
-    return { product, score }
-  })
+    // Multiply final score by priority factor
+    score *= product.priority / 50;
+    return { product, score };
+  });
 
   return scored
     .filter((item) => item.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, maxResults)
-    .map((item) => item.product)
+    .map((item) => item.product);
 }
 
+// Complementary products is unchanged
 export function getComplementaryProducts(
   productId: string,
   maxResults: number = 3
 ): PosProduct[] {
-  const product = posProducts.find((p) => p.identifier === productId)
-  if (!product) return []
+  const product = posProducts.find((p) => p.identifier === productId);
+  if (!product) return [];
   return product.relatedProducts
     .map((id) => posProducts.find((p) => p.identifier === id))
     .filter((p): p is PosProduct => p !== undefined)
-    .slice(0, maxResults)
+    .slice(0, maxResults);
 }
