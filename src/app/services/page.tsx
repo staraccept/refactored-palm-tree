@@ -82,7 +82,7 @@ export default function Services() {
                     <motion.a
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      href=""
+                      href="/online-ordering"
                       className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
                     >
                       Online Ordering
