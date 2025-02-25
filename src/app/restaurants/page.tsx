@@ -113,10 +113,19 @@ export default function Restaurants() {
                       Working Capital
                     </motion.a>
                     <motion.a
+                                                              whileHover={{ scale: 1.05 }}
+                                                              whileTap={{ scale: 0.95 }}
+                                                              className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
+                                                              href="/poslineup"
+                                                              aria-label="View All POS Systems"
+                                                            >
+                                                              POS Systems
+                                                            </motion.a>
+                    <motion.a
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
-                      href="#contact"
+                      href="/#contact"
                     >
                       Contact
                     </motion.a>
@@ -204,8 +213,14 @@ export default function Restaurants() {
                   Working Capital Funding
                 </Link>
                 <a
+                  href="/poslineup"
                   className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  href="#contact"
+                >
+                  POS Systems
+                </a>
+                <a
+                  className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  href="/#contact"
                 >
                   Contact
                 </a>

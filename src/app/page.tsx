@@ -143,9 +143,13 @@ function AiSearchOverlay() {
       setRecommendations([]);
 
       try {
+        // Using the API endpoint with API token in the request headers
         const res = await fetch("https://cold-bush-ec7b.pauljash.workers.dev/", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            // Add authorization if needed in the future
+          },
           body: JSON.stringify({ query: userQuery }),
         });
         if (!res.ok) {
@@ -286,7 +290,7 @@ function AiSearchOverlay() {
                           <div>
                             <h5 className="font-medium">Features</h5>
                             <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-300 mt-1 space-y-1">
-                              {item.features.map((feat: string, fIdx: number) => (
+                              {item.features.slice(0, 4).map((feat: string, fIdx: number) => (
                                 <li key={fIdx}>{feat}</li>
                               ))}
                             </ul>
@@ -304,12 +308,12 @@ function AiSearchOverlay() {
                         )}
                       </div>
                       <div className="mt-4">
-                        <a
-                          href="/pos-placeholder"
-                          className="text-blue-600 dark:text-blue-400 hover:underline"
+                        <Link
+                          href="/poslineup"
+                          className="inline-block px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
                         >
-                          {item.cta || "View"}
-                        </a>
+                          {item.cta || "Learn More"}
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -804,6 +808,14 @@ export default function Home() {
                 </div>
               ))}
             </div>
+            <div className="mt-6 text-center">
+              <Link
+                href="/poslineup"
+                className="inline-block px-5 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
+              >
+                View All POS Systems
+              </Link>
+            </div>
           </div>
         );
       case 4:
@@ -1257,6 +1269,15 @@ export default function Home() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
+                      href="/poslineup"
+                      aria-label="View All POS Systems"
+                    >
+                      POS Systems
+                    </motion.a>
+                    <motion.a
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       href="#contact"
                       aria-label="Go to Contact section"
                     >
@@ -1346,6 +1367,12 @@ export default function Home() {
                   href="/working-capital-funding"
                 >
                   Working Capital Funding
+                </Link>
+                <Link
+                  className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  href="/poslineup"
+                >
+                  POS Systems
                 </Link>
                 <button
                   className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -1450,6 +1477,15 @@ export default function Home() {
                     >
                       Talk to an Expert
                     </motion.button>
+                    <Link href="/poslineup">
+                      <motion.button
+                        whileHover={{ scale: 1.05, boxShadow: '0px 4px 8px rgba(0,0,0,0.2)' }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-8 py-4 text-lg font-semibold text-white transition-colors bg-blue-600 rounded-full hover:bg-blue-700"
+                      >
+                        View All POS Systems
+                      </motion.button>
+                    </Link>
                   </motion.div>
                   <AiSearchOverlay />
                 </motion.div>
@@ -1545,7 +1581,7 @@ export default function Home() {
                   </div>
                   <h3 className="font-semibold text-lg">Tailored Solutions</h3>
                   <p className="mt-2 text-sm">
-                    From ideas on a napkin to your 25th location, we’ll find the perfect fit for you.
+                    From ideas on a napkin to your 25th location, we'll find the perfect fit for you.
                   </p>
                 </div>
               </div>
