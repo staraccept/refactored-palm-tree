@@ -24,7 +24,7 @@ import {
   FaBolt,
   FaMobileAlt
 } from 'react-icons/fa';
-import { ThemeProvider, useTheme } from './components/ThemeProvider';
+import { ThemeProvider, useTheme } from '../components/ThemeProvider';
 import { posProducts } from '@/lib/posProducts';
 import { findRelatedProducts as localFindProducts } from '@/lib/posProducts';
 import Link from 'next/link';
@@ -95,23 +95,16 @@ const initialContactFormData = {
 // Utility functions
 function matchRecommendedItem(recommendation: string): PosProduct {
   const recLower = recommendation.trim().toLowerCase();
-  const matched =
-    posProducts.find((p) => p.name.toLowerCase() === recLower) ||
-    posProducts.find(
-      (p) =>
-        p.name.toLowerCase().includes(recLower) ||
-        recLower.includes(p.name.toLowerCase())
-    );
+  const matched = posProducts.find((p) => p.name.toLowerCase() === recLower) ||
+    posProducts.find((p) => p.name.toLowerCase().includes(recLower) || recLower.includes(p.name.toLowerCase()));
 
-  return (
-    matched || {
-      name: recommendation,
-      image: null,
-      features: [],
-      bestFor: [],
-      cta: ''
-    }
-  );
+  return matched || {
+    name: recommendation,
+    image: null,
+    features: [],
+    bestFor: [],
+    cta: ''
+  };
 }
 
 const sampleQueries = [
@@ -120,10 +113,6 @@ const sampleQueries = [
   "I have two locations and need real-time inventory sync",
 ];
 
-/** 
- * AI Search Overlay 
- * -- Now placed BELOW the Wizard instead of in the Hero 
- */
 function AiSearchOverlay() {
   const [currentSampleIndex, setCurrentSampleIndex] = useState(0);
   const [typedText, setTypedText] = useState("");
@@ -155,7 +144,7 @@ function AiSearchOverlay() {
 
   // Optimized typing effect
   useEffect(() => {
-    if (userQuery) return; // Skip when user has typed something
+    if (userQuery) return; // Skip when user has entered something
 
     const text = sampleQueries[currentSampleIndex];
 
@@ -182,12 +171,10 @@ function AiSearchOverlay() {
 
   // Clean user query to improve matching
   const preprocessQuery = (query: string): string => {
+    // Remove common filler phrases
     return query
       .toLowerCase()
-      .replace(
-        /i am a|i'm a|i need a|looking for|we are a|we need|i want|we want|i have a|we have a/gi,
-        ''
-      )
+      .replace(/i am a|i'm a|i need a|looking for|we are a|we need|i want|we want|i have a|we have a/gi, '')
       .trim();
   };
 
@@ -205,7 +192,7 @@ function AiSearchOverlay() {
 
     const processedQuery = preprocessQuery(query);
 
-    setSearchState((prev) => ({
+    setSearchState(prev => ({
       ...prev,
       isLoading: true,
       errorMessage: "",
@@ -224,14 +211,10 @@ function AiSearchOverlay() {
       }
 
       const data = await res.json();
-      if (
-        !data.recommendations ||
-        !Array.isArray(data.recommendations) ||
-        data.recommendations.length === 0
-      ) {
+      if (!data.recommendations || !Array.isArray(data.recommendations) || data.recommendations.length === 0) {
         const fallbackProducts = localFindProducts(processedQuery, 3);
         if (fallbackProducts.length > 0) {
-          setSearchState((prev) => ({
+          setSearchState(prev => ({
             ...prev,
             isLoading: false,
             recommendations: fallbackProducts
@@ -239,14 +222,14 @@ function AiSearchOverlay() {
         } else {
           const genericFallback = localFindProducts('pos', 3);
           if (genericFallback.length > 0) {
-            setSearchState((prev) => ({
+            setSearchState(prev => ({
               ...prev,
               isLoading: false,
               recommendations: genericFallback,
               errorMessage: "No exact matches. Here are our most popular systems:"
             }));
           } else {
-            setSearchState((prev) => ({
+            setSearchState(prev => ({
               ...prev,
               isLoading: false,
               errorMessage: "No recommendations found for your query."
@@ -254,16 +237,9 @@ function AiSearchOverlay() {
           }
         }
       } else {
-        const matchedItems = data.recommendations.map((r: string) =>
-          matchRecommendedItem(r)
-        );
-        if (
-          matchedItems.every(
-            (item: { name: string; features: string[] }) =>
-              item.name && item.features.length > 0
-          )
-        ) {
-          setSearchState((prev) => ({
+        const matchedItems = data.recommendations.map((r: string) => matchRecommendedItem(r));
+        if (matchedItems.every((item: { name: string; features: string[]; }) => item.name && item.features.length > 0)) {
+          setSearchState(prev => ({
             ...prev,
             isLoading: false,
             recommendations: matchedItems
@@ -271,23 +247,21 @@ function AiSearchOverlay() {
         } else {
           const fallbackProducts = localFindProducts(processedQuery, 3);
           if (fallbackProducts.length > 0) {
-            setSearchState((prev) => ({
+            setSearchState(prev => ({
               ...prev,
               isLoading: false,
               recommendations: fallbackProducts
             }));
           } else {
-            const validMatchedItems = matchedItems.filter(
-              (item: { name: string }) => item.name
-            );
+            const validMatchedItems = matchedItems.filter((item: { name: string; }) => item.name);
             if (validMatchedItems.length > 0) {
-              setSearchState((prev) => ({
+              setSearchState(prev => ({
                 ...prev,
                 isLoading: false,
                 recommendations: validMatchedItems
               }));
             } else {
-              setSearchState((prev) => ({
+              setSearchState(prev => ({
                 ...prev,
                 isLoading: false,
                 errorMessage: "Could not find suitable recommendations."
@@ -300,61 +274,44 @@ function AiSearchOverlay() {
       console.error("Error fetching recommendations:", error);
 
       const query_str = typeof query === 'string' ? query : '';
-      const isProfessionalQuery = /lawyer|attorney|legal|accountant|doctor|medical|professional|tax|consultant/i.test(
-        query_str
-      );
-      const isRetailQuery = /retail|shop|store|boutique|merchandise|clothing/i.test(
-        query_str
-      );
-      const isFoodQuery = /restaurant|food|café|cafe|dining|bar|kitchen/i.test(
-        query_str
-      );
+      const isProfessionalQuery = /lawyer|attorney|legal|accountant|doctor|medical|professional|tax|consultant/i.test(query_str);
+      const isRetailQuery = /retail|shop|store|boutique|merchandise|clothing/i.test(query_str);
+      const isFoodQuery = /restaurant|food|café|cafe|dining|bar|kitchen/i.test(query_str);
 
       let fallbackProducts;
 
       if (isProfessionalQuery) {
         fallbackProducts = posProducts
-          .filter((p) => p.identifier === 'mini3' || p.identifier === 'flex4')
+          .filter(p => p.identifier === 'mini3' || p.identifier === 'flex4')
           .slice(0, 3);
       } else if (isRetailQuery) {
         fallbackProducts = posProducts
-          .filter(
-            (p) =>
-              p.identifier === 'mini3' ||
-              p.identifier === 'solo' ||
-              p.identifier === 'kiosk'
-          )
+          .filter(p => p.identifier === 'mini3' || p.identifier === 'solo' || p.identifier === 'kiosk')
           .slice(0, 3);
       } else if (isFoodQuery) {
         fallbackProducts = posProducts
-          .filter(
-            (p) =>
-              p.identifier === 'duo2' ||
-              p.identifier === 'solo' ||
-              p.identifier === 'kds'
-          )
+          .filter(p => p.identifier === 'duo2' || p.identifier === 'solo' || p.identifier === 'kds')
           .slice(0, 3);
       } else {
         fallbackProducts = localFindProducts(processedQuery, 3);
       }
 
       if (fallbackProducts.length > 0) {
-        setSearchState((prev) => ({
+        setSearchState(prev => ({
           ...prev,
           isLoading: false,
           recommendations: fallbackProducts
         }));
       } else {
         const defaultFallbacks = posProducts
-          .filter((p) => p.identifier === 'mini3' || p.identifier === 'flex4')
+          .filter(p => p.identifier === 'mini3' || p.identifier === 'flex4')
           .slice(0, 2);
 
-        setSearchState((prev) => ({
+        setSearchState(prev => ({
           ...prev,
           isLoading: false,
           recommendations: defaultFallbacks,
-          errorMessage:
-            "We couldn't process your request. Here are our most versatile options:"
+          errorMessage: "We couldn't process your request. Here are our most versatile options:"
         }));
       }
     }
@@ -374,17 +331,14 @@ function AiSearchOverlay() {
   // Handle click outside to close results
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setSearchState((prev) => ({ ...prev, showResults: false }));
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setSearchState(prev => ({ ...prev, showResults: false }));
       }
     }
 
     function handleEsc(e: KeyboardEvent) {
       if (e.key === 'Escape') {
-        setSearchState((prev) => ({ ...prev, showResults: false }));
+        setSearchState(prev => ({ ...prev, showResults: false }));
       }
     }
 
@@ -399,7 +353,7 @@ function AiSearchOverlay() {
 
   const handleInputFocus = useCallback(() => {
     if (userQuery || searchState.isLoading || searchState.errorMessage) {
-      setSearchState((prev) => ({ ...prev, showResults: true }));
+      setSearchState(prev => ({ ...prev, showResults: true }));
     }
   }, [userQuery, searchState.isLoading, searchState.errorMessage]);
 
@@ -447,21 +401,13 @@ function AiSearchOverlay() {
           >
             {isLoading && (
               <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
-                <div
-                  className="w-4 h-4 border-2 border-t-transparent border-gray-400 rounded-full animate-spin"
-                  aria-hidden="true"
-                ></div>
+                <div className="w-4 h-4 border-2 border-t-transparent border-gray-400 rounded-full animate-spin" aria-hidden="true"></div>
                 <span>Fetching recommendations...</span>
               </div>
             )}
 
             {!isLoading && errorMessage && (
-              <div
-                className="text-red-500 dark:text-red-300 mb-4"
-                role="alert"
-              >
-                {errorMessage}
-              </div>
+              <div className="text-red-500 dark:text-red-300 mb-4" role="alert">{errorMessage}</div>
             )}
 
             {!isLoading && recommendations.length > 0 && (
@@ -532,31 +478,27 @@ function AiSearchOverlay() {
 export default function Home() {
   // State management - using reducer for complex state
   type SelectorAction =
-    | { type: 'SET_BUSINESS_TYPE'; payload: string }
-    | { type: 'TOGGLE_SOFTWARE_NEED'; payload: string }
+    | { type: 'SET_BUSINESS_TYPE', payload: string }
+    | { type: 'TOGGLE_SOFTWARE_NEED', payload: string }
     | { type: 'TOGGLE_ONLINE_ORDERING' }
-    | { type: 'SET_QUANTITY'; payload: { deviceType: keyof ProductSelectorData; value: number } }
-    | { type: 'UPDATE_FIELD'; payload: { name: keyof ProductSelectorData; value: string } }
+    | { type: 'SET_QUANTITY', payload: { deviceType: keyof ProductSelectorData, value: number } }
+    | { type: 'UPDATE_FIELD', payload: { name: keyof ProductSelectorData, value: string } }
     | { type: 'RESET_FORM' };
 
-  const selectorReducer = (
-    state: ProductSelectorData,
-    action: SelectorAction
-  ): ProductSelectorData => {
+  const selectorReducer = (state: ProductSelectorData, action: SelectorAction): ProductSelectorData => {
     switch (action.type) {
       case 'SET_BUSINESS_TYPE':
         return {
           ...state,
           businessType: action.payload,
-          softwareNeeds:
-            action.payload === 'restaurant' ? ['full-service'] : [],
+          softwareNeeds: action.payload === 'restaurant' ? ['full-service'] : [],
           onlineOrdering: false
         };
       case 'TOGGLE_SOFTWARE_NEED':
         return {
           ...state,
           softwareNeeds: state.softwareNeeds.includes(action.payload)
-            ? state.softwareNeeds.filter((item) => item !== action.payload)
+            ? state.softwareNeeds.filter(item => item !== action.payload)
             : [...state.softwareNeeds, action.payload]
         };
       case 'TOGGLE_ONLINE_ORDERING':
@@ -582,16 +524,10 @@ export default function Home() {
   };
 
   type ContactAction =
-    | {
-        type: 'UPDATE_FIELD';
-        payload: { name: keyof typeof initialContactFormData; value: string };
-      }
+    | { type: 'UPDATE_FIELD', payload: { name: keyof typeof initialContactFormData, value: string } }
     | { type: 'RESET_FORM' };
 
-  const contactReducer = (
-    state: typeof initialContactFormData,
-    action: ContactAction
-  ) => {
+  const contactReducer = (state: typeof initialContactFormData, action: ContactAction) => {
     switch (action.type) {
       case 'UPDATE_FIELD':
         return {
@@ -608,14 +544,8 @@ export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
   const [wizardStep, setWizardStep] = useState(1);
-  const [selectorData, dispatchSelector] = React.useReducer(
-    selectorReducer,
-    initialSelectorData
-  );
-  const [contactFormData, dispatchContact] = React.useReducer(
-    contactReducer,
-    initialContactFormData
-  );
+  const [selectorData, dispatchSelector] = React.useReducer(selectorReducer, initialSelectorData);
+  const [contactFormData, dispatchContact] = React.useReducer(contactReducer, initialContactFormData);
   const [selectorSubmission, setSelectorSubmission] = useState({
     isLoading: false,
     status: 'idle' as 'idle' | 'success' | 'error',
@@ -629,7 +559,7 @@ export default function Home() {
 
   const { darkMode, toggleDarkMode } = useTheme();
 
-  // Images for hero carousel
+  // Memoized values
   const images = [
     {
       src: '/retailflex3.png',
@@ -649,7 +579,7 @@ export default function Home() {
     },
   ];
 
-  // Image carousel
+  // Image carousel with cleanup
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % images.length);
@@ -657,69 +587,59 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [images.length]);
 
-  // Validation for each wizard step
-  const validateForm = useCallback(
-    (step: number) => {
-      let errors: string[] = [];
+  const validateForm = useCallback((step: number) => {
+    let errors: string[] = [];
 
-      if (step === 1 && !selectorData.businessType) {
-        errors.push('Please select a business type.');
+    if (step === 1 && !selectorData.businessType) {
+      errors.push('Please select a business type.');
+    }
+
+    if (step === 2) {
+      if (selectorData.businessType === 'restaurant' && selectorData.softwareNeeds.length === 0) {
+        errors.push('Please select whether your restaurant is Full-Service or Quick-Service.');
       }
+    }
+    if (step === 3) {
+      const totalDevices =
+        selectorData.fullServicePosQty +
+        selectorData.barServicePosQty +
+        selectorData.miniPosQty +
+        selectorData.handheldPosQty +
+        selectorData.kitchenPrinterQty +
+        selectorData.kitchenDisplayQty +
+        selectorData.kioskQty;
 
-      if (step === 2) {
-        if (
-          selectorData.businessType === 'restaurant' &&
-          selectorData.softwareNeeds.length === 0
-        ) {
-          errors.push(
-            'Please select whether your restaurant is Full-Service or Quick-Service.'
-          );
-        }
+      if (totalDevices === 0) {
+        errors.push('Please select at least one device or hardware option.');
       }
-      if (step === 3) {
-        const totalDevices =
-          selectorData.fullServicePosQty +
-          selectorData.barServicePosQty +
-          selectorData.miniPosQty +
-          selectorData.handheldPosQty +
-          selectorData.kitchenPrinterQty +
-          selectorData.kitchenDisplayQty +
-          selectorData.kioskQty;
+    }
+    if (step === 4) {
+      const { firstName, lastName, email, phone } = selectorData;
 
-        if (totalDevices === 0) {
-          errors.push('Please select at least one device or hardware option.');
-        }
+      if (!firstName) errors.push('First Name is required.');
+      if (!lastName) errors.push('Last Name is required.');
+      if (!email) errors.push('Email is required.');
+      if (!phone) errors.push('Phone is required.');
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (email && !emailRegex.test(email)) {
+        errors.push('Please enter a valid email address.');
       }
-      if (step === 4) {
-        const { firstName, lastName, email, phone } = selectorData;
+    }
 
-        if (!firstName) errors.push('First Name is required.');
-        if (!lastName) errors.push('Last Name is required.');
-        if (!email) errors.push('Email is required.');
-        if (!phone) errors.push('Phone is required.');
+    return {
+      valid: errors.length === 0,
+      message: errors.join(' ')
+    };
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (email && !emailRegex.test(email)) {
-          errors.push('Please enter a valid email address.');
-        }
-      }
-
-      return {
-        valid: errors.length === 0,
-        message: errors.join(' ')
-      };
-    },
-    [selectorData]
-  );
+  }, [selectorData]);
 
   const validateContactForm = useCallback(() => {
     let errors: string[] = [];
     const requiredFields = ['firstName', 'lastName', 'email', 'phone'];
     for (const field of requiredFields) {
       if (!contactFormData[field as keyof typeof contactFormData]) {
-        errors.push(
-          `${field.charAt(0).toUpperCase() + field.slice(1)} is required.`
-        );
+        errors.push(`${field.charAt(0).toUpperCase() + field.slice(1)} is required.`);
       }
     }
 
@@ -733,7 +653,7 @@ export default function Home() {
     };
   }, [contactFormData]);
 
-  // Wizard step handlers
+  // Optimized form handlers with useCallback
   const handleNextStep = useCallback(() => {
     const validation = validateForm(wizardStep);
     if (!validation.valid) {
@@ -748,48 +668,45 @@ export default function Home() {
     setWizardStep((prev) => Math.max(prev - 1, 1));
   }, []);
 
-  const handleSelectorInputChange = useCallback(
-    (
-      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-      deviceType?: keyof ProductSelectorData
-    ) => {
-      const { name, value, type, checked } = e.target as HTMLInputElement;
+  const handleSelectorInputChange = useCallback((
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    deviceType?: keyof ProductSelectorData
+  ) => {
+    const { name, value, type, checked } = e.target as HTMLInputElement;
 
-      if (type === 'checkbox') {
-        if (name === 'onlineOrdering') {
-          dispatchSelector({ type: 'TOGGLE_ONLINE_ORDERING' });
-          return;
-        }
-        dispatchSelector({ type: 'TOGGLE_SOFTWARE_NEED', payload: value });
+    if (type === 'checkbox') {
+      if (name === 'onlineOrdering') {
+        dispatchSelector({ type: 'TOGGLE_ONLINE_ORDERING' });
         return;
       }
+      dispatchSelector({ type: 'TOGGLE_SOFTWARE_NEED', payload: value });
+      return;
+    }
 
-      if (deviceType) {
-        dispatchSelector({
-          type: 'SET_QUANTITY',
-          payload: { deviceType, value: parseInt(value, 10) || 0 }
-        });
-        return;
-      }
-
-      dispatchSelector({
-        type: 'UPDATE_FIELD',
-        payload: { name: name as keyof ProductSelectorData, value }
-      });
-    },
-    []
-  );
-
-  const handleQuantityChange = useCallback(
-    (deviceType: keyof ProductSelectorData, increment: number) => {
-      const currentValue = selectorData[deviceType] as number;
+    if (deviceType) {
       dispatchSelector({
         type: 'SET_QUANTITY',
-        payload: { deviceType, value: Math.max(0, currentValue + increment) }
+        payload: { deviceType, value: parseInt(value, 10) || 0 }
       });
-    },
-    [selectorData]
-  );
+      return;
+    }
+
+    dispatchSelector({
+      type: 'UPDATE_FIELD',
+      payload: { name: name as keyof ProductSelectorData, value }
+    });
+  }, []);
+
+  const handleQuantityChange = useCallback((
+    deviceType: keyof ProductSelectorData,
+    increment: number
+  ) => {
+    const currentValue = selectorData[deviceType] as number;
+    dispatchSelector({
+      type: 'SET_QUANTITY',
+      payload: { deviceType, value: Math.max(0, currentValue + increment) }
+    });
+  }, [selectorData]);
 
   const handleSelectorSubmit = useCallback(async () => {
     setSelectorSubmission({ isLoading: true, status: 'idle', message: '' });
@@ -815,8 +732,7 @@ export default function Home() {
         monthlyVolume
       } = selectorData;
 
-      const finalLocations =
-        numLocationsChoice === 'plus' ? numLocationsCustom : numLocationsChoice;
+      const finalLocations = numLocationsChoice === 'plus' ? numLocationsCustom : numLocationsChoice;
 
       const params = new URLSearchParams({
         formType: 'contactPage',
@@ -836,7 +752,7 @@ export default function Home() {
         phone,
         numLocations: finalLocations,
         monthlyVolume,
-        submitTime: new Date().toISOString()
+        submitTime: new Date().toISOString(),
       });
 
       const url = `https://hooks.zapier.com/hooks/catch/17465641/2awchwj/?${params.toString()}`;
@@ -848,130 +764,110 @@ export default function Home() {
 
       setSelectorSubmission({
         status: 'success',
-        message:
-          "Thank you! We'll be in touch shortly to assist with your needs.",
+        message: "Thank you! We'll be in touch shortly to assist with your needs.",
         isLoading: false
       });
 
       dispatchSelector({ type: 'RESET_FORM' });
       setWizardStep(1);
+
     } catch (error) {
       console.error('Submission error:', error);
       setSelectorSubmission({
         status: 'error',
         message: 'Error submitting. Please try again or contact us.',
-        isLoading: false
+        isLoading: false,
       });
     }
   }, [selectorData]);
 
-  const handleContactInputChange = useCallback(
-    (
-      e: React.ChangeEvent<
-        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-      >
-    ) => {
-      const { name, value } = e.target;
-      dispatchContact({
-        type: 'UPDATE_FIELD',
-        payload: { name: name as keyof typeof initialContactFormData, value }
+  const handleContactInputChange = useCallback((
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    dispatchContact({
+      type: 'UPDATE_FIELD',
+      payload: { name: name as keyof typeof initialContactFormData, value }
+    });
+  }, []);
+
+  const handleContactSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    setContactSubmission({ isLoading: true, status: 'idle', message: '' });
+
+    const validation = validateContactForm();
+    if (!validation.valid) {
+      setContactSubmission({
+        isLoading: false,
+        status: 'error',
+        message: validation.message
       });
-    },
-    []
-  );
+      return;
+    }
 
-  const handleContactSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      setContactSubmission({ isLoading: true, status: 'idle', message: '' });
+    const finalLocations = contactFormData.numLocationsChoice === 'plus'
+      ? contactFormData.numLocationsCustom
+      : contactFormData.numLocationsChoice;
 
-      const validation = validateContactForm();
-      if (!validation.valid) {
-        setContactSubmission({
-          isLoading: false,
-          status: 'error',
-          message: validation.message
-        });
-        return;
+    try {
+      const params = new URLSearchParams({
+        firstName: contactFormData.firstName,
+        lastName: contactFormData.lastName,
+        email: contactFormData.email,
+        phone: contactFormData.phone,
+        callDate: contactFormData.callDate,
+        preferredTime: contactFormData.preferredTime,
+        businessType: contactFormData.businessType,
+        numLocations: finalLocations,
+        monthlyVolume: contactFormData.monthlyVolume,
+        submitTime: new Date().toISOString(),
+        formType: 'contactPage',
+      });
+
+      const url = `https://hooks.zapier.com/hooks/catch/17465641/2awchwj/?${params.toString()}`;
+      const response = await fetch(url, { method: 'GET' });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const finalLocations =
-        contactFormData.numLocationsChoice === 'plus'
-          ? contactFormData.numLocationsCustom
-          : contactFormData.numLocationsChoice;
+      setContactSubmission({
+        status: 'success',
+        message: "Thank you! We'll be in touch shortly.",
+        isLoading: false
+      });
+      dispatchContact({ type: 'RESET_FORM' });
 
-      try {
-        const params = new URLSearchParams({
-          firstName: contactFormData.firstName,
-          lastName: contactFormData.lastName,
-          email: contactFormData.email,
-          phone: contactFormData.phone,
-          callDate: contactFormData.callDate,
-          preferredTime: contactFormData.preferredTime,
-          businessType: contactFormData.businessType,
-          numLocations: finalLocations,
-          monthlyVolume: contactFormData.monthlyVolume,
-          submitTime: new Date().toISOString(),
-          formType: 'contactPage'
-        });
+    } catch (error) {
+      console.error('Submission error:', error);
+      setContactSubmission({
+        status: 'error',
+        message: 'Error submitting. Please try again or contact us.',
+        isLoading: false
+      });
+    }
+  }, [contactFormData, validateContactForm]);
 
-        const url = `https://hooks.zapier.com/hooks/catch/17465641/2awchwj/?${params.toString()}`;
-        const response = await fetch(url, { method: 'GET' });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        setContactSubmission({
-          status: 'success',
-          message: "Thank you! We'll be in touch shortly.",
-          isLoading: false
-        });
-        dispatchContact({ type: 'RESET_FORM' });
-      } catch (error) {
-        console.error('Submission error:', error);
-        setContactSubmission({
-          status: 'error',
-          message: 'Error submitting. Please try again or contact us.',
-          isLoading: false
-        });
-      }
-    },
-    [contactFormData, validateContactForm]
-  );
-
-  // Render wizard steps
+  // Memoized wizard step rendering
   const renderStepContent = useCallback(() => {
     switch (wizardStep) {
-      case 1: // Business Type
+      case 1: // Business Type Selection
         return (
           <div className="text-gray-900 dark:text-white">
-            <h3 className="mb-4 text-xl font-semibold">
-              What type of business do you have?
-            </h3>
-            <p className="mb-6 text-gray-600 dark:text-gray-400">
-              So we can tailor the right POS solution for you.
-            </p>
+            <h3 className="mb-4 text-xl font-semibold">What type of business do you have?</h3>
+            <p className="mb-6 text-gray-600 dark:text-gray-400">So we can tailor the right POS solution for you.</p>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
               {[
                 { type: 'retail', title: 'Retail', img: '/retail.jpg' },
                 { type: 'restaurant', title: 'Restaurant', img: '/restaurant.jpg' },
                 { type: 'services', title: 'Services', img: '/services.jpg' },
                 { type: 'other', title: 'Other', img: '/other.jpg' }
-              ].map((item) => (
+              ].map(item => (
                 <motion.button
                   key={item.type}
-                  whileHover={{
-                    scale: 1.07,
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-                  }}
+                  whileHover={{ scale: 1.07, boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() =>
-                    dispatchSelector({
-                      type: 'SET_BUSINESS_TYPE',
-                      payload: item.type
-                    })
-                  }
+                  onClick={() => dispatchSelector({ type: 'SET_BUSINESS_TYPE', payload: item.type })}
                   className={`p-4 border transition-colors rounded-3xl shadow-sm ${
                     selectorData.businessType === item.type
                       ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-700'
@@ -989,21 +885,18 @@ export default function Home() {
                       className="rounded transition-transform duration-300 hover:scale-105"
                     />
                   </div>
-                  <h4 className="text-lg font-semibold text-center">
-                    {item.title}
-                  </h4>
+                  <h4 className="text-lg font-semibold text-center">{item.title}</h4>
                 </motion.button>
               ))}
             </div>
           </div>
         );
-      case 2: // Restaurant details or Online ordering
+
+      case 2: // Restaurant type or online ordering
         if (selectorData.businessType === 'restaurant') {
           return (
             <div className="text-gray-900 dark:text-white">
-              <h3 className="mb-4 text-xl font-semibold">
-                What type of restaurant?
-              </h3>
+              <h3 className="mb-4 text-xl font-semibold">What type of restaurant?</h3>
               <p className="mb-6 text-gray-600 dark:text-gray-400">
                 Select Full-Service and/or Quick-Service as needed.
               </p>
@@ -1011,7 +904,7 @@ export default function Home() {
                 {[
                   { id: 'full-service', label: 'Full-Service Dining' },
                   { id: 'quick-service', label: 'Quick-Service' }
-                ].map((option) => (
+                ].map(option => (
                   <motion.div
                     key={option.id}
                     className={`flex items-center p-4 border rounded-3xl cursor-pointer mb-3 shadow-sm transition-all ${
@@ -1019,16 +912,8 @@ export default function Home() {
                         ? 'bg-blue-50 border-blue-500 dark:bg-blue-900 dark:border-blue-700'
                         : 'hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-700'
                     }`}
-                    onClick={() =>
-                      dispatchSelector({
-                        type: 'TOGGLE_SOFTWARE_NEED',
-                        payload: option.id
-                      })
-                    }
-                    whileHover={{
-                      y: -2,
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-                    }}
+                    onClick={() => dispatchSelector({ type: 'TOGGLE_SOFTWARE_NEED', payload: option.id })}
+                    whileHover={{ y: -2, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
                   >
                     <input
                       type="checkbox"
@@ -1038,10 +923,7 @@ export default function Home() {
                       onChange={() => {}}
                       aria-label={option.label}
                     />
-                    <label
-                      htmlFor={`restaurant-type-${option.id}`}
-                      className="cursor-pointer flex-grow font-medium"
-                    >
+                    <label htmlFor={`restaurant-type-${option.id}`} className="cursor-pointer flex-grow font-medium">
                       {option.label}
                     </label>
                   </motion.div>
@@ -1054,20 +936,17 @@ export default function Home() {
                   Did you know?
                 </h4>
                 <p className="text-sm text-gray-700 dark:text-gray-300">
-                  Full-service restaurants typically need more robust table
-                  management and ordering systems, while quick-service
-                  restaurants benefit from faster checkout options and
-                  self-service kiosks.
+                  Full-service restaurants typically need more robust table management and ordering systems,
+                  while quick-service restaurants benefit from faster checkout options and self-service kiosks.
                 </p>
               </div>
             </div>
           );
         }
+
         return (
           <div className="text-gray-900 dark:text-white">
-            <h3 className="mb-4 text-xl font-semibold">
-              Do you need online ordering capabilities?
-            </h3>
+            <h3 className="mb-4 text-xl font-semibold">Do you need online ordering capabilities?</h3>
             <p className="mb-6 text-gray-600 dark:text-gray-400">
               Select if you need online ordering for your business.
             </p>
@@ -1078,10 +957,7 @@ export default function Home() {
                   : 'hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-700'
               }`}
               onClick={() => dispatchSelector({ type: 'TOGGLE_ONLINE_ORDERING' })}
-              whileHover={{
-                y: -2,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-              }}
+              whileHover={{ y: -2, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
             >
               <input
                 type="checkbox"
@@ -1091,10 +967,7 @@ export default function Home() {
                 onChange={() => {}}
                 aria-label="Need online ordering"
               />
-              <label
-                htmlFor="online-ordering"
-                className="cursor-pointer flex-grow font-medium"
-              >
+              <label htmlFor="online-ordering" className="cursor-pointer flex-grow font-medium">
                 Yes, I need online ordering capabilities
               </label>
             </motion.div>
@@ -1105,13 +978,13 @@ export default function Home() {
                 Business Growth Tip
               </h4>
               <p className="text-sm text-gray-700 dark:text-gray-300">
-                Businesses with online ordering capabilities typically see a 30%
-                increase in average order value and can reach customers beyond
-                their physical location.
+                Businesses with online ordering capabilities typically see a 30% increase in average order value
+                and can reach customers beyond their physical location.
               </p>
             </div>
           </div>
         );
+
       case 3: // POS & Hardware Selection
         return (
           <div className="text-gray-900 dark:text-white">
@@ -1124,27 +997,13 @@ export default function Home() {
                 let deviceType: keyof ProductSelectorData | null = null;
 
                 switch (product.identifier) {
-                  case "duo2":
-                    deviceType = "fullServicePosQty";
-                    break;
-                  case "solo":
-                    deviceType = "barServicePosQty";
-                    break;
-                  case "mini3":
-                    deviceType = "miniPosQty";
-                    break;
-                  case "flex4":
-                    deviceType = "handheldPosQty";
-                    break;
-                  case "starprinter":
-                    deviceType = "kitchenPrinterQty";
-                    break;
-                  case "kds":
-                    deviceType = "kitchenDisplayQty";
-                    break;
-                  case "kiosk":
-                    deviceType = "kioskQty";
-                    break;
+                  case "duo2": deviceType = "fullServicePosQty"; break;
+                  case "solo": deviceType = "barServicePosQty"; break;
+                  case "mini3": deviceType = "miniPosQty"; break;
+                  case "flex4": deviceType = "handheldPosQty"; break;
+                  case "starprinter": deviceType = "kitchenPrinterQty"; break;
+                  case "kds": deviceType = "kitchenDisplayQty"; break;
+                  case "kiosk": deviceType = "kioskQty"; break;
                 }
 
                 if (!deviceType) return null;
@@ -1155,10 +1014,7 @@ export default function Home() {
                   <motion.div
                     key={product.identifier}
                     className="p-6 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-2xl flex flex-col items-center shadow-sm"
-                    whileHover={{
-                      y: -4,
-                      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
-                    }}
+                    whileHover={{ y: -4, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
                   >
                     {product.image && (
                       <Image
@@ -1184,27 +1040,15 @@ export default function Home() {
                         className="p-3 bg-gray-200 dark:bg-gray-600 rounded-l-full text-gray-700 dark:text-gray-200"
                         aria-label={`Decrease ${product.name} quantity`}
                       >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M20 12H4"
-                          />
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H4" />
                         </svg>
                       </motion.button>
                       <input
                         type="number"
                         className="w-16 mx-0 text-center border dark:border-gray-600 dark:bg-gray-800 h-10"
                         value={qtyVal}
-                        onChange={(e) =>
-                          handleSelectorInputChange(e, deviceType!)
-                        }
+                        onChange={(e) => handleSelectorInputChange(e, deviceType!)}
                         aria-label={`${product.name} quantity`}
                         min="0"
                       />
@@ -1215,18 +1059,8 @@ export default function Home() {
                         className="p-3 bg-gray-200 dark:bg-gray-600 rounded-r-full text-gray-700 dark:text-gray-200"
                         aria-label={`Increase ${product.name} quantity`}
                       >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M12 4v16m8-8H4"
-                          />
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                         </svg>
                       </motion.button>
                     </div>
@@ -1240,24 +1074,15 @@ export default function Home() {
                 className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors shadow-md"
               >
                 View All POS Systems
-                <svg
-                  className="w-4 h-4 ml-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                  />
+                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
               </Link>
             </div>
           </div>
         );
-      case 4: // Contact info
+
+      case 4: // Contact Information
         return (
           <div className="text-gray-900 dark:text-white">
             <h3 className="mb-4 text-xl font-semibold">Almost done!</h3>
@@ -1266,10 +1091,7 @@ export default function Home() {
             </p>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label
-                  htmlFor="firstName"
-                  className="block mb-1 text-sm font-medium"
-                >
+                <label htmlFor="firstName" className="block mb-1 text-sm font-medium">
                   First Name
                 </label>
                 <input
@@ -1283,10 +1105,7 @@ export default function Home() {
                 />
               </div>
               <div>
-                <label
-                  htmlFor="lastName"
-                  className="block mb-1 text-sm font-medium"
-                >
+                <label htmlFor="lastName" className="block mb-1 text-sm font-medium">
                   Last Name
                 </label>
                 <input
@@ -1329,21 +1148,17 @@ export default function Home() {
               />
             </div>
             <div className="mt-6">
-              <label className="block mb-2 text-sm font-medium">
-                Number of Locations
-              </label>
+              <label className="block mb-2 text-sm font-medium">Number of Locations</label>
               <div className="flex flex-wrap items-center gap-2">
                 {['1', '2', '3', '4', '5'].map((opt) => (
                   <motion.button
                     key={opt}
                     type="button"
                     whileTap={{ scale: 0.95 }}
-                    onClick={() =>
-                      dispatchSelector({
-                        type: 'UPDATE_FIELD',
-                        payload: { name: 'numLocationsChoice', value: opt }
-                      })
-                    }
+                    onClick={() => dispatchSelector({
+                      type: 'UPDATE_FIELD',
+                      payload: { name: 'numLocationsChoice', value: opt }
+                    })}
                     className={`px-4 py-2 rounded-full text-sm shadow-sm ${
                       selectorData.numLocationsChoice === opt
                         ? 'bg-blue-600 text-white dark:bg-blue-500'
@@ -1357,12 +1172,10 @@ export default function Home() {
                 <motion.button
                   type="button"
                   whileTap={{ scale: 0.95 }}
-                  onClick={() =>
-                    dispatchSelector({
-                      type: 'UPDATE_FIELD',
-                      payload: { name: 'numLocationsChoice', value: 'plus' }
-                    })
-                  }
+                  onClick={() => dispatchSelector({
+                    type: 'UPDATE_FIELD',
+                    payload: { name: 'numLocationsChoice', value: 'plus' }
+                  })}
                   className={`px-4 py-2 rounded-full text-sm shadow-sm ${
                     selectorData.numLocationsChoice === 'plus'
                       ? 'bg-blue-600 text-white dark:bg-blue-500'
@@ -1375,10 +1188,7 @@ export default function Home() {
               </div>
               {selectorData.numLocationsChoice === 'plus' && (
                 <div className="mt-3">
-                  <label
-                    htmlFor="numLocationsCustom"
-                    className="block mb-1 text-sm text-gray-600 dark:text-gray-400"
-                  >
+                  <label htmlFor="numLocationsCustom" className="block mb-1 text-sm text-gray-600 dark:text-gray-400">
                     Enter number of locations:
                   </label>
                   <input
@@ -1395,21 +1205,17 @@ export default function Home() {
               )}
             </div>
             <div className="mt-6">
-              <label className="block mb-2 text-sm font-medium">
-                Monthly Processing Volume
-              </label>
+              <label className="block mb-2 text-sm font-medium">Monthly Processing Volume</label>
               <div className="flex flex-wrap gap-2">
                 {['0-50K', '50K-250K', '250K-1MM', '1MM+'].map((range) => (
                   <motion.button
                     key={range}
                     type="button"
                     whileTap={{ scale: 0.95 }}
-                    onClick={() =>
-                      dispatchSelector({
-                        type: 'UPDATE_FIELD',
-                        payload: { name: 'monthlyVolume', value: range }
-                      })
-                    }
+                    onClick={() => dispatchSelector({
+                      type: 'UPDATE_FIELD',
+                      payload: { name: 'monthlyVolume', value: range }
+                    })}
                     className={`px-4 py-2 rounded-full border text-sm shadow-sm ${
                       selectorData.monthlyVolume === range
                         ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500'
@@ -1425,7 +1231,8 @@ export default function Home() {
                 ))}
               </div>
             </div>
-            {/* Privacy notice */}
+
+            {/* Privacy notice - increases trust */}
             <div className="mt-6 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
               <p className="flex items-start">
                 <FaLock className="text-green-600 dark:text-green-400 mt-0.5 mr-2 flex-shrink-0" />
@@ -1437,6 +1244,7 @@ export default function Home() {
             </div>
           </div>
         );
+
       case 5: // Review & Submit
         const { status, message, isLoading: selectorIsLoading } = selectorSubmission;
 
@@ -1478,23 +1286,11 @@ export default function Home() {
           return (
             <div className="text-center py-6">
               <div className="inline-flex items-center justify-center w-16 h-16 mb-6 bg-red-100 dark:bg-red-900 rounded-full">
-                <svg
-                  className="w-8 h-8 text-red-600 dark:text-red-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
+                <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="mb-4 text-2xl font-semibold text-red-600 dark:text-red-400">
-                Error
-              </h3>
+              <h3 className="mb-4 text-2xl font-semibold text-red-600 dark:text-red-400">Error</h3>
               <p className="mb-6 text-gray-600 dark:text-gray-400">{message}</p>
               <motion.button
                 type="button"
@@ -1510,89 +1306,56 @@ export default function Home() {
         }
 
         const { numLocationsChoice, numLocationsCustom } = selectorData;
-        const finalLocations =
-          numLocationsChoice === 'plus' ? numLocationsCustom : numLocationsChoice;
+        const finalLocations = numLocationsChoice === 'plus' ? numLocationsCustom : numLocationsChoice;
 
         return (
-          <div>
-            <h3 className="mb-6 text-xl font-semibold dark:text-white">
-              Review Your Choices
-            </h3>
+          <>
+            <h3 className="mb-6 text-xl font-semibold dark:text-white">Review Your Choices</h3>
             <div className="space-y-4 text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-lg font-medium mb-3 text-gray-900 dark:text-white">
-                    Business Details
-                  </h4>
+                  <h4 className="text-lg font-medium mb-3 text-gray-900 dark:text-white">Business Details</h4>
                   <div className="space-y-2">
                     <p className="flex items-center">
-                      <span className="w-32 text-gray-500 dark:text-gray-400">
-                        Business Type:
-                      </span>
-                      <span className="font-medium capitalize">
-                        {selectorData.businessType}
-                      </span>
+                      <span className="w-32 text-gray-500 dark:text-gray-400">Business Type:</span>
+                      <span className="font-medium capitalize">{selectorData.businessType}</span>
                     </p>
                     {selectorData.businessType === 'restaurant' && (
                       <p className="flex items-center">
-                        <span className="w-32 text-gray-500 dark:text-gray-400">
-                          Restaurant Type:
-                        </span>
-                        <span className="font-medium capitalize">
-                          {selectorData.softwareNeeds.join(', ')}
-                        </span>
+                        <span className="w-32 text-gray-500 dark:text-gray-400">Restaurant Type:</span>
+                        <span className="font-medium capitalize">{selectorData.softwareNeeds.join(', ')}</span>
                       </p>
                     )}
-                    {selectorData.businessType !== 'restaurant' &&
-                      selectorData.onlineOrdering && (
-                        <p className="flex items-center">
-                          <span className="w-32 text-gray-500 dark:text-gray-400">
-                            Online Ordering:
-                          </span>
-                          <span className="font-medium">Yes</span>
-                        </p>
-                      )}
+                    {selectorData.businessType !== 'restaurant' && selectorData.onlineOrdering && (
+                      <p className="flex items-center">
+                        <span className="w-32 text-gray-500 dark:text-gray-400">Online Ordering:</span>
+                        <span className="font-medium">Yes</span>
+                      </p>
+                    )}
                     <p className="flex items-center">
-                      <span className="w-32 text-gray-500 dark:text-gray-400">
-                        Locations:
-                      </span>
-                      <span className="font-medium">
-                        {finalLocations || 'N/A'}
-                      </span>
+                      <span className="w-32 text-gray-500 dark:text-gray-400">Locations:</span>
+                      <span className="font-medium">{finalLocations || 'N/A'}</span>
                     </p>
                     <p className="flex items-center">
-                      <span className="w-32 text-gray-500 dark:text-gray-400">
-                        Monthly Volume:
-                      </span>
-                      <span className="font-medium">
-                        {selectorData.monthlyVolume}
-                      </span>
+                      <span className="w-32 text-gray-500 dark:text-gray-400">Monthly Volume:</span>
+                      <span className="font-medium">{selectorData.monthlyVolume}</span>
                     </p>
                   </div>
                 </div>
+
                 <div>
-                  <h4 className="text-lg font-medium mb-3 text-gray-900 dark:text-white">
-                    Contact Information
-                  </h4>
+                  <h4 className="text-lg font-medium mb-3 text-gray-900 dark:text-white">Contact Information</h4>
                   <div className="space-y-2">
                     <p className="flex items-center">
-                      <span className="w-24 text-gray-500 dark:text-gray-400">
-                        Name:
-                      </span>
-                      <span className="font-medium">
-                        {selectorData.firstName} {selectorData.lastName}
-                      </span>
+                      <span className="w-24 text-gray-500 dark:text-gray-400">Name:</span>
+                      <span className="font-medium">{selectorData.firstName} {selectorData.lastName}</span>
                     </p>
                     <p className="flex items-center">
-                      <span className="w-24 text-gray-500 dark:text-gray-400">
-                        Email:
-                      </span>
+                      <span className="w-24 text-gray-500 dark:text-gray-400">Email:</span>
                       <span className="font-medium">{selectorData.email}</span>
                     </p>
                     <p className="flex items-center">
-                      <span className="w-24 text-gray-500 dark:text-gray-400">
-                        Phone:
-                      </span>
+                      <span className="w-24 text-gray-500 dark:text-gray-400">Phone:</span>
                       <span className="font-medium">{selectorData.phone}</span>
                     </p>
                   </div>
@@ -1600,9 +1363,7 @@ export default function Home() {
               </div>
 
               <div className="pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
-                <h4 className="text-lg font-medium mb-3 text-gray-900 dark:text-white">
-                  Selected Hardware
-                </h4>
+                <h4 className="text-lg font-medium mb-3 text-gray-900 dark:text-white">Selected Hardware</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                   {selectorData.fullServicePosQty > 0 && (
                     <div className="flex items-center">
@@ -1667,10 +1428,7 @@ export default function Home() {
             <div className="mt-8 text-center">
               <motion.button
                 type="button"
-                whileHover={{
-                  scale: 1.05,
-                  boxShadow: '0px 4px 20px rgba(59,130,246,0.3)'
-                }}
+                whileHover={{ scale: 1.05, boxShadow: '0px 4px 20px rgba(59,130,246,0.3)' }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleSelectorSubmit}
                 className="px-8 py-4 text-white transition-colors bg-blue-600 dark:bg-blue-500 rounded-full hover:bg-blue-700 dark:hover:bg-blue-600 shadow-md"
@@ -1678,24 +1436,9 @@ export default function Home() {
               >
                 {selectorIsLoading ? (
                   <span className="flex items-center justify-center">
-                    <svg
-                      className="w-5 h-5 mr-3 -ml-1 text-white animate-spin"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
+                    <svg className="w-5 h-5 mr-3 -ml-1 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Submitting...
                   </span>
@@ -1703,33 +1446,24 @@ export default function Home() {
                   'Submit & Get Your Quote'
                 )}
               </motion.button>
+
               <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
                 You'll receive a custom quote within 24 hours
               </p>
             </div>
-          </div>
+          </>
         );
+
       default:
         return null;
     }
-  }, [
-    wizardStep,
-    selectorData,
-    selectorSubmission,
-    handleSelectorInputChange,
-    handleQuantityChange,
-    handleSelectorSubmit
-  ]);
+  }, [wizardStep, selectorData, selectorSubmission, handleSelectorInputChange, handleQuantityChange, handleSelectorSubmit]);
 
-  // Wizard progress indicator
+  // Memoized progress indicator
   const renderProgressIndicator = useCallback(() => {
     const totalSteps = 5;
     return (
-      <div
-        className="flex items-center justify-center my-6"
-        role="navigation"
-        aria-label="Form steps"
-      >
+      <div className="flex items-center justify-center my-6" role="navigation" aria-label="Form steps">
         {Array.from({ length: totalSteps }).map((_, index) => {
           const stepNum = index + 1;
           return (
@@ -1739,28 +1473,15 @@ export default function Home() {
                   wizardStep > stepNum
                     ? 'bg-blue-600 text-white dark:bg-blue-700'
                     : wizardStep === stepNum
-                    ? 'bg-blue-500 text-white dark:bg-blue-600 ring-4 ring-blue-100 dark:ring-blue-900'
-                    : 'bg-gray-200 text-gray-500 dark:bg-gray-600 dark:text-gray-400'
+                      ? 'bg-blue-500 text-white dark:bg-blue-600 ring-4 ring-blue-100 dark:ring-blue-900'
+                      : 'bg-gray-200 text-gray-500 dark:bg-gray-600 dark:text-gray-400'
                 }`}
-                aria-current={wizardStep === stepNum ? 'step' : undefined}
-                aria-label={`Step ${stepNum}${
-                  wizardStep === stepNum ? ' (current)' : ''
-                }`}
+                aria-current={wizardStep === stepNum ? "step" : undefined}
+                aria-label={`Step ${stepNum}${wizardStep === stepNum ? ' (current)' : ''}`}
               >
                 {wizardStep > stepNum ? (
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M5 13l4 4L19 7"
-                    />
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                 ) : (
                   stepNum
@@ -1769,9 +1490,7 @@ export default function Home() {
               {stepNum < totalSteps && (
                 <div
                   className={`w-20 h-1 transition-colors ${
-                    wizardStep > stepNum
-                      ? 'bg-blue-600 dark:bg-blue-700'
-                      : 'bg-gray-200 dark:bg-gray-600'
+                    wizardStep > stepNum ? 'bg-blue-600 dark:bg-blue-700' : 'bg-gray-200 dark:bg-gray-600'
                   }`}
                   aria-hidden="true"
                 ></div>
@@ -1783,7 +1502,7 @@ export default function Home() {
     );
   }, [wizardStep]);
 
-  // Scroll helper
+  // Function to handle scrolling -- improved
   const scrollToSection = useCallback((sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -1791,6 +1510,7 @@ export default function Home() {
     }
   }, []);
 
+  // Return the complete component
   return (
     <ThemeProvider>
       <main className={darkMode ? 'dark' : ''}>
@@ -1799,29 +1519,17 @@ export default function Home() {
             <title>StarAccept Business Solutions - Merchant Processing & Payment Systems</title>
             <meta
               name="description"
-              content="Get affordable, full-service credit card processing with proven, cutting-edge technology. Our zero-fee solutions transform your business."
+              content="Get affordable, full-service credit card processing with proven, cutting-edge technology. Our zero-fee solutions transform your business with simplified payment processing."
             />
-            <meta
-              name="keywords"
-              content="merchant processing, POS systems, credit card processing, payment solutions, Clover, zero-fee processing"
-            />
-            <meta
-              property="og:title"
-              content="StarAccept Business Solutions"
-            />
-            <meta
-              property="og:description"
-              content="Affordable, full-service credit card processing with proven, cutting-edge technology. Transform your business."
-            />
+            <meta name="keywords" content="merchant processing, POS systems, credit card processing, payment solutions, Clover, zero-fee processing" />
+            <meta property="og:title" content="StarAccept Business Solutions" />
+            <meta property="og:description" content="Affordable, full-service credit card processing with proven, cutting-edge technology. Transform your business." />
             <meta property="og:image" content="/og-image.jpg" />
             <meta property="og:url" content="https://staraccept.com" />
             <meta name="twitter:card" content="summary_large_image" />
             <link rel="icon" href="/favicon.ico" />
             <link rel="canonical" href="https://staraccept.com" />
-            <script
-              async
-              src="https://www.googletagmanager.com/gtag/js?id=G-2D18CMVZEF"
-            ></script>
+            <script async src="https://www.googletagmanager.com/gtag/js?id=G-2D18CMVZEF"></script>
             <script
               dangerouslySetInnerHTML={{
                 __html: `window.dataLayer = window.dataLayer || [];
@@ -1832,9 +1540,7 @@ export default function Home() {
             />
           </Head>
 
-          {/** 
-           * NAVBAR (unchanged) 
-           */}
+          {/* NAVBAR - With accessibility improvements */}
           <motion.nav
             className="fixed top-0 z-50 w-full bg-white dark:bg-gray-800 shadow-sm bg-opacity-90 backdrop-blur-sm"
             initial={{ y: -100 }}
@@ -1919,19 +1625,17 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="flex items-center">
-                  {/* Single "business type" prompt button */}
                   <motion.button
                     type="button"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="hidden md:inline-flex items-center justify-center px=4 py-2 mr-4 text-sm bg-blue-600 text-white rounded-full hover:bg-blue-700 shadow-sm px-4"
+                    className="hidden md:inline-flex items-center justify-center px-4 py-2 text-sm bg-blue-600 text-white rounded-full hover:bg-blue-700 mr-4 shadow-sm"
                     onClick={() => scrollToSection('product-selector')}
                     aria-label="What's your business type?"
                   >
                     <FaRegLightbulb className="mr-1" />
-                    Find Your POS
+                    What's your business type?
                   </motion.button>
-
                   <button
                     onClick={toggleDarkMode}
                     className="hidden md:inline-block p-2 text-gray-600 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none"
@@ -1939,21 +1643,11 @@ export default function Home() {
                     type="button"
                   >
                     {darkMode ? (
-                      <svg
-                        className="w-6 h-6"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                      >
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M12 21a9 9 0 0 1-6.36-2.64C3.09 15.81 2 13 2 9.5 2 5.36 5.36 2 9.5 2c.9 0 1.78.12 2.6.34.82.22 1.6.56 2.28 1.02.68.46 1.24 1.08 1.68 1.8.44.72.78 1.56.98 2.46.2.9.3 1.82.3 2.78 0 3.5-2.54 6.43-5.99 7.6-1.5.53-3.09.8-4.73.8z" />
                       </svg>
                     ) : (
-                      <svg
-                        className="w-6 h-6"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                      >
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" />
                       </svg>
                     )}
@@ -1967,34 +1661,12 @@ export default function Home() {
                       type="button"
                     >
                       {isMenuOpen ? (
-                        <svg
-                          className="w-6 h-6"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          aria-hidden="true"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       ) : (
-                        <svg
-                          className="w-6 h-6"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          aria-hidden="true"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 6h16M4 12h16M4 18h16"
-                          />
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                       )}
                     </button>
@@ -2068,7 +1740,7 @@ export default function Home() {
                   }}
                   role="menuitem"
                 >
-                  Find Your POS
+                  Find Your Perfect POS
                 </button>
                 <Link
                   className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -2093,10 +1765,8 @@ export default function Home() {
             )}
           </motion.nav>
 
-          {/**
-           * HERO SECTION - simplified main CTA & shorter text
-           */}
-          <div className="relative h-[70vh] md:h-[75vh] w-full max-w-[1920px] mx-auto pt-24 flex items-center justify-center">
+          {/* HERO - Enhanced with trust signals and better visual hierarchy */}
+          <div className="relative h-[85vh] md:h-[85vh] lg:h-[90vh] w-full max-w-[1920px] mx-auto pt-24 flex items-center justify-center">
             <motion.div
               className="absolute inset-0 overflow-hidden"
               initial={{ opacity: 0 }}
@@ -2120,9 +1790,7 @@ export default function Home() {
               {images.map((_, index) => (
                 <button
                   key={index}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    currentImage === index ? 'bg-white w-8' : 'bg-white/50'
-                  }`}
+                  className={`w-2 h-2 rounded-full transition-all ${currentImage === index ? 'bg-white w-8' : 'bg-white/50'}`}
                   onClick={() => setCurrentImage(index)}
                   aria-label={`Go to slide ${index + 1}`}
                   aria-selected={currentImage === index}
@@ -2132,219 +1800,247 @@ export default function Home() {
               ))}
             </div>
             <div className="absolute inset-0 flex items-center max-w-[1920px] mx-auto">
-              <div className="relative z-20 max-w-4xl px-4 mx-auto mt-16 text-white">
-                <motion.h1
-                  className="mb-4 text-4xl font-extrabold tracking-tight text-white md:text-5xl lg:text-6xl"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 0.8 }}
-                >
-                  Simplify Payments.  
-                  <br className="hidden md:block" />
-                  <span className="text-amber-400">Maximize Savings.</span>
-                </motion.h1>
-                <motion.p
-                  className="mb-6 text-lg md:text-xl text-white/90 font-light leading-relaxed"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3, duration: 0.8 }}
-                >
-                  Embrace secure, fast, and <span className="font-semibold">Zero-Fee</span> card processing with next-gen POS systems trusted by thousands of businesses.
-                </motion.p>
-
+              <div className="relative z-20 max-w-6xl px-4 mx-auto mt-16">
                 <motion.div
-                  className="flex flex-wrap gap-4"
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4, duration: 0.8 }}
+                  transition={{ duration: 0.8 }}
+                  className="max-w-3xl text-white"
                 >
-                  {/* Primary CTA: "View All POS" */}
-                  <Link href="/poslineup">
+                  <motion.h1
+                    className="mb-6 text-4xl font-extrabold tracking-tight text-white md:text-5xl lg:text-6xl"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.8 }}
+                  >
+                    <span className="text-amber-400">Transform</span> Your Business <br />
+                    With Next-Gen Payment Solutions
+                  </motion.h1>
+                  <motion.p
+                    className="mb-6 text-xl text-white/90 md:text-2xl font-light leading-relaxed"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3, duration: 0.8 }}
+                  >
+                    Seamless, Secure, and <span className="text-amber-400 font-semibold">Zero-Fee</span> Processing with bleeding-edge technology. <span className="font-semibold">Trusted by businesses globally.</span>
+                  </motion.p>
+
+                  <motion.div
+                    className="flex flex-wrap gap-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4, duration: 0.8 }}
+                  >
+                    <motion.a
+                      href="https://onboarding.tillpayments.com/signup/6748abe55b6362feca0a75f3"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      whileHover={{ scale: 1.05, boxShadow: '0px 4px 20px rgba(255,200,0,0.3)' }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <motion.button
+                        type="button"
+                        className="px-8 py-4 text-lg font-semibold text-gray-900 transition-colors rounded-full bg-amber-500 hover:bg-amber-400 shadow-lg"
+                        aria-label="Get Started Now"
+                      >
+                        Get Started Now <span className="ml-1">→</span>
+                      </motion.button>
+                    </motion.a>
                     <motion.button
                       type="button"
-                      whileHover={{ scale: 1.05 }}
+                      whileHover={{ scale: 1.05, boxShadow: '0px 4px 20px rgba(255,255,255,0.2)' }}
                       whileTap={{ scale: 0.95 }}
-                      className="px-8 py-4 text-lg font-semibold text-white transition-colors bg-blue-600 rounded-full hover:bg-blue-700 shadow-md"
-                      aria-label="View All POS Systems"
+                      className="px-8 py-4 text-lg font-semibold text-white transition-colors border-2 border-white rounded-full hover:bg-white/10"
+                      onClick={() => scrollToSection('contact')}
+                      aria-label="Talk to an Expert"
                     >
-                      View All POS Systems
+                      Talk to an Expert
                     </motion.button>
-                  </Link>
-                  {/* Secondary CTA: "Talk to an Expert" */}
-                  <motion.button
-                    type="button"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-8 py-4 text-lg font-semibold text-gray-900 transition-colors rounded-full bg-amber-400 hover:bg-amber-300 shadow-md"
-                    onClick={() => scrollToSection('contact')}
-                    aria-label="Talk to an Expert"
-                  >
-                    Talk to an Expert
-                  </motion.button>
+                    <Link href="/poslineup">
+                      <motion.button
+                        type="button"
+                        whileHover={{ scale: 1.05, boxShadow: '0px 4px 20px rgba(59,130,246,0.3)' }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-8 py-4 text-lg font-semibold text-white transition-colors bg-blue-600 rounded-full hover:bg-blue-700 shadow-md"
+                        aria-label="View All POS Systems"
+                      >
+                        View All POS Systems
+                      </motion.button>
+                    </Link>
+                  </motion.div>
+                  <AiSearchOverlay />
                 </motion.div>
               </div>
             </div>
           </div>
 
-          {/**
-           * NEW SECTION: Short Intro / “Why StarAccept” 
-           */}
-          <section className="py-16 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
-            <div className="max-w-6xl mx-auto px-4">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                  Why StarAccept?
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-                  Our all-in-one solutions combine next-gen payment technology
-                  with transparent, zero-fee pricing. Whether you're a small
-                  shop or a multi-location enterprise, we’ve got you covered.
-                </p>
-              </div>
-              {/* Simple bullet highlights */}
-              <div className="grid gap-8 md:grid-cols-3">
-                {[
-                  {
-                    icon: <FaShieldAlt className="text-blue-600 dark:text-blue-400 text-3xl" />,
-                    title: 'Secure & Compliant',
-                    text: 'Full PCI compliance ensures safe and worry-free transactions.'
-                  },
-                  {
-                    icon: <FaHeadset className="text-green-600 dark:text-green-400 text-3xl" />,
-                    title: '24/7 Expert Support',
-                    text: 'Round-the-clock assistance so you’re never left hanging.'
-                  },
-                  {
-                    icon: <FaBolt className="text-amber-500 dark:text-amber-400 text-3xl" />,
-                    title: 'Lightning-Fast Setup',
-                    text: 'Get up and running in as little as 24 hours.'
-                  }
-                ].map((item, index) => (
-                  <motion.div
-                    key={index}
-                    className="p-8 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-sm text-center"
-                    whileHover={{ y: -4 }}
-                  >
-                    <div className="mb-4 flex justify-center">{item.icon}</div>
-                    <h4 className="text-lg font-semibold mb-2">{item.title}</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      {item.text}
-                    </p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/** 
-           * STATS SECTION 
-           * (Now placed after short intro)
-           */}
+          {/* Stats Section - Enhanced with client logos and interactive hover effects */}
           <section className="py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 text-gray-900 dark:text-white">
             <div className="max-w-6xl mx-auto px-4">
-              <h2 className="text-3xl font-bold text-center mb-4">
-                Businesses Of All Sizes
-              </h2>
+              <h2 className="text-3xl font-bold text-center mb-4">Businesses Of All Sizes</h2>
               <p className="text-center text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-12">
-                Join thousands of merchants who’ve upgraded to our simpler, more
-                affordable payment processing platform.
+                Join thousands of merchants who've upgraded to our simpler, more affordable payment processing platform.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
                 <motion.div
                   className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center"
-                  whileHover={{ y: -5 }}
+                  whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <FaCheckCircle
-                    className="text-green-500 dark:text-green-400 text-4xl mb-2"
-                    aria-hidden="true"
-                  />
-                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">
-                    99.99%
-                  </h3>
-                  <p className="mt-2 text-gray-600 dark:text-gray-300">
-                    Uptime
-                  </p>
+                  <FaCheckCircle className="text-green-500 dark:text-green-400 text-4xl mb-2" aria-hidden="true" />
+                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">99.99%</h3>
+                  <p className="mt-2 text-gray-600 dark:text-gray-300">Uptime</p>
                 </motion.div>
                 <motion.div
                   className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center"
-                  whileHover={{ y: -5 }}
+                  whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <FaClock
-                    className="text-blue-500 dark:text-blue-400 text-4xl mb-2"
-                    aria-hidden="true"
-                  />
-                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">
-                    24/7
-                  </h3>
-                  <p className="mt-2 text-gray-600 dark:text-gray-300">
-                    Support
-                  </p>
+                  <FaClock className="text-blue-500 dark:text-blue-400 text-4xl mb-2" aria-hidden="true" />
+                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">24/7</h3>
+                  <p className="mt-2 text-gray-600 dark:text-gray-300">Support</p>
                 </motion.div>
                 <motion.div
                   className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center"
-                  whileHover={{ y: -5 }}
+                  whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <FaHandshake
-                    className="text-orange-500 dark:text-orange-400 text-4xl mb-2"
-                    aria-hidden="true"
-                  />
+                  <FaHandshake className="text-orange-500 dark:text-orange-400 text-4xl mb-2" aria-hidden="true" />
                   <h3 className="text-xl font-bold text-gray-800 dark:text-white">
                     Direct Channel
                   </h3>
-                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                    No Middleman, No Hidden Fees
-                  </p>
+                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">No Middleman, No Hidden Fees</p>
                 </motion.div>
                 <motion.div
                   className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center"
-                  whileHover={{ y: -5 }}
+                  whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <FaPuzzlePiece
-                    className="text-purple-500 dark:text-purple-400 text-4xl mb-2"
-                    aria-hidden="true"
-                  />
-                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">
-                    300+
-                  </h3>
-                  <p className="mt-2 text-gray-600 dark:text-gray-300">
-                    Integrations
-                  </p>
+                  <FaPuzzlePiece className="text-purple-500 dark:text-purple-400 text-4xl mb-2" aria-hidden="true" />
+                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">300+</h3>
+                  <p className="mt-2 text-gray-600 dark:text-gray-300">Integrations</p>
                 </motion.div>
                 <motion.div
                   className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center"
-                  whileHover={{ y: -5 }}
+                  whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <FaGlobe
-                    className="text-green-600 dark:text-green-400 text-4xl mb-2"
-                    aria-hidden="true"
-                  />
-                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">
-                    Global
-                  </h3>
-                  <p className="mt-2 text-gray-600 dark:text-gray-300">
-                    Coverage
-                  </p>
+                  <FaGlobe className="text-green-600 dark:text-green-400 text-4xl mb-2" aria-hidden="true" />
+                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">Global</h3>
+                  <p className="mt-2 text-gray-600 dark:text-gray-300">Coverage</p>
                 </motion.div>
               </div>
             </div>
           </section>
 
-          {/** 
-           * FEATURED SOLUTIONS (formerly “Flexible Solutions...”) 
-           */}
+          {/* NEW: Testimonials Section for social proof */}
+          <section className="py-20 bg-white dark:bg-gray-900">
+            <div className="max-w-6xl mx-auto px-4">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">What Our Clients Say</h2>
+                <p className="text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                  Don't just take our word for it. Here's what businesses like yours have experienced after switching to StarAccept.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <motion.div
+                  className="bg-gray-50 dark:bg-gray-800 p-8 rounded-2xl shadow-sm"
+                  whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                >
+                  <div className="flex items-center mb-4">
+                    <div className="mr-4 bg-gray-200 dark:bg-gray-700 w-12 h-12 rounded-full flex items-center justify-center">
+                      <FaUsers className="text-gray-600 dark:text-gray-400" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white">Carlos Cedeno</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Coastal Grill Restaurant</p>
+                    </div>
+                  </div>
+                  <div className="mb-4 flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <FaStar key={star} className="text-amber-500 mr-1" />
+                    ))}
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300 italic">
+                    "Switching to StarAccept saved us over $12,000 in processing fees last year. The Clover online ordering system boosted our takeout sales substantially. Their team has been incredible with support whenever we need it."
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  className="bg-gray-50 dark:bg-gray-800 p-8 rounded-2xl shadow-sm"
+                  whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                >
+                  <div className="flex items-center mb-4">
+                    <div className="mr-4 bg-gray-200 dark:bg-gray-700 w-12 h-12 rounded-full flex items-center justify-center">
+                      <FaUsers className="text-gray-600 dark:text-gray-400" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white">Gus T</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Urban Boutique</p>
+                    </div>
+                  </div>
+                  <div className="mb-4 flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <FaStar key={star} className="text-amber-500 mr-1" />
+                    ))}
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300 italic">
+                    "As a small retailer, I needed something affordable but powerful. The Mini POS system has everything I need - inventory management, customer tracking, and the zero-fee program means I can pass savings to my customers."
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  className="bg-gray-50 dark:bg-gray-800 p-8 rounded-2xl shadow-sm"
+                  whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                >
+                  <div className="flex items-center mb-4">
+                    <div className="mr-4 bg-gray-200 dark:bg-gray-700 w-12 h-12 rounded-full flex items-center justify-center">
+                      <FaUsers className="text-gray-600 dark:text-gray-400" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white">Dr. Wilson</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Downtown Medical Clinic</p>
+                    </div>
+                  </div>
+                  <div className="mb-4 flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <FaStar key={star} className="text-amber-500 mr-1" />
+                    ))}
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300 italic">
+                    "The security features give us peace of mind when handling patient payments. Integration with our scheduling software was seamless, and we've reduced our monthly processing costs significantly."
+                  </p>
+                </motion.div>
+              </div>
+
+              <div className="text-center mt-12">
+                <Link href="#product-selector">
+                  <motion.button
+                    type="button"
+                    whileHover={{ scale: 1.05, boxShadow: '0px 4px 20px rgba(59,130,246,0.3)' }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-8 py-4 text-lg font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 shadow-md"
+                    onClick={() => scrollToSection('product-selector')}
+                  >
+                    Personalized Payment Solution
+                  </motion.button>
+                </Link>
+              </div>
+            </div>
+          </section>
+
+          {/* Flexible Solutions Section - Improved visual presentation */}
           <section className="py-16 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-100">
             <div className="max-w-6xl mx-auto px-4">
               <div className="mb-12 text-center">
                 <span className="inline-block px-4 py-1 mb-4 text-sm font-medium text-blue-600 bg-blue-100 dark:bg-blue-900 dark:text-blue-300 rounded-full">
                   All-in-One Platform
                 </span>
-                <h2 className="text-3xl font-bold mb-4">
-                  Featured Solutions for Every Business
-                </h2>
+                <h2 className="text-3xl font-bold mb-4">Flexible Solutions for Every Business</h2>
                 <p className="mt-2 text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                  Powerful features and hardware options tailored to your unique
-                  business needs and growth stage
+                  Powerful features and hardware options tailored to your unique business needs and growth stage
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
@@ -2352,35 +2048,35 @@ export default function Home() {
                   {
                     icon: FaCreditCard,
                     title: "Payments",
-                    desc: "Accept Apple Pay, Google Pay, QR, and more.",
+                    desc: "Accept Apple Pay, Google Pay, Android Pay, Samsung Pay, Tap To Pay, and more.",
                     color: "bg-blue-100 dark:bg-blue-900/30",
                     iconColor: "text-blue-600 dark:text-blue-400"
                   },
                   {
                     icon: FaCog,
                     title: "Software",
-                    desc: "Manage tables, menus, online ordering, and more.",
+                    desc: "Manage tables, customize orders, control menus, handle online ordering, and more.",
                     color: "bg-purple-100 dark:bg-purple-900/30",
                     iconColor: "text-purple-600 dark:text-purple-400"
                   },
                   {
                     icon: FaTools,
                     title: "Hardware",
-                    desc: "Countertop stations, handhelds, and KDS for any size.",
+                    desc: "Countertop stations, handheld devices, and KDS options for restaurants of any size.",
                     color: "bg-amber-100 dark:bg-amber-900/30",
                     iconColor: "text-amber-600 dark:text-amber-400"
                   },
                   {
                     icon: FaLaptop,
                     title: "Applications",
-                    desc: "Online orders, reservations, loyalty, and more.",
+                    desc: "Streamline online orders, reservations, loyalty programs, and more.",
                     color: "bg-green-100 dark:bg-green-900/30",
                     iconColor: "text-green-600 dark:text-green-400"
                   },
                   {
                     icon: FaRegLightbulb,
                     title: "Tailored Solutions",
-                    desc: "From idea to 25+ locations, we’ll find the perfect fit.",
+                    desc: "From ideas on a napkin to your 25th location, we'll find the perfect fit for you.",
                     color: "bg-red-100 dark:bg-red-900/30",
                     iconColor: "text-red-600 dark:text-red-400"
                   }
@@ -2390,58 +2086,38 @@ export default function Home() {
                     className="flex flex-col items-center text-center"
                     whileHover={{ y: -5 }}
                   >
-                    <div
-                      className={`w-20 h-20 rounded-full ${item.color} flex items-center justify-center mb-4 shadow-sm`}
-                    >
-                      <item.icon className={`${item.iconColor} text-3xl`} />
+                    <div className={`w-20 h-20 rounded-full ${item.color} flex items-center justify-center mb-4 shadow-sm`}>
+                      <item.icon className={`${item.iconColor} text-3xl`} aria-hidden="true" />
                     </div>
                     <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {item.desc}
-                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{item.desc}</p>
                   </motion.div>
                 ))}
               </div>
 
-              {/* Zero-Fee highlight */}
+              {/* Feature highlight */}
               <div className="mt-16 bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
                 <div className="grid md:grid-cols-2 items-center">
                   <div className="p-8 md:p-12">
                     <span className="inline-block px-4 py-1 mb-4 text-sm font-medium text-amber-600 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 rounded-full">
                       Most Popular
                     </span>
-                    <h3 className="text-2xl font-bold mb-4">
-                      Zero-Fee Processing
-                    </h3>
+                    <h3 className="text-2xl font-bold mb-4">Zero-Fee Processing</h3>
                     <p className="text-gray-600 dark:text-gray-400 mb-6">
-                      Eliminate processing fees with our surcharging program.
-                      Fully compliant and automatically itemized for customers
-                      to see. Save thousands annually without hidden costs.
+                      Eliminate processing fees with our innovative surcharging program. Fully compliant with all regulations, our system automatically adds the exact processing fee as a separate line item on customer receipts.
                     </p>
                     <ul className="space-y-3 mb-8">
                       {[
                         "Save thousands in processing fees annually",
-                        "Fully compliant with card brand rules",
+                        "Fully compliant with Visa/MC regulations",
                         "Transparent fee display for customers",
-                        "Simple setup—no technical headaches"
+                        "Simple setup with no technical headaches"
                       ].map((item, i) => (
                         <li key={i} className="flex items-start">
-                          <svg
-                            className="w-5 h-5 text-green-500 mr-2 mt-0.5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M5 13l4 4L19 7"
-                            ></path>
+                          <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                           </svg>
-                          <span className="text-gray-700 dark:text-gray-300">
-                            {item}
-                          </span>
+                          <span className="text-gray-700 dark:text-gray-300">{item}</span>
                         </li>
                       ))}
                     </ul>
@@ -2453,7 +2129,7 @@ export default function Home() {
                         className="px-6 py-3 bg-amber-500 text-gray-900 rounded-full hover:bg-amber-400 shadow-md"
                         onClick={() => scrollToSection('contact')}
                       >
-                        Learn How Much You’ll Save
+                        Learn How Much You'll Save
                       </motion.button>
                     </Link>
                   </div>
@@ -2472,136 +2148,8 @@ export default function Home() {
             </div>
           </section>
 
-          {/** 
-           * TESTIMONIALS 
-           * (Now after 'Featured Solutions')
-           */}
-          <section className="py-20 bg-white dark:bg-gray-900">
-            <div className="max-w-6xl mx-auto px-4">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                  What Our Clients Say
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-                  Don’t just take our word for it. Here’s what businesses like
-                  yours have experienced after switching to StarAccept.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <motion.div
-                  className="bg-gray-50 dark:bg-gray-800 p-8 rounded-2xl shadow-sm"
-                  whileHover={{ y: -5 }}
-                >
-                  <div className="flex items-center mb-4">
-                    <div className="mr-4 bg-gray-200 dark:bg-gray-700 w-12 h-12 rounded-full flex items-center justify-center">
-                      <FaUsers className="text-gray-600 dark:text-gray-400" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900 dark:text-white">
-                        Carlos Cedeno
-                      </h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Coastal Grill Restaurant
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mb-4 flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <FaStar key={star} className="text-amber-500 mr-1" />
-                    ))}
-                  </div>
-                  <p className="text-gray-700 dark:text-gray-300 italic">
-                    "Switching to StarAccept saved us over $12,000 in fees last
-                    year. Their Clover online ordering system boosted our takeout
-                    sales substantially, and the support team has been incredible."
-                  </p>
-                </motion.div>
-
-                <motion.div
-                  className="bg-gray-50 dark:bg-gray-800 p-8 rounded-2xl shadow-sm"
-                  whileHover={{ y: -5 }}
-                >
-                  <div className="flex items-center mb-4">
-                    <div className="mr-4 bg-gray-200 dark:bg-gray-700 w-12 h-12 rounded-full flex items-center justify-center">
-                      <FaUsers className="text-gray-600 dark:text-gray-400" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900 dark:text-white">
-                        Gus T
-                      </h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Urban Boutique
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mb-4 flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <FaStar key={star} className="text-amber-500 mr-1" />
-                    ))}
-                  </div>
-                  <p className="text-gray-700 dark:text-gray-300 italic">
-                    "As a small retailer, I needed something affordable but
-                    powerful. The Mini POS has everything I need - inventory
-                    management and loyalty, plus the zero-fee program saves me
-                    a ton monthly."
-                  </p>
-                </motion.div>
-
-                <motion.div
-                  className="bg-gray-50 dark:bg-gray-800 p-8 rounded-2xl shadow-sm"
-                  whileHover={{ y: -5 }}
-                >
-                  <div className="flex items-center mb-4">
-                    <div className="mr-4 bg-gray-200 dark:bg-gray-700 w-12 h-12 rounded-full flex items-center justify-center">
-                      <FaUsers className="text-gray-600 dark:text-gray-400" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900 dark:text-white">
-                        Dr. Wilson
-                      </h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Downtown Medical Clinic
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mb-4 flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <FaStar key={star} className="text-amber-500 mr-1" />
-                    ))}
-                  </div>
-                  <p className="text-gray-700 dark:text-gray-300 italic">
-                    "The security features give us peace of mind handling patient
-                    payments. Integration with our scheduling software was
-                    seamless, and we've cut monthly processing costs in half."
-                  </p>
-                </motion.div>
-              </div>
-
-              <div className="text-center mt-12">
-                <Link href="#product-selector">
-                  <motion.button
-                    type="button"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-8 py-4 text-lg font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 shadow-md"
-                    onClick={() => scrollToSection('product-selector')}
-                  >
-                    Personalized Payment Solution
-                  </motion.button>
-                </Link>
-              </div>
-            </div>
-          </section>
-
-          {/**
-           * WIZARD 
-           * (Positioned AFTER Testimonials per prompt)
-           */}
-          <section
-            className="py-20 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900"
-            id="product-selector"
-          >
+          {/* Wizard Section - Enhanced with better UX and accessibility */}
+          <section className="py-20 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900" id="product-selector">
             <div className="max-w-6xl px-4 mx-auto">
               <div className="mb-12 text-center">
                 <span className="inline-block px-4 py-1 mb-4 text-sm font-medium text-blue-600 bg-blue-100 dark:bg-blue-900 dark:text-blue-300 rounded-full">
@@ -2611,13 +2159,13 @@ export default function Home() {
                   Find Your Perfect Payment Solution
                 </h2>
                 <p className="max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">
-                  Answer a few quick questions and we’ll match you with the ideal
-                  system for your specific business needs.
+                  Answer a few quick questions and we'll match you with the ideal system for your specific business needs.
                 </p>
               </div>
 
               <div className="p-8 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-2xl shadow-lg">
                 {renderProgressIndicator()}
+
                 <AnimatePresence initial={false} mode="wait">
                   <motion.div
                     key={wizardStep}
@@ -2625,7 +2173,7 @@ export default function Home() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -100 }}
                     transition={{ duration: 0.4, ease: 'easeInOut' }}
-                    className="min-h-[400px]"
+                    className="min-h-[400px]" // Prevent layout shift
                   >
                     {selectorSubmission.isLoading ? (
                       <div className="flex items-center justify-center h-64">
@@ -2653,18 +2201,8 @@ export default function Home() {
                       aria-label="Go to previous step"
                     >
                       <span className="flex items-center">
-                        <svg
-                          className="w-4 h-4 mr-2"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M15 19l-7-7 7-7"
-                          />
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
                         </svg>
                         Previous
                       </span>
@@ -2675,9 +2213,7 @@ export default function Home() {
                       onClick={handleNextStep}
                       disabled={wizardStep === 5}
                       className={`px-6 py-3 text-white bg-blue-600 dark:bg-blue-500 rounded-full transition-colors shadow-md ${
-                        wizardStep === 5
-                          ? 'opacity-50 cursor-not-allowed'
-                          : 'hover:bg-blue-700 dark:hover:bg-blue-600'
+                        wizardStep === 5 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700 dark:hover:bg-blue-600'
                       }`}
                       whileHover={wizardStep !== 5 ? { scale: 1.05 } : undefined}
                       whileTap={wizardStep !== 5 ? { scale: 0.95 } : undefined}
@@ -2685,93 +2221,54 @@ export default function Home() {
                     >
                       <span className="flex items-center">
                         Next
-                        <svg
-                          className="w-4 h-4 ml-2"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M9 5l7 7-7 7"
-                          />
+                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                         </svg>
                       </span>
                     </motion.button>
                   </div>
                 )}
               </div>
-            </div>
-          </section>
 
-          {/**
-           * AI SEARCH OVERLAY 
-           * (Moved below Wizard)
-           */}
-          <section className="pt-8 pb-16 bg-white dark:bg-gray-900">
-            <div className="max-w-6xl mx-auto px-4">
-              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
-                Still Not Sure? Ask Our AI!
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Type a question about your business or specific POS needs, and
-                our AI will suggest the best solutions.
-              </p>
-              <AiSearchOverlay />
-            </div>
-          </section>
-
-          {/**
-           * FAQ SECTION 
-           * (Now after the AI overlay, to answer final objections)
-           */}
-          <section className="py-20 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900">
-            <div className="max-w-6xl mx-auto px-4">
-              <h3 className="mb-8 text-2xl font-bold text-center text-gray-900 dark:text-white">
-                Frequently Asked Questions
-              </h3>
-              <div className="grid gap-6 md:grid-cols-2">
-                {[
-                  {
-                    q: "How quickly can I start processing payments?",
-                    a: "Most merchants are approved within 24-48 hours and can begin processing immediately after receiving their equipment."
-                  },
-                  {
-                    q: "Are there any long-term contracts?",
-                    a: "No. We believe in earning your business every day. Our solutions come with no long-term contracts or early termination fees."
-                  },
-                  {
-                    q: "Is your zero-fee program compliant with card brand rules?",
-                    a: "Yes. Our surcharging program is fully compliant with Visa, Mastercard, Discover, and American Express regulations. We handle all updates automatically."
-                  },
-                  {
-                    q: "Do you offer technical support?",
-                    a: "Absolutely. We provide 24/7 technical support via phone, email, and chat to ensure your payment systems are always running smoothly."
-                  }
-                ].map((faq, index) => (
-                  <motion.div
-                    key={index}
-                    className="p-6 bg-gray-50 dark:bg-gray-800 rounded-xl"
-                    whileHover={{ y: -2, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
-                  >
-                    <h4 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-                      {faq.q}
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      {faq.a}
-                    </p>
-                  </motion.div>
-                ))}
+              {/* FAQ Section - addresses objections */}
+              <div className="mt-20">
+                <h3 className="mb-8 text-2xl font-bold text-center text-gray-900 dark:text-white">
+                  Frequently Asked Questions
+                </h3>
+                <div className="grid gap-6 md:grid-cols-2">
+                  {[
+                    {
+                      q: "How quickly can I start processing payments?",
+                      a: "Most merchants are approved within 24-48 hours and can begin processing immediately after receiving their equipment."
+                    },
+                    {
+                      q: "Are there any long-term contracts?",
+                      a: "No. We believe in earning your business every day. Our solutions come with no long-term contracts or early termination fees."
+                    },
+                    {
+                      q: "Is your zero-fee program compliant with card brand rules?",
+                      a: "Yes. Our surcharging program is fully compliant with Visa, Mastercard, Discover, and American Express regulations and is automatically updated to remain compliant with any rule changes."
+                    },
+                    {
+                      q: "Do you offer technical support?",
+                      a: "Absolutely. We provide 24/7 technical support via phone, email, and chat to ensure your payment systems are always running smoothly."
+                    }
+                  ].map((faq, index) => (
+                    <motion.div
+                      key={index}
+                      className="p-6 bg-gray-50 dark:bg-gray-800 rounded-xl"
+                      whileHover={{ y: -2, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+                    >
+                      <h4 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">{faq.q}</h4>
+                      <p className="text-gray-600 dark:text-gray-400">{faq.a}</p>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             </div>
           </section>
 
-          {/**
-           * CONTACT SECTION 
-           * (Placed after FAQ)
-           */}
+          {/* Contact Section - Optimized for conversions */}
           <div
             className="relative px-4 py-20 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800"
             id="contact"
@@ -2781,12 +2278,9 @@ export default function Home() {
                 <span className="inline-block px-4 py-1 mb-4 text-sm font-medium text-blue-600 bg-blue-100 dark:bg-blue-900 dark:text-blue-300 rounded-full">
                   Get in Touch
                 </span>
-                <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">
-                  Ready to Get Started?
-                </h2>
+                <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">Ready to Get Started?</h2>
                 <p className="max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">
-                  Talk to a payment expert today and discover how we can help
-                  your business grow.
+                  Talk to a payment expert today and discover how we can help your business grow.
                 </p>
               </div>
 
@@ -2795,10 +2289,7 @@ export default function Home() {
                   <form onSubmit={handleContactSubmit} className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
                       <div>
-                        <label
-                          htmlFor="contact-firstName"
-                          className="block mb-2 text-sm font-medium text-gray-700 dark:text-white"
-                        >
+                        <label htmlFor="contact-firstName" className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
                           First Name*
                         </label>
                         <input
@@ -2813,10 +2304,7 @@ export default function Home() {
                         />
                       </div>
                       <div>
-                        <label
-                          htmlFor="contact-lastName"
-                          className="block mb-2 text-sm font-medium text-gray-700 dark:text-white"
-                        >
+                        <label htmlFor="contact-lastName" className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
                           Last Name*
                         </label>
                         <input
@@ -2832,10 +2320,7 @@ export default function Home() {
                       </div>
                     </div>
                     <div>
-                      <label
-                        htmlFor="contact-email"
-                        className="block mb-2 text-sm font-medium text-gray-700 dark:text-white"
-                      >
+                      <label htmlFor="contact-email" className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
                         Business Email*
                       </label>
                       <input
@@ -2850,10 +2335,7 @@ export default function Home() {
                       />
                     </div>
                     <div>
-                      <label
-                        htmlFor="contact-phone"
-                        className="block mb-2 text-sm font-medium text-gray-700 dark:text-white"
-                      >
+                      <label htmlFor="contact-phone" className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
                         Phone Number*
                       </label>
                       <input
@@ -2869,10 +2351,7 @@ export default function Home() {
                     </div>
                     <div className="grid gap-6 md:grid-cols-2">
                       <div>
-                        <label
-                          htmlFor="callDate"
-                          className="block mb-2 text-sm font-medium text-gray-700 dark:text-white"
-                        >
+                        <label htmlFor="callDate" className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
                           Preferred Call Date
                         </label>
                         <input
@@ -2885,10 +2364,7 @@ export default function Home() {
                         />
                       </div>
                       <div>
-                        <label
-                          htmlFor="preferredTime"
-                          className="block mb-2 text-sm font-medium text-gray-700 dark:text-white"
-                        >
+                        <label htmlFor="preferredTime" className="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
                           Preferred Time
                         </label>
                         <select
@@ -2900,9 +2376,7 @@ export default function Home() {
                         >
                           <option value="">Select a time</option>
                           <option value="morning">Morning (9AM - 12PM)</option>
-                          <option value="afternoon">
-                            Afternoon (12PM - 5PM)
-                          </option>
+                          <option value="afternoon">Afternoon (12PM - 5PM)</option>
                           <option value="evening">Evening (5PM - 8PM)</option>
                         </select>
                       </div>
@@ -2924,10 +2398,9 @@ export default function Home() {
                                 payload: { name: 'numLocationsChoice', value: opt }
                               });
                             }}
-                            className={`px-4 py-2 rounded-full text-sm shadow-sm ${
-                              contactFormData.numLocationsChoice === opt
-                                ? 'bg-blue-600 text-white dark:bg-blue-500'
-                                : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500'
+                            className={`px-4 py-2 rounded-full text-sm shadow-sm ${contactFormData.numLocationsChoice === opt
+                              ? 'bg-blue-600 text-white dark:bg-blue-500'
+                              : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500'
                             }`}
                             aria-label={`Select ${opt} location${opt !== '1' ? 's' : ''}`}
                           >
@@ -2944,10 +2417,9 @@ export default function Home() {
                               payload: { name: 'numLocationsChoice', value: 'plus' }
                             });
                           }}
-                          className={`px-4 py-2 rounded-full text-sm shadow-sm ${
-                            contactFormData.numLocationsChoice === 'plus'
-                              ? 'bg-blue-600 text-white dark:bg-blue-500'
-                              : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500'
+                          className={`px-4 py-2 rounded-full text-sm shadow-sm ${contactFormData.numLocationsChoice === 'plus'
+                            ? 'bg-blue-600 text-white dark:bg-blue-500'
+                            : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500'
                           }`}
                           aria-label="More than 5 locations"
                         >
@@ -2956,10 +2428,7 @@ export default function Home() {
                       </div>
                       {contactFormData.numLocationsChoice === 'plus' && (
                         <div className="mt-3">
-                          <label
-                            htmlFor="numLocationsCustom"
-                            className="block mb-1 text-sm text-gray-600 dark:text-gray-400"
-                          >
+                          <label htmlFor="numLocationsCustom" className="block mb-1 text-sm text-gray-600 dark:text-gray-400">
                             Enter number of locations:
                           </label>
                           <input
@@ -2992,10 +2461,9 @@ export default function Home() {
                                 payload: { name: 'monthlyVolume', value: range }
                               });
                             }}
-                            className={`px-4 py-2 rounded-full border text-sm shadow-sm ${
-                              contactFormData.monthlyVolume === range
-                                ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500'
-                                : 'text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
+                            className={`px-4 py-2 rounded-full border text-sm shadow-sm ${contactFormData.monthlyVolume === range
+                              ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500'
+                              : 'text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
                             }`}
                             aria-label={`Monthly volume: ${range}`}
                           >
@@ -3008,19 +2476,13 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* Privacy notice */}
+                    {/* Privacy notice - reduces perceived risk */}
                     <div className="text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
                       <p className="flex items-start">
                         <FaLock className="text-green-600 dark:text-green-400 mt-0.5 mr-2 flex-shrink-0" />
                         <span>
-                          By submitting this form, you agree to our{' '}
-                          <Link
-                            href="/privacy"
-                            className="text-blue-600 dark:text-blue-400 hover:underline"
-                          >
-                            Privacy Policy
-                          </Link>
-                          . We’ll never share your information with third parties.
+                          By submitting this form, you agree to our <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline">Privacy Policy</Link>.
+                          We'll never share your information with third parties.
                         </span>
                       </p>
                     </div>
@@ -3029,33 +2491,15 @@ export default function Home() {
                       <motion.button
                         type="submit"
                         className="w-full py-4 px-6 rounded-full font-semibold text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
-                        whileHover={{
-                          scale: 1.02,
-                          boxShadow: '0px 4px 20px rgba(59,130,246,0.3)'
-                        }}
+                        whileHover={{ scale: 1.02, boxShadow: '0px 4px 20px rgba(59,130,246,0.3)' }}
                         whileTap={{ scale: 0.98 }}
                         disabled={contactSubmission.isLoading}
                       >
                         {contactSubmission.isLoading ? (
                           <span className="flex items-center justify-center">
-                            <svg
-                              className="w-5 h-5 mr-3 -ml-1 text-white animate-spin"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              ></circle>
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              ></path>
+                            <svg className="w-5 h-5 mr-3 -ml-1 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                             Sending...
                           </span>
@@ -3069,10 +2513,9 @@ export default function Home() {
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className={`p-4 rounded-lg mt-2 ${
-                          contactSubmission.status === 'success'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-200'
-                            : 'bg-red-100 text-red-800 dark:bg-red-800/30 dark:text-red-200'
+                        className={`p-4 rounded-lg mt-2 ${contactSubmission.status === 'success'
+                          ? 'bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-200'
+                          : 'bg-red-100 text-red-800 dark:bg-red-800/30 dark:text-red-200'
                         }`}
                         role="alert"
                       >
@@ -3084,54 +2527,36 @@ export default function Home() {
 
                 <div className="space-y-8">
                   <div className="p-8 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-2xl shadow-lg">
-                    <h3 className="mb-6 text-2xl font-semibold dark:text-white">
-                      Why Businesses Choose Us
-                    </h3>
+                    <h3 className="mb-6 text-2xl font-semibold dark:text-white">Why Businesses Choose Us</h3>
                     <div className="space-y-6">
                       {[
                         {
                           title: 'Save on Processing Fees',
-                          description:
-                            'Our transparent pricing and zero-fee options save merchants up to 100% of their processing costs.',
-                          icon: (
-                            <FaChartLine className="text-green-500 dark:text-green-400 text-2xl" />
-                          )
+                          description: 'Our transparent pricing and zero-fee options save merchants up to 100% of their processing costs.',
+                          icon: <FaChartLine className="text-green-500 dark:text-green-400 text-2xl" />,
                         },
                         {
                           title: 'Local Support Team',
-                          description:
-                            'Get personalized assistance from payment experts who understand your local market and industry.',
-                          icon: (
-                            <FaUsers className="text-blue-500 dark:text-blue-400 text-2xl" />
-                          )
+                          description: 'Get personalized assistance from payment experts who understand your local market and industry.',
+                          icon: <FaUsers className="text-blue-500 dark:text-blue-400 text-2xl" />,
                         },
                         {
                           title: 'Future-Proof Technology',
-                          description:
-                            'We continually update our systems to support the latest payment methods and security standards.',
-                          icon: (
-                            <FaMobileAlt className="text-purple-500 dark:text-purple-400 text-2xl" />
-                          )
-                        }
+                          description: 'Our systems are constantly updated to support the latest payment methods and security standards.',
+                          icon: <FaMobileAlt className="text-purple-500 dark:text-purple-400 text-2xl" />,
+                        },
                       ].map((item, index) => (
                         <motion.div
                           key={index}
                           className="flex items-start space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-800"
-                          whileHover={{
-                            y: -2,
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-                          }}
+                          whileHover={{ y: -2, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
                         >
                           <div className="flex-shrink-0 p-3 bg-white dark:bg-gray-700 rounded-full shadow-sm">
                             {item.icon}
                           </div>
                           <div>
-                            <h4 className="font-semibold text-gray-900 dark:text-white">
-                              {item.title}
-                            </h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {item.description}
-                            </p>
+                            <h4 className="font-semibold text-gray-900 dark:text-white">{item.title}</h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{item.description}</p>
                           </div>
                         </motion.div>
                       ))}
@@ -3150,21 +2575,13 @@ export default function Home() {
                   </div>
 
                   <div className="p-6 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-xl shadow-lg">
-                    <h3 className="mb-4 text-xl font-semibold dark:text-white">
-                      Direct Contact
-                    </h3>
+                    <h3 className="mb-4 text-xl font-semibold dark:text-white">Direct Contact</h3>
                     <div className="space-y-4">
                       <a
                         href="tel:+18888857333"
                         className="flex items-center p-3 space-x-3 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 bg-gray-50 dark:bg-gray-800 rounded-xl transition-colors"
                       >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          aria-hidden="true"
-                        >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -3178,13 +2595,7 @@ export default function Home() {
                         href="mailto:support@staraccept.com"
                         className="flex items-center p-3 space-x-3 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 bg-gray-50 dark:bg-gray-800 rounded-xl transition-colors"
                       >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          aria-hidden="true"
-                        >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -3201,9 +2612,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/**
-           * FOOTER & Floating “Apply Now” 
-           */}
+          {/* FOOTER - Enhanced with proper structure */}
           <footer className="py-12 bg-white dark:bg-gray-900">
             <div className="max-w-6xl px-4 mx-auto">
               <div className="grid gap-8 md:grid-cols-4 mb-8">
@@ -3217,77 +2626,52 @@ export default function Home() {
                       className="transition-all duration-300 hover:brightness-110 dark:brightness-150"
                     />
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                      StarAccept provides cutting-edge POS systems and payment
-                      processing solutions for businesses of all sizes.
+                      StarAccept provides cutting-edge POS systems and payment processing solutions for businesses of all sizes.
                     </p>
                   </div>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-                    Industry Solutions
-                  </h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Industry Solutions</h3>
                   <ul className="space-y-2">
                     <li>
-                      <Link
-                        href="/restaurants"
-                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
-                      >
+                      <Link href="/restaurants" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm">
                         Restaurant POS Systems
                       </Link>
                     </li>
                     <li>
-                      <Link
-                        href="/retail"
-                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
-                      >
+                      <Link href="/retail" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm">
                         Retail POS Systems
                       </Link>
                     </li>
                     <li>
-                      <Link
-                        href="/services"
-                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
-                      >
+                      <Link href="/services" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm">
                         Service Business Solutions
                       </Link>
                     </li>
                   </ul>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-                    Products
-                  </h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Products</h3>
                   <ul className="space-y-2">
                     <li>
-                      <Link
-                        href="/poslineup"
-                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
-                      >
+                      <Link href="/poslineup" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm">
                         POS Systems
                       </Link>
                     </li>
                     <li>
-                      <Link
-                        href="/online-ordering"
-                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
-                      >
+                      <Link href="/online-ordering" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm">
                         Online Ordering
                       </Link>
                     </li>
                     <li>
-                      <Link
-                        href="/working-capital-funding"
-                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
-                      >
+                      <Link href="/working-capital-funding" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm">
                         Working Capital Funding
                       </Link>
                     </li>
                   </ul>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-                    Contact Us
-                  </h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Contact Us</h3>
                   <ul className="space-y-2">
                     <li className="text-gray-600 dark:text-gray-400 text-sm">
                       <strong>Phone:</strong> (888) 885-7333
@@ -3307,10 +2691,11 @@ export default function Home() {
                 </div>
               </div>
 
+              
+
               <div className="pt-8 mt-8 border-t border-gray-200 dark:border-gray-700 text-center md:flex md:justify-between md:text-left">
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  © {new Date().getFullYear()} Star Accept Business Solutions.
-                  All rights reserved.
+                  © {new Date().getFullYear()} Star Accept Business Solutions. All rights reserved.
                 </p>
                 <div className="mt-4 md:mt-0">
                   <p className="text-sm text-gray-500 dark:text-gray-500">
@@ -3319,7 +2704,6 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            {/* Floating "Apply Now" Bar -- full-width at bottom */}
             <motion.div
               className="fixed bottom-0 left-0 w-full p-4 bg-amber-500 transition-transform z-40"
               initial={{ y: '100%' }}
@@ -3329,8 +2713,7 @@ export default function Home() {
             >
               <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between">
                 <p className="text-gray-900 font-medium mb-2 md:mb-0">
-                  Ready to eliminate credit card processing fees? Apply now and
-                  start saving!
+                  Ready to eliminate credit card processing fees? Apply now and start saving!
                 </p>
                 <a
                   href="https://onboarding.tillpayments.com/signup/6748abe55b6362feca0a75f3"

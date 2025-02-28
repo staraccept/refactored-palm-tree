@@ -24,12 +24,13 @@ import {
   FaBolt,
   FaMobileAlt
 } from 'react-icons/fa';
-import { ThemeProvider, useTheme } from './components/ThemeProvider';
+import Link from 'next/link';
+import { ThemeProvider, useTheme } from '../components/ThemeProvider';
 import { posProducts } from '@/lib/posProducts';
 import { findRelatedProducts as localFindProducts } from '@/lib/posProducts';
-import Link from 'next/link';
 
-// Types and Initial Data
+// ------------------ Types and Initial Data ------------------
+
 interface ProductSelectorData {
   businessType: string;
   softwareNeeds: string[];
@@ -92,7 +93,8 @@ const initialContactFormData = {
   monthlyVolume: '0-50K',
 };
 
-// Utility functions
+// ------------------ Utility functions ------------------
+
 function matchRecommendedItem(recommendation: string): PosProduct {
   const recLower = recommendation.trim().toLowerCase();
   const matched =
@@ -109,22 +111,19 @@ function matchRecommendedItem(recommendation: string): PosProduct {
       image: null,
       features: [],
       bestFor: [],
-      cta: ''
+      cta: '',
     }
   );
 }
 
-const sampleQueries = [
-  "I own a coffee shop and need a fast checkout system",
-  "I want a system that supports Apple Pay and QR codes",
-  "I have two locations and need real-time inventory sync",
-];
-
-/** 
- * AI Search Overlay 
- * -- Now placed BELOW the Wizard instead of in the Hero 
- */
+// ------------------ AiSearchOverlay Component ------------------
+// Moved below the Wizard to reduce hero clutter.
 function AiSearchOverlay() {
+  const sampleQueries = [
+    "I own a coffee shop and need a fast checkout system",
+    "I want a system that supports Apple Pay and QR codes",
+    "I have two locations and need real-time inventory sync",
+  ];
   const [currentSampleIndex, setCurrentSampleIndex] = useState(0);
   const [typedText, setTypedText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -138,7 +137,7 @@ function AiSearchOverlay() {
     isLoading: false,
     recommendations: [],
     errorMessage: "",
-    showResults: false
+    showResults: false,
   });
 
   const typingSpeed = 80;
@@ -146,16 +145,16 @@ function AiSearchOverlay() {
   const cursorRef = useRef<HTMLSpanElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Set cursor animation only once
+  // Cursor animation
   useEffect(() => {
     if (cursorRef.current) {
       cursorRef.current.style.animation = "blink 1s infinite";
     }
   }, []);
 
-  // Optimized typing effect
+  // Automated typing effect for sample queries
   useEffect(() => {
-    if (userQuery) return; // Skip when user has typed something
+    if (userQuery) return; // Stop typing animation once user types
 
     const text = sampleQueries[currentSampleIndex];
 
@@ -180,25 +179,26 @@ function AiSearchOverlay() {
     return () => clearTimeout(timer);
   }, [typedText, isDeleting, currentSampleIndex, userQuery]);
 
-  // Clean user query to improve matching
+  // Clean user query
   const preprocessQuery = (query: string): string => {
+    // Remove common filler phrases
     return query
       .toLowerCase()
       .replace(
         /i am a|i'm a|i need a|looking for|we are a|we need|i want|we want|i have a|we have a/gi,
-        ''
+        ""
       )
       .trim();
   };
 
-  // Optimized search functionality
+  // Fetch or generate recommendations
   const fetchRecommendations = useCallback(async (query: string) => {
     if (!query) {
       setSearchState({
         isLoading: false,
         recommendations: [],
         errorMessage: "",
-        showResults: false
+        showResults: false,
       });
       return;
     }
@@ -209,10 +209,11 @@ function AiSearchOverlay() {
       ...prev,
       isLoading: true,
       errorMessage: "",
-      showResults: true
+      showResults: true,
     }));
 
     try {
+      // Example endpoint (Zapier/Workers):
       const res = await fetch("https://cold-bush-ec7b.pauljash.workers.dev/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -229,31 +230,35 @@ function AiSearchOverlay() {
         !Array.isArray(data.recommendations) ||
         data.recommendations.length === 0
       ) {
+        // Fallback to local approximate matching
         const fallbackProducts = localFindProducts(processedQuery, 3);
         if (fallbackProducts.length > 0) {
           setSearchState((prev) => ({
             ...prev,
             isLoading: false,
-            recommendations: fallbackProducts
+            recommendations: fallbackProducts,
           }));
         } else {
-          const genericFallback = localFindProducts('pos', 3);
+          // If no fallback from local data, show generic
+          const genericFallback = localFindProducts("pos", 3);
           if (genericFallback.length > 0) {
             setSearchState((prev) => ({
               ...prev,
               isLoading: false,
               recommendations: genericFallback,
-              errorMessage: "No exact matches. Here are our most popular systems:"
+              errorMessage:
+                "No exact matches. Here are our most popular systems:",
             }));
           } else {
             setSearchState((prev) => ({
               ...prev,
               isLoading: false,
-              errorMessage: "No recommendations found for your query."
+              errorMessage: "No recommendations found for your query.",
             }));
           }
         }
       } else {
+        // If we do get valid data
         const matchedItems = data.recommendations.map((r: string) =>
           matchRecommendedItem(r)
         );
@@ -266,15 +271,16 @@ function AiSearchOverlay() {
           setSearchState((prev) => ({
             ...prev,
             isLoading: false,
-            recommendations: matchedItems
+            recommendations: matchedItems,
           }));
         } else {
+          // Partial fallback if some items are incomplete
           const fallbackProducts = localFindProducts(processedQuery, 3);
           if (fallbackProducts.length > 0) {
             setSearchState((prev) => ({
               ...prev,
               isLoading: false,
-              recommendations: fallbackProducts
+              recommendations: fallbackProducts,
             }));
           } else {
             const validMatchedItems = matchedItems.filter(
@@ -284,13 +290,13 @@ function AiSearchOverlay() {
               setSearchState((prev) => ({
                 ...prev,
                 isLoading: false,
-                recommendations: validMatchedItems
+                recommendations: validMatchedItems,
               }));
             } else {
               setSearchState((prev) => ({
                 ...prev,
                 isLoading: false,
-                errorMessage: "Could not find suitable recommendations."
+                errorMessage: "Could not find suitable recommendations.",
               }));
             }
           }
@@ -299,7 +305,8 @@ function AiSearchOverlay() {
     } catch (error) {
       console.error("Error fetching recommendations:", error);
 
-      const query_str = typeof query === 'string' ? query : '';
+      // Additional fallback logic if external endpoint fails
+      const query_str = typeof query === "string" ? query : "";
       const isProfessionalQuery = /lawyer|attorney|legal|accountant|doctor|medical|professional|tax|consultant/i.test(
         query_str
       );
@@ -310,28 +317,30 @@ function AiSearchOverlay() {
         query_str
       );
 
-      let fallbackProducts;
+      let fallbackProducts: PosProduct[] = [];
 
       if (isProfessionalQuery) {
         fallbackProducts = posProducts
-          .filter((p) => p.identifier === 'mini3' || p.identifier === 'flex4')
+          .filter(
+            (p) => p.identifier === "mini3" || p.identifier === "flex4"
+          )
           .slice(0, 3);
       } else if (isRetailQuery) {
         fallbackProducts = posProducts
           .filter(
             (p) =>
-              p.identifier === 'mini3' ||
-              p.identifier === 'solo' ||
-              p.identifier === 'kiosk'
+              p.identifier === "mini3" ||
+              p.identifier === "solo" ||
+              p.identifier === "kiosk"
           )
           .slice(0, 3);
       } else if (isFoodQuery) {
         fallbackProducts = posProducts
           .filter(
             (p) =>
-              p.identifier === 'duo2' ||
-              p.identifier === 'solo' ||
-              p.identifier === 'kds'
+              p.identifier === "duo2" ||
+              p.identifier === "solo" ||
+              p.identifier === "kds"
           )
           .slice(0, 3);
       } else {
@@ -342,11 +351,11 @@ function AiSearchOverlay() {
         setSearchState((prev) => ({
           ...prev,
           isLoading: false,
-          recommendations: fallbackProducts
+          recommendations: fallbackProducts,
         }));
       } else {
         const defaultFallbacks = posProducts
-          .filter((p) => p.identifier === 'mini3' || p.identifier === 'flex4')
+          .filter((p) => p.identifier === "mini3" || p.identifier === "flex4")
           .slice(0, 2);
 
         setSearchState((prev) => ({
@@ -354,24 +363,23 @@ function AiSearchOverlay() {
           isLoading: false,
           recommendations: defaultFallbacks,
           errorMessage:
-            "We couldn't process your request. Here are our most versatile options:"
+            "We couldn't process your request. Here are our most versatile options:",
         }));
       }
     }
   }, []);
 
-  // Debounced search
+  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       if (userQuery) {
         fetchRecommendations(userQuery);
       }
     }, 600);
-
     return () => clearTimeout(timer);
   }, [userQuery, fetchRecommendations]);
 
-  // Handle click outside to close results
+  // Close results if clicking outside or pressing Escape
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (
@@ -383,7 +391,7 @@ function AiSearchOverlay() {
     }
 
     function handleEsc(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         setSearchState((prev) => ({ ...prev, showResults: false }));
       }
     }
@@ -491,7 +499,7 @@ function AiSearchOverlay() {
                           <div>
                             <h5 className="font-medium">Features</h5>
                             <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-300 mt-1 space-y-1">
-                              {item.features.slice(0, 4).map((feat: string, fIdx: number) => (
+                              {item.features.slice(0, 4).map((feat, fIdx) => (
                                 <li key={fIdx}>{feat}</li>
                               ))}
                             </ul>
@@ -501,7 +509,7 @@ function AiSearchOverlay() {
                           <div>
                             <h5 className="font-medium">Best For</h5>
                             <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-300 mt-1 space-y-1">
-                              {item.bestFor.map((bf: string, bfIdx: number) => (
+                              {item.bestFor.map((bf, bfIdx) => (
                                 <li key={bfIdx}>{bf}</li>
                               ))}
                             </ul>
@@ -528,53 +536,57 @@ function AiSearchOverlay() {
   );
 }
 
-// Main component
+// ------------------ Main Home Component ------------------
+
 export default function Home() {
-  // State management - using reducer for complex state
+  // ------------------ Reducers & State ------------------
   type SelectorAction =
-    | { type: 'SET_BUSINESS_TYPE'; payload: string }
-    | { type: 'TOGGLE_SOFTWARE_NEED'; payload: string }
-    | { type: 'TOGGLE_ONLINE_ORDERING' }
-    | { type: 'SET_QUANTITY'; payload: { deviceType: keyof ProductSelectorData; value: number } }
-    | { type: 'UPDATE_FIELD'; payload: { name: keyof ProductSelectorData; value: string } }
-    | { type: 'RESET_FORM' };
+    | { type: "SET_BUSINESS_TYPE"; payload: string }
+    | { type: "TOGGLE_SOFTWARE_NEED"; payload: string }
+    | { type: "TOGGLE_ONLINE_ORDERING" }
+    | {
+        type: "SET_QUANTITY";
+        payload: { deviceType: keyof ProductSelectorData; value: number };
+      }
+    | { type: "UPDATE_FIELD"; payload: { name: keyof ProductSelectorData; value: string } }
+    | { type: "RESET_FORM" };
 
   const selectorReducer = (
     state: ProductSelectorData,
     action: SelectorAction
   ): ProductSelectorData => {
     switch (action.type) {
-      case 'SET_BUSINESS_TYPE':
+      case "SET_BUSINESS_TYPE":
         return {
           ...state,
           businessType: action.payload,
           softwareNeeds:
-            action.payload === 'restaurant' ? ['full-service'] : [],
-          onlineOrdering: false
+            action.payload === "restaurant" ? ["full-service"] : [],
+          onlineOrdering: false,
         };
-      case 'TOGGLE_SOFTWARE_NEED':
+      case "TOGGLE_SOFTWARE_NEED":
         return {
           ...state,
           softwareNeeds: state.softwareNeeds.includes(action.payload)
             ? state.softwareNeeds.filter((item) => item !== action.payload)
-            : [...state.softwareNeeds, action.payload]
+            : [...state.softwareNeeds, action.payload],
         };
-      case 'TOGGLE_ONLINE_ORDERING':
+      case "TOGGLE_ONLINE_ORDERING":
         return {
           ...state,
-          onlineOrdering: !state.onlineOrdering
+          onlineOrdering: !state.onlineOrdering,
         };
-      case 'SET_QUANTITY':
+      case "SET_QUANTITY":
         return {
           ...state,
-          [action.payload.deviceType]: Math.max(0, action.payload.value)
+          [action.payload.deviceType]: Math.max(0, action.payload.value),
         };
-      case 'UPDATE_FIELD':
+      case "UPDATE_FIELD":
         return {
           ...state,
-          [action.payload.name]: action.payload.value
+          [action.payload.name]: action.payload.value,
         };
-      case 'RESET_FORM':
+      case "RESET_FORM":
         return initialSelectorData;
       default:
         return state;
@@ -583,22 +595,25 @@ export default function Home() {
 
   type ContactAction =
     | {
-        type: 'UPDATE_FIELD';
-        payload: { name: keyof typeof initialContactFormData; value: string };
+        type: "UPDATE_FIELD";
+        payload: {
+          name: keyof typeof initialContactFormData;
+          value: string;
+        };
       }
-    | { type: 'RESET_FORM' };
+    | { type: "RESET_FORM" };
 
   const contactReducer = (
     state: typeof initialContactFormData,
     action: ContactAction
   ) => {
     switch (action.type) {
-      case 'UPDATE_FIELD':
+      case "UPDATE_FIELD":
         return {
           ...state,
-          [action.payload.name]: action.payload.value
+          [action.payload.name]: action.payload.value,
         };
-      case 'RESET_FORM':
+      case "RESET_FORM":
         return initialContactFormData;
       default:
         return state;
@@ -618,38 +633,38 @@ export default function Home() {
   );
   const [selectorSubmission, setSelectorSubmission] = useState({
     isLoading: false,
-    status: 'idle' as 'idle' | 'success' | 'error',
-    message: '',
+    status: "idle" as "idle" | "success" | "error",
+    message: "",
   });
   const [contactSubmission, setContactSubmission] = useState({
     isLoading: false,
-    status: 'idle' as 'idle' | 'success' | 'error',
-    message: '',
+    status: "idle" as "idle" | "success" | "error",
+    message: "",
   });
 
   const { darkMode, toggleDarkMode } = useTheme();
 
-  // Images for hero carousel
+  // ------------------ Hero Carousel Images ------------------
   const images = [
     {
-      src: '/retailflex3.png',
-      alt: 'Flexible Payment Terminal',
+      src: "/retailflex3.png",
+      alt: "Flexible Payment Terminal",
       priority: true,
-      quality: 85
+      quality: 85,
     },
     {
-      src: '/qsrduo2.png',
-      alt: 'QSR Duo POS System',
-      quality: 85
+      src: "/qsrduo2.png",
+      alt: "QSR Duo POS System",
+      quality: 85,
     },
     {
-      src: '/retailmini3.png',
-      alt: 'Retail Mini POS',
-      quality: 85
+      src: "/retailmini3.png",
+      alt: "Retail Mini POS",
+      quality: 85,
     },
   ];
 
-  // Image carousel
+  // Rotate hero images
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % images.length);
@@ -657,22 +672,22 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [images.length]);
 
-  // Validation for each wizard step
+  // ------------------ Form Validation ------------------
   const validateForm = useCallback(
     (step: number) => {
       let errors: string[] = [];
 
       if (step === 1 && !selectorData.businessType) {
-        errors.push('Please select a business type.');
+        errors.push("Please select a business type.");
       }
 
       if (step === 2) {
         if (
-          selectorData.businessType === 'restaurant' &&
+          selectorData.businessType === "restaurant" &&
           selectorData.softwareNeeds.length === 0
         ) {
           errors.push(
-            'Please select whether your restaurant is Full-Service or Quick-Service.'
+            "Please select whether your restaurant is Full-Service or Quick-Service."
           );
         }
       }
@@ -687,26 +702,26 @@ export default function Home() {
           selectorData.kioskQty;
 
         if (totalDevices === 0) {
-          errors.push('Please select at least one device or hardware option.');
+          errors.push("Please select at least one device or hardware option.");
         }
       }
       if (step === 4) {
         const { firstName, lastName, email, phone } = selectorData;
 
-        if (!firstName) errors.push('First Name is required.');
-        if (!lastName) errors.push('Last Name is required.');
-        if (!email) errors.push('Email is required.');
-        if (!phone) errors.push('Phone is required.');
+        if (!firstName) errors.push("First Name is required.");
+        if (!lastName) errors.push("Last Name is required.");
+        if (!email) errors.push("Email is required.");
+        if (!phone) errors.push("Phone is required.");
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (email && !emailRegex.test(email)) {
-          errors.push('Please enter a valid email address.');
+          errors.push("Please enter a valid email address.");
         }
       }
 
       return {
         valid: errors.length === 0,
-        message: errors.join(' ')
+        message: errors.join(" "),
       };
     },
     [selectorData]
@@ -714,7 +729,7 @@ export default function Home() {
 
   const validateContactForm = useCallback(() => {
     let errors: string[] = [];
-    const requiredFields = ['firstName', 'lastName', 'email', 'phone'];
+    const requiredFields = ["firstName", "lastName", "email", "phone"];
     for (const field of requiredFields) {
       if (!contactFormData[field as keyof typeof contactFormData]) {
         errors.push(
@@ -724,23 +739,25 @@ export default function Home() {
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (contactFormData.email && !emailRegex.test(contactFormData.email)) {
-      errors.push('Please enter a valid email address.');
+    if (
+      contactFormData.email &&
+      !emailRegex.test(contactFormData.email)
+    ) {
+      errors.push("Please enter a valid email address.");
     }
     return {
       valid: errors.length === 0,
-      message: errors.join(' ')
+      message: errors.join(" "),
     };
   }, [contactFormData]);
 
-  // Wizard step handlers
+  // ------------------ Wizard Navigation ------------------
   const handleNextStep = useCallback(() => {
     const validation = validateForm(wizardStep);
     if (!validation.valid) {
       alert(validation.message);
       return;
     }
-
     setWizardStep((prev) => Math.min(prev + 1, 5));
   }, [wizardStep, validateForm]);
 
@@ -748,6 +765,7 @@ export default function Home() {
     setWizardStep((prev) => Math.max(prev - 1, 1));
   }, []);
 
+  // ------------------ Handlers for POS Wizard Form ------------------
   const handleSelectorInputChange = useCallback(
     (
       e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -755,26 +773,26 @@ export default function Home() {
     ) => {
       const { name, value, type, checked } = e.target as HTMLInputElement;
 
-      if (type === 'checkbox') {
-        if (name === 'onlineOrdering') {
-          dispatchSelector({ type: 'TOGGLE_ONLINE_ORDERING' });
+      if (type === "checkbox") {
+        if (name === "onlineOrdering") {
+          dispatchSelector({ type: "TOGGLE_ONLINE_ORDERING" });
           return;
         }
-        dispatchSelector({ type: 'TOGGLE_SOFTWARE_NEED', payload: value });
+        dispatchSelector({ type: "TOGGLE_SOFTWARE_NEED", payload: value });
         return;
       }
 
       if (deviceType) {
         dispatchSelector({
-          type: 'SET_QUANTITY',
-          payload: { deviceType, value: parseInt(value, 10) || 0 }
+          type: "SET_QUANTITY",
+          payload: { deviceType, value: parseInt(value, 10) || 0 },
         });
         return;
       }
 
       dispatchSelector({
-        type: 'UPDATE_FIELD',
-        payload: { name: name as keyof ProductSelectorData, value }
+        type: "UPDATE_FIELD",
+        payload: { name: name as keyof ProductSelectorData, value },
       });
     },
     []
@@ -784,15 +802,15 @@ export default function Home() {
     (deviceType: keyof ProductSelectorData, increment: number) => {
       const currentValue = selectorData[deviceType] as number;
       dispatchSelector({
-        type: 'SET_QUANTITY',
-        payload: { deviceType, value: Math.max(0, currentValue + increment) }
+        type: "SET_QUANTITY",
+        payload: { deviceType, value: Math.max(0, currentValue + increment) },
       });
     },
     [selectorData]
   );
 
   const handleSelectorSubmit = useCallback(async () => {
-    setSelectorSubmission({ isLoading: true, status: 'idle', message: '' });
+    setSelectorSubmission({ isLoading: true, status: "idle", message: "" });
 
     try {
       const {
@@ -812,17 +830,18 @@ export default function Home() {
         phone,
         numLocationsChoice,
         numLocationsCustom,
-        monthlyVolume
+        monthlyVolume,
       } = selectorData;
 
       const finalLocations =
-        numLocationsChoice === 'plus' ? numLocationsCustom : numLocationsChoice;
+        numLocationsChoice === "plus" ? numLocationsCustom : numLocationsChoice;
 
+      // Example submission to Zapier via GET:
       const params = new URLSearchParams({
-        formType: 'contactPage',
+        formType: "contactPage",
         businessType,
-        softwareNeeds: softwareNeeds.join(','),
-        onlineOrdering: onlineOrdering ? 'yes' : 'no',
+        softwareNeeds: softwareNeeds.join(","),
+        onlineOrdering: onlineOrdering ? "yes" : "no",
         fullServicePosQty: fullServicePosQty.toString(),
         barServicePosQty: barServicePosQty.toString(),
         miniPosQty: miniPosQty.toString(),
@@ -836,35 +855,36 @@ export default function Home() {
         phone,
         numLocations: finalLocations,
         monthlyVolume,
-        submitTime: new Date().toISOString()
+        submitTime: new Date().toISOString(),
       });
 
       const url = `https://hooks.zapier.com/hooks/catch/17465641/2awchwj/?${params.toString()}`;
-      const response = await fetch(url, { method: 'GET' });
+      const response = await fetch(url, { method: "GET" });
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
       setSelectorSubmission({
-        status: 'success',
+        status: "success",
         message:
           "Thank you! We'll be in touch shortly to assist with your needs.",
-        isLoading: false
+        isLoading: false,
       });
 
-      dispatchSelector({ type: 'RESET_FORM' });
+      dispatchSelector({ type: "RESET_FORM" });
       setWizardStep(1);
     } catch (error) {
-      console.error('Submission error:', error);
+      console.error("Submission error:", error);
       setSelectorSubmission({
-        status: 'error',
-        message: 'Error submitting. Please try again or contact us.',
-        isLoading: false
+        status: "error",
+        message: "Error submitting. Please try again or contact us.",
+        isLoading: false,
       });
     }
   }, [selectorData]);
 
+  // ------------------ Handlers for Contact Form ------------------
   const handleContactInputChange = useCallback(
     (
       e: React.ChangeEvent<
@@ -873,8 +893,8 @@ export default function Home() {
     ) => {
       const { name, value } = e.target;
       dispatchContact({
-        type: 'UPDATE_FIELD',
-        payload: { name: name as keyof typeof initialContactFormData, value }
+        type: "UPDATE_FIELD",
+        payload: { name: name as keyof typeof initialContactFormData, value },
       });
     },
     []
@@ -883,20 +903,20 @@ export default function Home() {
   const handleContactSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      setContactSubmission({ isLoading: true, status: 'idle', message: '' });
+      setContactSubmission({ isLoading: true, status: "idle", message: "" });
 
       const validation = validateContactForm();
       if (!validation.valid) {
         setContactSubmission({
           isLoading: false,
-          status: 'error',
-          message: validation.message
+          status: "error",
+          message: validation.message,
         });
         return;
       }
 
       const finalLocations =
-        contactFormData.numLocationsChoice === 'plus'
+        contactFormData.numLocationsChoice === "plus"
           ? contactFormData.numLocationsCustom
           : contactFormData.numLocationsChoice;
 
@@ -912,35 +932,35 @@ export default function Home() {
           numLocations: finalLocations,
           monthlyVolume: contactFormData.monthlyVolume,
           submitTime: new Date().toISOString(),
-          formType: 'contactPage'
+          formType: "contactPage",
         });
 
         const url = `https://hooks.zapier.com/hooks/catch/17465641/2awchwj/?${params.toString()}`;
-        const response = await fetch(url, { method: 'GET' });
+        const response = await fetch(url, { method: "GET" });
 
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
         setContactSubmission({
-          status: 'success',
+          status: "success",
           message: "Thank you! We'll be in touch shortly.",
-          isLoading: false
+          isLoading: false,
         });
-        dispatchContact({ type: 'RESET_FORM' });
+        dispatchContact({ type: "RESET_FORM" });
       } catch (error) {
-        console.error('Submission error:', error);
+        console.error("Submission error:", error);
         setContactSubmission({
-          status: 'error',
-          message: 'Error submitting. Please try again or contact us.',
-          isLoading: false
+          status: "error",
+          message: "Error submitting. Please try again or contact us.",
+          isLoading: false,
         });
       }
     },
     [contactFormData, validateContactForm]
   );
 
-  // Render wizard steps
+  // ------------------ Render Wizard Steps ------------------
   const renderStepContent = useCallback(() => {
     switch (wizardStep) {
       case 1: // Business Type
@@ -954,28 +974,25 @@ export default function Home() {
             </p>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
               {[
-                { type: 'retail', title: 'Retail', img: '/retail.jpg' },
-                { type: 'restaurant', title: 'Restaurant', img: '/restaurant.jpg' },
-                { type: 'services', title: 'Services', img: '/services.jpg' },
-                { type: 'other', title: 'Other', img: '/other.jpg' }
+                { type: "retail", title: "Retail", img: "/retail.jpg" },
+                { type: "restaurant", title: "Restaurant", img: "/restaurant.jpg" },
+                { type: "services", title: "Services", img: "/services.jpg" },
+                { type: "other", title: "Other", img: "/other.jpg" },
               ].map((item) => (
                 <motion.button
                   key={item.type}
                   whileHover={{
                     scale: 1.07,
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                    boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
                   }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() =>
-                    dispatchSelector({
-                      type: 'SET_BUSINESS_TYPE',
-                      payload: item.type
-                    })
+                    dispatchSelector({ type: "SET_BUSINESS_TYPE", payload: item.type })
                   }
                   className={`p-4 border transition-colors rounded-3xl shadow-sm ${
                     selectorData.businessType === item.type
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-700'
-                      : 'border-gray-200 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800'
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-700"
+                      : "border-gray-200 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
                   }`}
                   aria-label={`Select ${item.title} business type`}
                   type="button"
@@ -985,20 +1002,19 @@ export default function Home() {
                       src={item.img}
                       alt={item.title}
                       fill
-                      style={{ objectFit: 'cover' }}
+                      style={{ objectFit: "cover" }}
                       className="rounded transition-transform duration-300 hover:scale-105"
                     />
                   </div>
-                  <h4 className="text-lg font-semibold text-center">
-                    {item.title}
-                  </h4>
+                  <h4 className="text-lg font-semibold text-center">{item.title}</h4>
                 </motion.button>
               ))}
             </div>
           </div>
         );
-      case 2: // Restaurant details or Online ordering
-        if (selectorData.businessType === 'restaurant') {
+
+      case 2: // Restaurant or Online Ordering
+        if (selectorData.businessType === "restaurant") {
           return (
             <div className="text-gray-900 dark:text-white">
               <h3 className="mb-4 text-xl font-semibold">
@@ -1009,25 +1025,25 @@ export default function Home() {
               </p>
               <div className="space-y-4">
                 {[
-                  { id: 'full-service', label: 'Full-Service Dining' },
-                  { id: 'quick-service', label: 'Quick-Service' }
+                  { id: "full-service", label: "Full-Service Dining" },
+                  { id: "quick-service", label: "Quick-Service" },
                 ].map((option) => (
                   <motion.div
                     key={option.id}
                     className={`flex items-center p-4 border rounded-3xl cursor-pointer mb-3 shadow-sm transition-all ${
                       selectorData.softwareNeeds.includes(option.id)
-                        ? 'bg-blue-50 border-blue-500 dark:bg-blue-900 dark:border-blue-700'
-                        : 'hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-700'
+                        ? "bg-blue-50 border-blue-500 dark:bg-blue-900 dark:border-blue-700"
+                        : "hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-700"
                     }`}
                     onClick={() =>
                       dispatchSelector({
-                        type: 'TOGGLE_SOFTWARE_NEED',
-                        payload: option.id
+                        type: "TOGGLE_SOFTWARE_NEED",
+                        payload: option.id,
                       })
                     }
                     whileHover={{
                       y: -2,
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                     }}
                   >
                     <input
@@ -1063,6 +1079,7 @@ export default function Home() {
             </div>
           );
         }
+
         return (
           <div className="text-gray-900 dark:text-white">
             <h3 className="mb-4 text-xl font-semibold">
@@ -1074,13 +1091,13 @@ export default function Home() {
             <motion.div
               className={`flex items-center p-4 border rounded-3xl cursor-pointer shadow-sm mb-6 ${
                 selectorData.onlineOrdering
-                  ? 'bg-blue-50 border-blue-500 dark:bg-blue-900 dark:border-blue-700'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-700'
+                  ? "bg-blue-50 border-blue-500 dark:bg-blue-900 dark:border-blue-700"
+                  : "hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-700"
               }`}
-              onClick={() => dispatchSelector({ type: 'TOGGLE_ONLINE_ORDERING' })}
+              onClick={() => dispatchSelector({ type: "TOGGLE_ONLINE_ORDERING" })}
               whileHover={{
                 y: -2,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
               }}
             >
               <input
@@ -1105,14 +1122,15 @@ export default function Home() {
                 Business Growth Tip
               </h4>
               <p className="text-sm text-gray-700 dark:text-gray-300">
-                Businesses with online ordering capabilities typically see a 30%
-                increase in average order value and can reach customers beyond
-                their physical location.
+                Businesses with online ordering capabilities typically see a
+                30% increase in average order value and can reach customers
+                beyond their physical location.
               </p>
             </div>
           </div>
         );
-      case 3: // POS & Hardware Selection
+
+      case 3: // POS & Hardware
         return (
           <div className="text-gray-900 dark:text-white">
             <h3 className="mb-4 text-xl font-semibold">Select Your POS & Hardware</h3>
@@ -1157,7 +1175,7 @@ export default function Home() {
                     className="p-6 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-2xl flex flex-col items-center shadow-sm"
                     whileHover={{
                       y: -4,
-                      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
                     }}
                   >
                     {product.image && (
@@ -1166,7 +1184,7 @@ export default function Home() {
                         alt={product.name}
                         width={200}
                         height={200}
-                        style={{ objectFit: 'contain' }}
+                        style={{ objectFit: "contain" }}
                         className="mb-4 rounded h-40 w-auto"
                       />
                     )}
@@ -1202,9 +1220,7 @@ export default function Home() {
                         type="number"
                         className="w-16 mx-0 text-center border dark:border-gray-600 dark:bg-gray-800 h-10"
                         value={qtyVal}
-                        onChange={(e) =>
-                          handleSelectorInputChange(e, deviceType!)
-                        }
+                        onChange={(e) => handleSelectorInputChange(e, deviceType!)}
                         aria-label={`${product.name} quantity`}
                         min="0"
                       />
@@ -1246,18 +1262,14 @@ export default function Home() {
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
               </Link>
             </div>
           </div>
         );
-      case 4: // Contact info
+
+      case 4: // Contact Info
         return (
           <div className="text-gray-900 dark:text-white">
             <h3 className="mb-4 text-xl font-semibold">Almost done!</h3>
@@ -1333,23 +1345,23 @@ export default function Home() {
                 Number of Locations
               </label>
               <div className="flex flex-wrap items-center gap-2">
-                {['1', '2', '3', '4', '5'].map((opt) => (
+                {["1", "2", "3", "4", "5"].map((opt) => (
                   <motion.button
                     key={opt}
                     type="button"
                     whileTap={{ scale: 0.95 }}
                     onClick={() =>
                       dispatchSelector({
-                        type: 'UPDATE_FIELD',
-                        payload: { name: 'numLocationsChoice', value: opt }
+                        type: "UPDATE_FIELD",
+                        payload: { name: "numLocationsChoice", value: opt },
                       })
                     }
                     className={`px-4 py-2 rounded-full text-sm shadow-sm ${
                       selectorData.numLocationsChoice === opt
-                        ? 'bg-blue-600 text-white dark:bg-blue-500'
-                        : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500'
+                        ? "bg-blue-600 text-white dark:bg-blue-500"
+                        : "bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500"
                     }`}
-                    aria-label={`${opt} location${opt !== '1' ? 's' : ''}`}
+                    aria-label={`${opt} location${opt !== "1" ? "s" : ""}`}
                   >
                     {opt}
                   </motion.button>
@@ -1359,21 +1371,21 @@ export default function Home() {
                   whileTap={{ scale: 0.95 }}
                   onClick={() =>
                     dispatchSelector({
-                      type: 'UPDATE_FIELD',
-                      payload: { name: 'numLocationsChoice', value: 'plus' }
+                      type: "UPDATE_FIELD",
+                      payload: { name: "numLocationsChoice", value: "plus" },
                     })
                   }
                   className={`px-4 py-2 rounded-full text-sm shadow-sm ${
-                    selectorData.numLocationsChoice === 'plus'
-                      ? 'bg-blue-600 text-white dark:bg-blue-500'
-                      : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500'
+                    selectorData.numLocationsChoice === "plus"
+                      ? "bg-blue-600 text-white dark:bg-blue-500"
+                      : "bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500"
                   }`}
                   aria-label="More than 5 locations"
                 >
                   6+
                 </motion.button>
               </div>
-              {selectorData.numLocationsChoice === 'plus' && (
+              {selectorData.numLocationsChoice === "plus" && (
                 <div className="mt-3">
                   <label
                     htmlFor="numLocationsCustom"
@@ -1399,48 +1411,52 @@ export default function Home() {
                 Monthly Processing Volume
               </label>
               <div className="flex flex-wrap gap-2">
-                {['0-50K', '50K-250K', '250K-1MM', '1MM+'].map((range) => (
+                {["0-50K", "50K-250K", "250K-1MM", "1MM+"].map((range) => (
                   <motion.button
                     key={range}
                     type="button"
                     whileTap={{ scale: 0.95 }}
                     onClick={() =>
                       dispatchSelector({
-                        type: 'UPDATE_FIELD',
-                        payload: { name: 'monthlyVolume', value: range }
+                        type: "UPDATE_FIELD",
+                        payload: { name: "monthlyVolume", value: range },
                       })
                     }
                     className={`px-4 py-2 rounded-full border text-sm shadow-sm ${
                       selectorData.monthlyVolume === range
-                        ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500'
-                        : 'text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
+                        ? "bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500"
+                        : "text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
                     }`}
                     aria-label={`Monthly volume: ${range}`}
                   >
-                    {range === '0-50K' && '$0-50K'}
-                    {range === '50K-250K' && '$50K-250K'}
-                    {range === '250K-1MM' && '$250K-1MM'}
-                    {range === '1MM+' && '$1MM+'}
+                    {range === "0-50K" && "$0-50K"}
+                    {range === "50K-250K" && "$50K-250K"}
+                    {range === "250K-1MM" && "$250K-1MM"}
+                    {range === "1MM+" && "$1MM+"}
                   </motion.button>
                 ))}
               </div>
             </div>
-            {/* Privacy notice */}
+
+            {/* Privacy Notice */}
             <div className="mt-6 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
               <p className="flex items-start">
                 <FaLock className="text-green-600 dark:text-green-400 mt-0.5 mr-2 flex-shrink-0" />
                 <span>
-                  Your information is secure and will only be used to provide you with a quote.
-                  We respect your privacy and will never share your details with third parties.
+                  Your information is secure and will only be used to provide you
+                  with a quote. We respect your privacy and will never share your
+                  details with third parties.
                 </span>
               </p>
             </div>
           </div>
         );
-      case 5: // Review & Submit
-        const { status, message, isLoading: selectorIsLoading } = selectorSubmission;
 
-        if (status === 'success') {
+      case 5: // Review & Submit
+        const { status, message, isLoading: selectorIsLoading } =
+          selectorSubmission;
+
+        if (status === "success") {
           return (
             <div className="text-center py-6">
               <div className="inline-flex items-center justify-center w-16 h-16 mb-6 bg-green-100 dark:bg-green-900 rounded-full">
@@ -1474,7 +1490,7 @@ export default function Home() {
           );
         }
 
-        if (status === 'error') {
+        if (status === "error") {
           return (
             <div className="text-center py-6">
               <div className="inline-flex items-center justify-center w-16 h-16 mb-6 bg-red-100 dark:bg-red-900 rounded-full">
@@ -1511,10 +1527,10 @@ export default function Home() {
 
         const { numLocationsChoice, numLocationsCustom } = selectorData;
         const finalLocations =
-          numLocationsChoice === 'plus' ? numLocationsCustom : numLocationsChoice;
+          numLocationsChoice === "plus" ? numLocationsCustom : numLocationsChoice;
 
         return (
-          <div>
+          <>
             <h3 className="mb-6 text-xl font-semibold dark:text-white">
               Review Your Choices
             </h3>
@@ -1533,17 +1549,17 @@ export default function Home() {
                         {selectorData.businessType}
                       </span>
                     </p>
-                    {selectorData.businessType === 'restaurant' && (
+                    {selectorData.businessType === "restaurant" && (
                       <p className="flex items-center">
                         <span className="w-32 text-gray-500 dark:text-gray-400">
                           Restaurant Type:
                         </span>
                         <span className="font-medium capitalize">
-                          {selectorData.softwareNeeds.join(', ')}
+                          {selectorData.softwareNeeds.join(", ")}
                         </span>
                       </p>
                     )}
-                    {selectorData.businessType !== 'restaurant' &&
+                    {selectorData.businessType !== "restaurant" &&
                       selectorData.onlineOrdering && (
                         <p className="flex items-center">
                           <span className="w-32 text-gray-500 dark:text-gray-400">
@@ -1557,7 +1573,7 @@ export default function Home() {
                         Locations:
                       </span>
                       <span className="font-medium">
-                        {finalLocations || 'N/A'}
+                        {finalLocations || "N/A"}
                       </span>
                     </p>
                     <p className="flex items-center">
@@ -1570,6 +1586,7 @@ export default function Home() {
                     </p>
                   </div>
                 </div>
+
                 <div>
                   <h4 className="text-lg font-medium mb-3 text-gray-900 dark:text-white">
                     Contact Information
@@ -1669,7 +1686,7 @@ export default function Home() {
                 type="button"
                 whileHover={{
                   scale: 1.05,
-                  boxShadow: '0px 4px 20px rgba(59,130,246,0.3)'
+                  boxShadow: "0px 4px 20px rgba(59,130,246,0.3)",
                 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleSelectorSubmit}
@@ -1700,15 +1717,17 @@ export default function Home() {
                     Submitting...
                   </span>
                 ) : (
-                  'Submit & Get Your Quote'
+                  "Submit & Get Your Quote"
                 )}
               </motion.button>
+
               <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
                 You'll receive a custom quote within 24 hours
               </p>
             </div>
-          </div>
+          </>
         );
+
       default:
         return null;
     }
@@ -1718,10 +1737,10 @@ export default function Home() {
     selectorSubmission,
     handleSelectorInputChange,
     handleQuantityChange,
-    handleSelectorSubmit
+    handleSelectorSubmit,
   ]);
 
-  // Wizard progress indicator
+  // ------------------ Progress Indicator ------------------
   const renderProgressIndicator = useCallback(() => {
     const totalSteps = 5;
     return (
@@ -1737,14 +1756,14 @@ export default function Home() {
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
                   wizardStep > stepNum
-                    ? 'bg-blue-600 text-white dark:bg-blue-700'
+                    ? "bg-blue-600 text-white dark:bg-blue-700"
                     : wizardStep === stepNum
-                    ? 'bg-blue-500 text-white dark:bg-blue-600 ring-4 ring-blue-100 dark:ring-blue-900'
-                    : 'bg-gray-200 text-gray-500 dark:bg-gray-600 dark:text-gray-400'
+                    ? "bg-blue-500 text-white dark:bg-blue-600 ring-4 ring-blue-100 dark:ring-blue-900"
+                    : "bg-gray-200 text-gray-500 dark:bg-gray-600 dark:text-gray-400"
                 }`}
-                aria-current={wizardStep === stepNum ? 'step' : undefined}
+                aria-current={wizardStep === stepNum ? "step" : undefined}
                 aria-label={`Step ${stepNum}${
-                  wizardStep === stepNum ? ' (current)' : ''
+                  wizardStep === stepNum ? " (current)" : ""
                 }`}
               >
                 {wizardStep > stepNum ? (
@@ -1770,8 +1789,8 @@ export default function Home() {
                 <div
                   className={`w-20 h-1 transition-colors ${
                     wizardStep > stepNum
-                      ? 'bg-blue-600 dark:bg-blue-700'
-                      : 'bg-gray-200 dark:bg-gray-600'
+                      ? "bg-blue-600 dark:bg-blue-700"
+                      : "bg-gray-200 dark:bg-gray-600"
                   }`}
                   aria-hidden="true"
                 ></div>
@@ -1783,32 +1802,35 @@ export default function Home() {
     );
   }, [wizardStep]);
 
-  // Scroll helper
+  // Smooth scrolling for anchor links
   const scrollToSection = useCallback((sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      element.scrollIntoView({ behavior: "smooth" });
     }
   }, []);
 
+  // ------------------ Render Page ------------------
   return (
     <ThemeProvider>
-      <main className={darkMode ? 'dark' : ''}>
-        <div className={`min-h-screen text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-900`}>
+      <main className={darkMode ? "dark" : ""}>
+        <div
+          className={`min-h-screen text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-900`}
+        >
           <Head>
-            <title>StarAccept Business Solutions - Merchant Processing & Payment Systems</title>
+            <title>
+              StarAccept Business Solutions - Merchant Processing & Payment
+              Systems
+            </title>
             <meta
               name="description"
-              content="Get affordable, full-service credit card processing with proven, cutting-edge technology. Our zero-fee solutions transform your business."
+              content="Get affordable, full-service credit card processing with proven, cutting-edge technology. Our zero-fee solutions transform your business with simplified payment processing."
             />
             <meta
               name="keywords"
               content="merchant processing, POS systems, credit card processing, payment solutions, Clover, zero-fee processing"
             />
-            <meta
-              property="og:title"
-              content="StarAccept Business Solutions"
-            />
+            <meta property="og:title" content="StarAccept Business Solutions" />
             <meta
               property="og:description"
               content="Affordable, full-service credit card processing with proven, cutting-edge technology. Transform your business."
@@ -1824,23 +1846,23 @@ export default function Home() {
             ></script>
             <script
               dangerouslySetInnerHTML={{
-                __html: `window.dataLayer = window.dataLayer || [];
+                __html: `
+                      window.dataLayer = window.dataLayer || [];
                       function gtag(){dataLayer.push(arguments);}
                       gtag('js', new Date());
-                      gtag('config', 'G-2D18CMVZEF');`,
+                      gtag('config', 'G-2D18CMVZEF');
+                    `,
               }}
             />
           </Head>
 
-          {/** 
-           * NAVBAR (unchanged) 
-           */}
+          {/* ------------------ NAVBAR ------------------ */}
           <motion.nav
             className="fixed top-0 z-50 w-full bg-white dark:bg-gray-800 shadow-sm bg-opacity-90 backdrop-blur-sm"
             initial={{ y: -100 }}
             animate={{ y: 0 }}
             transition={{ duration: 0.5 }}
-            style={{ fontFamily: 'Inter, sans-serif' }}
+            style={{ fontFamily: "Inter, sans-serif" }}
             role="navigation"
             aria-label="Main Navigation"
           >
@@ -1919,23 +1941,23 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="flex items-center">
-                  {/* Single "business type" prompt button */}
                   <motion.button
                     type="button"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="hidden md:inline-flex items-center justify-center px=4 py-2 mr-4 text-sm bg-blue-600 text-white rounded-full hover:bg-blue-700 shadow-sm px-4"
-                    onClick={() => scrollToSection('product-selector')}
+                    className="hidden md:inline-flex items-center justify-center px-4 py-2 text-sm bg-blue-600 text-white rounded-full hover:bg-blue-700 mr-4 shadow-sm"
+                    onClick={() => scrollToSection("product-selector")}
                     aria-label="What's your business type?"
                   >
                     <FaRegLightbulb className="mr-1" />
-                    Find Your POS
+                    What's your business type?
                   </motion.button>
-
                   <button
                     onClick={toggleDarkMode}
                     className="hidden md:inline-block p-2 text-gray-600 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none"
-                    aria-label={`Switch to ${darkMode ? 'light' : 'dark'} mode`}
+                    aria-label={`Switch to ${
+                      darkMode ? "light" : "dark"
+                    } mode`}
                     type="button"
                   >
                     {darkMode ? (
@@ -2006,7 +2028,7 @@ export default function Home() {
               <motion.div
                 className="md:hidden bg-white dark:bg-gray-800 px-4 pt-2 pb-3 space-y-1"
                 initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
+                animate={{ height: "auto", opacity: 1 }}
                 transition={{ duration: 0.3 }}
                 role="menu"
                 aria-orientation="vertical"
@@ -2064,11 +2086,11 @@ export default function Home() {
                   className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => {
                     setIsMenuOpen(false);
-                    scrollToSection('product-selector');
+                    scrollToSection("product-selector");
                   }}
                   role="menuitem"
                 >
-                  Find Your POS
+                  Find Your Perfect POS
                 </button>
                 <Link
                   className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -2093,10 +2115,9 @@ export default function Home() {
             )}
           </motion.nav>
 
-          {/**
-           * HERO SECTION - simplified main CTA & shorter text
-           */}
-          <div className="relative h-[70vh] md:h-[75vh] w-full max-w-[1920px] mx-auto pt-24 flex items-center justify-center">
+          {/* ------------------ HERO (Simplified) ------------------ */}
+          <div className="relative h-[85vh] md:h-[85vh] lg:h-[90vh] w-full max-w-[1920px] mx-auto pt-24 flex items-center justify-center">
+            {/* Background carousel */}
             <motion.div
               className="absolute inset-0 overflow-hidden"
               initial={{ opacity: 0 }}
@@ -2116,12 +2137,18 @@ export default function Home() {
                 <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/70 via-black/50 to-transparent"></div>
               </div>
             </motion.div>
-            <div className="absolute z-20 flex space-x-2 transform -translate-x-1/2 bottom-8 left-1/2" role="tablist" aria-label="Image carousel controls">
+
+            {/* Hero carousel indicators */}
+            <div
+              className="absolute z-20 flex space-x-2 transform -translate-x-1/2 bottom-8 left-1/2"
+              role="tablist"
+              aria-label="Image carousel controls"
+            >
               {images.map((_, index) => (
                 <button
                   key={index}
                   className={`w-2 h-2 rounded-full transition-all ${
-                    currentImage === index ? 'bg-white w-8' : 'bg-white/50'
+                    currentImage === index ? "bg-white w-8" : "bg-white/50"
                   }`}
                   onClick={() => setCurrentImage(index)}
                   aria-label={`Go to slide ${index + 1}`}
@@ -2131,25 +2158,27 @@ export default function Home() {
                 />
               ))}
             </div>
+
+            {/* Hero text & CTA */}
             <div className="absolute inset-0 flex items-center max-w-[1920px] mx-auto">
               <div className="relative z-20 max-w-4xl px-4 mx-auto mt-16 text-white">
                 <motion.h1
-                  className="mb-4 text-4xl font-extrabold tracking-tight text-white md:text-5xl lg:text-6xl"
+                  className="mb-6 text-4xl font-extrabold tracking-tight md:text-5xl lg:text-6xl"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.8 }}
                 >
-                  Simplify Payments.  
-                  <br className="hidden md:block" />
-                  <span className="text-amber-400">Maximize Savings.</span>
+                  Empower Your Business with Next-Gen Payment Solutions
                 </motion.h1>
                 <motion.p
-                  className="mb-6 text-lg md:text-xl text-white/90 font-light leading-relaxed"
+                  className="mb-6 text-xl text-white/90 md:text-2xl font-light leading-relaxed"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.8 }}
                 >
-                  Embrace secure, fast, and <span className="font-semibold">Zero-Fee</span> card processing with next-gen POS systems trusted by thousands of businesses.
+                  Experience seamless, secure, and{" "}
+                  <span className="font-semibold text-amber-400">Zero-Fee</span>{" "}
+                  processing. Trusted by thousands of businesses globally.
                 </motion.p>
 
                 <motion.div
@@ -2158,25 +2187,36 @@ export default function Home() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4, duration: 0.8 }}
                 >
-                  {/* Primary CTA: "View All POS" */}
-                  <Link href="/poslineup">
+                  {/* Primary CTA */}
+                  <motion.a
+                    href="https://onboarding.tillpayments.com/signup/6748abe55b6362feca0a75f3"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{
+                      scale: 1.05,
+                      boxShadow: "0px 4px 20px rgba(255,200,0,0.3)",
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                  >
                     <motion.button
                       type="button"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="px-8 py-4 text-lg font-semibold text-white transition-colors bg-blue-600 rounded-full hover:bg-blue-700 shadow-md"
-                      aria-label="View All POS Systems"
+                      className="px-8 py-4 text-lg font-semibold text-gray-900 transition-colors rounded-full bg-amber-500 hover:bg-amber-400 shadow-lg"
+                      aria-label="Get Started Now"
                     >
-                      View All POS Systems
+                      Get a Quote <span className="ml-1">→</span>
                     </motion.button>
-                  </Link>
-                  {/* Secondary CTA: "Talk to an Expert" */}
+                  </motion.a>
+
+                  {/* Secondary CTA */}
                   <motion.button
                     type="button"
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{
+                      scale: 1.05,
+                      boxShadow: "0px 4px 20px rgba(255,255,255,0.2)",
+                    }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-8 py-4 text-lg font-semibold text-gray-900 transition-colors rounded-full bg-amber-400 hover:bg-amber-300 shadow-md"
-                    onClick={() => scrollToSection('contact')}
+                    className="px-8 py-4 text-lg font-semibold text-white transition-colors border-2 border-white rounded-full hover:bg-white/10"
+                    onClick={() => scrollToSection("contact")}
                     aria-label="Talk to an Expert"
                   >
                     Talk to an Expert
@@ -2186,49 +2226,45 @@ export default function Home() {
             </div>
           </div>
 
-          {/**
-           * NEW SECTION: Short Intro / “Why StarAccept” 
-           */}
-          <section className="py-16 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+          {/* ------------------ SHORT INTRO SECTION ------------------ */}
+          <section className="py-16 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
             <div className="max-w-6xl mx-auto px-4">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                  Why StarAccept?
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-                  Our all-in-one solutions combine next-gen payment technology
-                  with transparent, zero-fee pricing. Whether you're a small
-                  shop or a multi-location enterprise, we’ve got you covered.
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold">Why Choose StarAccept?</h2>
+                <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mt-2">
+                  We’re more than just a payment processor. Discover our
+                  all-in-one solutions that help you cut costs and grow faster.
                 </p>
               </div>
-              {/* Simple bullet highlights */}
-              <div className="grid gap-8 md:grid-cols-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {[
                   {
-                    icon: <FaShieldAlt className="text-blue-600 dark:text-blue-400 text-3xl" />,
-                    title: 'Secure & Compliant',
-                    text: 'Full PCI compliance ensures safe and worry-free transactions.'
+                    title: "Zero-Fee Options",
+                    desc: "Eliminate processing fees with fully compliant surcharging programs.",
                   },
                   {
-                    icon: <FaHeadset className="text-green-600 dark:text-green-400 text-3xl" />,
-                    title: '24/7 Expert Support',
-                    text: 'Round-the-clock assistance so you’re never left hanging.'
+                    title: "24/7 Support",
+                    desc: "Round-the-clock help whenever you need it, by phone, email, or chat.",
                   },
                   {
-                    icon: <FaBolt className="text-amber-500 dark:text-amber-400 text-3xl" />,
-                    title: 'Lightning-Fast Setup',
-                    text: 'Get up and running in as little as 24 hours.'
-                  }
+                    title: "Scalable Hardware",
+                    desc: "From handheld devices to full countertop stations and everything in between.",
+                  },
+                  {
+                    title: "Powerful Analytics",
+                    desc: "Track sales, manage inventory, and spot trends with real-time data.",
+                  },
                 ].map((item, index) => (
                   <motion.div
                     key={index}
-                    className="p-8 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-sm text-center"
-                    whileHover={{ y: -4 }}
+                    className="p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-md"
+                    whileHover={{ y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
                   >
-                    <div className="mb-4 flex justify-center">{item.icon}</div>
-                    <h4 className="text-lg font-semibold mb-2">{item.title}</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      {item.text}
+                    <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">
+                      {item.title}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm">
+                      {item.desc}
                     </p>
                   </motion.div>
                 ))}
@@ -2236,24 +2272,20 @@ export default function Home() {
             </div>
           </section>
 
-          {/** 
-           * STATS SECTION 
-           * (Now placed after short intro)
-           */}
+          {/* ------------------ STATS SECTION ------------------ */}
           <section className="py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 text-gray-900 dark:text-white">
             <div className="max-w-6xl mx-auto px-4">
-              <h2 className="text-3xl font-bold text-center mb-4">
-                Businesses Of All Sizes
-              </h2>
+              <h2 className="text-3xl font-bold text-center mb-4">Businesses of All Sizes</h2>
               <p className="text-center text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-12">
-                Join thousands of merchants who’ve upgraded to our simpler, more
-                affordable payment processing platform.
+                Join thousands of merchants who’ve upgraded to simpler, more affordable
+                payment processing.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
                 <motion.div
                   className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center"
                   whileHover={{ y: -5 }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 >
                   <FaCheckCircle
                     className="text-green-500 dark:text-green-400 text-4xl mb-2"
@@ -2262,28 +2294,24 @@ export default function Home() {
                   <h3 className="text-2xl font-bold text-gray-800 dark:text-white">
                     99.99%
                   </h3>
-                  <p className="mt-2 text-gray-600 dark:text-gray-300">
-                    Uptime
-                  </p>
+                  <p className="mt-2 text-gray-600 dark:text-gray-300">Uptime</p>
                 </motion.div>
                 <motion.div
                   className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center"
                   whileHover={{ y: -5 }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 >
                   <FaClock
                     className="text-blue-500 dark:text-blue-400 text-4xl mb-2"
                     aria-hidden="true"
                   />
-                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">
-                    24/7
-                  </h3>
-                  <p className="mt-2 text-gray-600 dark:text-gray-300">
-                    Support
-                  </p>
+                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white">24/7</h3>
+                  <p className="mt-2 text-gray-600 dark:text-gray-300">Support</p>
                 </motion.div>
                 <motion.div
                   className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center"
                   whileHover={{ y: -5 }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 >
                   <FaHandshake
                     className="text-orange-500 dark:text-orange-400 text-4xl mb-2"
@@ -2299,6 +2327,7 @@ export default function Home() {
                 <motion.div
                   className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center"
                   whileHover={{ y: -5 }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 >
                   <FaPuzzlePiece
                     className="text-purple-500 dark:text-purple-400 text-4xl mb-2"
@@ -2307,13 +2336,12 @@ export default function Home() {
                   <h3 className="text-2xl font-bold text-gray-800 dark:text-white">
                     300+
                   </h3>
-                  <p className="mt-2 text-gray-600 dark:text-gray-300">
-                    Integrations
-                  </p>
+                  <p className="mt-2 text-gray-600 dark:text-gray-300">Integrations</p>
                 </motion.div>
                 <motion.div
                   className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md text-center"
                   whileHover={{ y: -5 }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 >
                   <FaGlobe
                     className="text-green-600 dark:text-green-400 text-4xl mb-2"
@@ -2322,68 +2350,63 @@ export default function Home() {
                   <h3 className="text-2xl font-bold text-gray-800 dark:text-white">
                     Global
                   </h3>
-                  <p className="mt-2 text-gray-600 dark:text-gray-300">
-                    Coverage
-                  </p>
+                  <p className="mt-2 text-gray-600 dark:text-gray-300">Coverage</p>
                 </motion.div>
               </div>
             </div>
           </section>
 
-          {/** 
-           * FEATURED SOLUTIONS (formerly “Flexible Solutions...”) 
-           */}
+          {/* ------------------ FEATURED SOLUTIONS (renamed) ------------------ */}
           <section className="py-16 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-100">
             <div className="max-w-6xl mx-auto px-4">
               <div className="mb-12 text-center">
                 <span className="inline-block px-4 py-1 mb-4 text-sm font-medium text-blue-600 bg-blue-100 dark:bg-blue-900 dark:text-blue-300 rounded-full">
                   All-in-One Platform
                 </span>
-                <h2 className="text-3xl font-bold mb-4">
-                  Featured Solutions for Every Business
-                </h2>
+                <h2 className="text-3xl font-bold mb-4">Featured Solutions</h2>
                 <p className="mt-2 text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                  Powerful features and hardware options tailored to your unique
-                  business needs and growth stage
+                  Powerful features and hardware options tailored to your unique business
+                  needs and growth stage.
                 </p>
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
                 {[
                   {
                     icon: FaCreditCard,
                     title: "Payments",
-                    desc: "Accept Apple Pay, Google Pay, QR, and more.",
+                    desc: "Accept Apple Pay, Google Pay, Tap To Pay, and more.",
                     color: "bg-blue-100 dark:bg-blue-900/30",
-                    iconColor: "text-blue-600 dark:text-blue-400"
+                    iconColor: "text-blue-600 dark:text-blue-400",
                   },
                   {
                     icon: FaCog,
                     title: "Software",
-                    desc: "Manage tables, menus, online ordering, and more.",
+                    desc: "Manage tables, customize orders, handle online ordering, etc.",
                     color: "bg-purple-100 dark:bg-purple-900/30",
-                    iconColor: "text-purple-600 dark:text-purple-400"
+                    iconColor: "text-purple-600 dark:text-purple-400",
                   },
                   {
                     icon: FaTools,
                     title: "Hardware",
-                    desc: "Countertop stations, handhelds, and KDS for any size.",
+                    desc: "Countertop stations, handheld devices, KDS for any setup.",
                     color: "bg-amber-100 dark:bg-amber-900/30",
-                    iconColor: "text-amber-600 dark:text-amber-400"
+                    iconColor: "text-amber-600 dark:text-amber-400",
                   },
                   {
                     icon: FaLaptop,
                     title: "Applications",
-                    desc: "Online orders, reservations, loyalty, and more.",
+                    desc: "Online orders, reservations, loyalty programs, and more.",
                     color: "bg-green-100 dark:bg-green-900/30",
-                    iconColor: "text-green-600 dark:text-green-400"
+                    iconColor: "text-green-600 dark:text-green-400",
                   },
                   {
                     icon: FaRegLightbulb,
                     title: "Tailored Solutions",
-                    desc: "From idea to 25+ locations, we’ll find the perfect fit.",
+                    desc: "From small pop-ups to multi-location enterprises, we can help.",
                     color: "bg-red-100 dark:bg-red-900/30",
-                    iconColor: "text-red-600 dark:text-red-400"
-                  }
+                    iconColor: "text-red-600 dark:text-red-400",
+                  },
                 ].map((item, index) => (
                   <motion.div
                     key={index}
@@ -2393,7 +2416,10 @@ export default function Home() {
                     <div
                       className={`w-20 h-20 rounded-full ${item.color} flex items-center justify-center mb-4 shadow-sm`}
                     >
-                      <item.icon className={`${item.iconColor} text-3xl`} />
+                      <item.icon
+                        className={`${item.iconColor} text-3xl`}
+                        aria-hidden="true"
+                      />
                     </div>
                     <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -2403,27 +2429,25 @@ export default function Home() {
                 ))}
               </div>
 
-              {/* Zero-Fee highlight */}
+              {/* Highlight Zero-Fee Processing */}
               <div className="mt-16 bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
                 <div className="grid md:grid-cols-2 items-center">
                   <div className="p-8 md:p-12">
                     <span className="inline-block px-4 py-1 mb-4 text-sm font-medium text-amber-600 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 rounded-full">
                       Most Popular
                     </span>
-                    <h3 className="text-2xl font-bold mb-4">
-                      Zero-Fee Processing
-                    </h3>
+                    <h3 className="text-2xl font-bold mb-4">Zero-Fee Processing</h3>
                     <p className="text-gray-600 dark:text-gray-400 mb-6">
-                      Eliminate processing fees with our surcharging program.
-                      Fully compliant and automatically itemized for customers
-                      to see. Save thousands annually without hidden costs.
+                      Eliminate processing fees with our innovative surcharging
+                      program. Fully compliant and automatically adds the exact fee
+                      on customer receipts.
                     </p>
                     <ul className="space-y-3 mb-8">
                       {[
                         "Save thousands in processing fees annually",
-                        "Fully compliant with card brand rules",
+                        "Fully compliant with Visa/MC rules",
                         "Transparent fee display for customers",
-                        "Simple setup—no technical headaches"
+                        "Simple setup with no technical headaches",
                       ].map((item, i) => (
                         <li key={i} className="flex items-start">
                           <svg
@@ -2451,7 +2475,7 @@ export default function Home() {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         className="px-6 py-3 bg-amber-500 text-gray-900 rounded-full hover:bg-amber-400 shadow-md"
-                        onClick={() => scrollToSection('contact')}
+                        onClick={() => scrollToSection("contact")}
                       >
                         Learn How Much You’ll Save
                       </motion.button>
@@ -2472,10 +2496,7 @@ export default function Home() {
             </div>
           </section>
 
-          {/** 
-           * TESTIMONIALS 
-           * (Now after 'Featured Solutions')
-           */}
+          {/* ------------------ TESTIMONIALS ------------------ */}
           <section className="py-20 bg-white dark:bg-gray-900">
             <div className="max-w-6xl mx-auto px-4">
               <div className="text-center mb-12">
@@ -2483,8 +2504,8 @@ export default function Home() {
                   What Our Clients Say
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-                  Don’t just take our word for it. Here’s what businesses like
-                  yours have experienced after switching to StarAccept.
+                  Don’t just take our word for it. See how other businesses
+                  benefit from StarAccept.
                 </p>
               </div>
 
@@ -2512,9 +2533,9 @@ export default function Home() {
                     ))}
                   </div>
                   <p className="text-gray-700 dark:text-gray-300 italic">
-                    "Switching to StarAccept saved us over $12,000 in fees last
-                    year. Their Clover online ordering system boosted our takeout
-                    sales substantially, and the support team has been incredible."
+                    "Switching to StarAccept saved us over $12,000 in processing
+                    fees last year. The Clover online ordering system boosted
+                    our takeout sales. Their support team is always on point."
                   </p>
                 </motion.div>
 
@@ -2542,9 +2563,8 @@ export default function Home() {
                   </div>
                   <p className="text-gray-700 dark:text-gray-300 italic">
                     "As a small retailer, I needed something affordable but
-                    powerful. The Mini POS has everything I need - inventory
-                    management and loyalty, plus the zero-fee program saves me
-                    a ton monthly."
+                    powerful. The Mini POS handles inventory and loyalty, and
+                    the zero-fee option helps me reinvest into the business."
                   </p>
                 </motion.div>
 
@@ -2571,33 +2591,16 @@ export default function Home() {
                     ))}
                   </div>
                   <p className="text-gray-700 dark:text-gray-300 italic">
-                    "The security features give us peace of mind handling patient
+                    "The security features give us peace of mind for patient
                     payments. Integration with our scheduling software was
-                    seamless, and we've cut monthly processing costs in half."
+                    seamless, and we've cut monthly processing costs by half."
                   </p>
                 </motion.div>
-              </div>
-
-              <div className="text-center mt-12">
-                <Link href="#product-selector">
-                  <motion.button
-                    type="button"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-8 py-4 text-lg font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 shadow-md"
-                    onClick={() => scrollToSection('product-selector')}
-                  >
-                    Personalized Payment Solution
-                  </motion.button>
-                </Link>
               </div>
             </div>
           </section>
 
-          {/**
-           * WIZARD 
-           * (Positioned AFTER Testimonials per prompt)
-           */}
+          {/* ------------------ WIZARD SECTION ------------------ */}
           <section
             className="py-20 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900"
             id="product-selector"
@@ -2611,8 +2614,8 @@ export default function Home() {
                   Find Your Perfect Payment Solution
                 </h2>
                 <p className="max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">
-                  Answer a few quick questions and we’ll match you with the ideal
-                  system for your specific business needs.
+                  Answer a few quick questions and we'll match you with the ideal system
+                  for your specific needs.
                 </p>
               </div>
 
@@ -2624,7 +2627,7 @@ export default function Home() {
                     initial={{ opacity: 0, x: 100 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -100 }}
-                    transition={{ duration: 0.4, ease: 'easeInOut' }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
                     className="min-h-[400px]"
                   >
                     {selectorSubmission.isLoading ? (
@@ -2645,8 +2648,8 @@ export default function Home() {
                       disabled={wizardStep === 1}
                       className={`px-6 py-3 text-gray-600 dark:text-gray-300 rounded-full transition-colors ${
                         wizardStep === 1
-                          ? 'opacity-50 cursor-not-allowed bg-gray-200 dark:bg-gray-600'
-                          : 'hover:bg-gray-100 dark:hover:bg-gray-600 bg-gray-100 dark:bg-gray-600'
+                          ? "opacity-50 cursor-not-allowed bg-gray-200 dark:bg-gray-600"
+                          : "hover:bg-gray-100 dark:hover:bg-gray-600 bg-gray-100 dark:bg-gray-600"
                       }`}
                       whileHover={wizardStep !== 1 ? { scale: 1.05 } : undefined}
                       whileTap={wizardStep !== 1 ? { scale: 0.95 } : undefined}
@@ -2676,8 +2679,8 @@ export default function Home() {
                       disabled={wizardStep === 5}
                       className={`px-6 py-3 text-white bg-blue-600 dark:bg-blue-500 rounded-full transition-colors shadow-md ${
                         wizardStep === 5
-                          ? 'opacity-50 cursor-not-allowed'
-                          : 'hover:bg-blue-700 dark:hover:bg-blue-600'
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:bg-blue-700 dark:hover:bg-blue-600"
                       }`}
                       whileHover={wizardStep !== 5 ? { scale: 1.05 } : undefined}
                       whileTap={wizardStep !== 5 ? { scale: 0.95 } : undefined}
@@ -2706,27 +2709,21 @@ export default function Home() {
             </div>
           </section>
 
-          {/**
-           * AI SEARCH OVERLAY 
-           * (Moved below Wizard)
-           */}
-          <section className="pt-8 pb-16 bg-white dark:bg-gray-900">
+          {/* ------------------ AI SEARCH OVERLAY (Moved Below Wizard) ------------------ */}
+          <section className="py-12 bg-white dark:bg-gray-800">
             <div className="max-w-6xl mx-auto px-4">
-              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
-                Still Not Sure? Ask Our AI!
+              <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+                Prefer a Quick Search?
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Type a question about your business or specific POS needs, and
-                our AI will suggest the best solutions.
+              <p className="max-w-3xl text-gray-600 dark:text-gray-300 mb-6">
+                Type in your business needs or questions, and our AI engine will
+                suggest the best POS systems or hardware.
               </p>
               <AiSearchOverlay />
             </div>
           </section>
 
-          {/**
-           * FAQ SECTION 
-           * (Now after the AI overlay, to answer final objections)
-           */}
+          {/* ------------------ FAQ ------------------ */}
           <section className="py-20 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900">
             <div className="max-w-6xl mx-auto px-4">
               <h3 className="mb-8 text-2xl font-bold text-center text-gray-900 dark:text-white">
@@ -2736,42 +2733,37 @@ export default function Home() {
                 {[
                   {
                     q: "How quickly can I start processing payments?",
-                    a: "Most merchants are approved within 24-48 hours and can begin processing immediately after receiving their equipment."
+                    a: "Most merchants are approved within 24-48 hours and can begin processing immediately after equipment setup.",
                   },
                   {
                     q: "Are there any long-term contracts?",
-                    a: "No. We believe in earning your business every day. Our solutions come with no long-term contracts or early termination fees."
+                    a: "No. We believe in earning your business every day. Our solutions come with no long-term contracts or early termination fees.",
                   },
                   {
                     q: "Is your zero-fee program compliant with card brand rules?",
-                    a: "Yes. Our surcharging program is fully compliant with Visa, Mastercard, Discover, and American Express regulations. We handle all updates automatically."
+                    a: "Yes. Our surcharging program is fully compliant with Visa, Mastercard, Discover, and American Express regulations and is automatically updated as rules change.",
                   },
                   {
                     q: "Do you offer technical support?",
-                    a: "Absolutely. We provide 24/7 technical support via phone, email, and chat to ensure your payment systems are always running smoothly."
-                  }
+                    a: "Absolutely. We provide 24/7 technical support via phone, email, and chat to ensure your systems run smoothly at all times.",
+                  },
                 ].map((faq, index) => (
                   <motion.div
                     key={index}
                     className="p-6 bg-gray-50 dark:bg-gray-800 rounded-xl"
-                    whileHover={{ y: -2, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+                    whileHover={{ y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
                   >
                     <h4 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
                       {faq.q}
                     </h4>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      {faq.a}
-                    </p>
+                    <p className="text-gray-600 dark:text-gray-400">{faq.a}</p>
                   </motion.div>
                 ))}
               </div>
             </div>
           </section>
 
-          {/**
-           * CONTACT SECTION 
-           * (Placed after FAQ)
-           */}
+          {/* ------------------ CONTACT ------------------ */}
           <div
             className="relative px-4 py-20 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800"
             id="contact"
@@ -2785,12 +2777,13 @@ export default function Home() {
                   Ready to Get Started?
                 </h2>
                 <p className="max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">
-                  Talk to a payment expert today and discover how we can help
-                  your business grow.
+                  Talk to a payment expert today and discover how we can help your
+                  business grow.
                 </p>
               </div>
 
               <div className="grid items-start gap-12 md:grid-cols-2">
+                {/* Contact Form */}
                 <div className="p-8 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 shadow-lg rounded-2xl">
                   <form onSubmit={handleContactSubmit} className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
@@ -2900,9 +2893,7 @@ export default function Home() {
                         >
                           <option value="">Select a time</option>
                           <option value="morning">Morning (9AM - 12PM)</option>
-                          <option value="afternoon">
-                            Afternoon (12PM - 5PM)
-                          </option>
+                          <option value="afternoon">Afternoon (12PM - 5PM)</option>
                           <option value="evening">Evening (5PM - 8PM)</option>
                         </select>
                       </div>
@@ -2912,7 +2903,7 @@ export default function Home() {
                         Number of Locations
                       </label>
                       <div className="flex flex-wrap items-center gap-2">
-                        {['1', '2', '3', '4', '5'].map((opt) => (
+                        {["1", "2", "3", "4", "5"].map((opt) => (
                           <motion.button
                             key={opt}
                             type="button"
@@ -2920,16 +2911,16 @@ export default function Home() {
                             onClick={(ev) => {
                               ev.preventDefault();
                               dispatchContact({
-                                type: 'UPDATE_FIELD',
-                                payload: { name: 'numLocationsChoice', value: opt }
+                                type: "UPDATE_FIELD",
+                                payload: { name: "numLocationsChoice", value: opt },
                               });
                             }}
                             className={`px-4 py-2 rounded-full text-sm shadow-sm ${
                               contactFormData.numLocationsChoice === opt
-                                ? 'bg-blue-600 text-white dark:bg-blue-500'
-                                : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500'
+                                ? "bg-blue-600 text-white dark:bg-blue-500"
+                                : "bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500"
                             }`}
-                            aria-label={`Select ${opt} location${opt !== '1' ? 's' : ''}`}
+                            aria-label={`Select ${opt} location${opt !== "1" ? "s" : ""}`}
                           >
                             {opt}
                           </motion.button>
@@ -2940,21 +2931,24 @@ export default function Home() {
                           onClick={(ev) => {
                             ev.preventDefault();
                             dispatchContact({
-                              type: 'UPDATE_FIELD',
-                              payload: { name: 'numLocationsChoice', value: 'plus' }
+                              type: "UPDATE_FIELD",
+                              payload: {
+                                name: "numLocationsChoice",
+                                value: "plus",
+                              },
                             });
                           }}
                           className={`px-4 py-2 rounded-full text-sm shadow-sm ${
-                            contactFormData.numLocationsChoice === 'plus'
-                              ? 'bg-blue-600 text-white dark:bg-blue-500'
-                              : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500'
+                            contactFormData.numLocationsChoice === "plus"
+                              ? "bg-blue-600 text-white dark:bg-blue-500"
+                              : "bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500"
                           }`}
                           aria-label="More than 5 locations"
                         >
                           6+
                         </motion.button>
                       </div>
-                      {contactFormData.numLocationsChoice === 'plus' && (
+                      {contactFormData.numLocationsChoice === "plus" && (
                         <div className="mt-3">
                           <label
                             htmlFor="numLocationsCustom"
@@ -2980,7 +2974,7 @@ export default function Home() {
                         Monthly Processing Volume
                       </label>
                       <div className="flex flex-wrap gap-2">
-                        {['0-50K', '50K-250K', '250K-1MM', '1MM+'].map((range) => (
+                        {["0-50K", "50K-250K", "250K-1MM", "1MM+"].map((range) => (
                           <motion.button
                             key={range}
                             type="button"
@@ -2988,39 +2982,39 @@ export default function Home() {
                             onClick={(ev) => {
                               ev.preventDefault();
                               dispatchContact({
-                                type: 'UPDATE_FIELD',
-                                payload: { name: 'monthlyVolume', value: range }
+                                type: "UPDATE_FIELD",
+                                payload: { name: "monthlyVolume", value: range },
                               });
                             }}
                             className={`px-4 py-2 rounded-full border text-sm shadow-sm ${
                               contactFormData.monthlyVolume === range
-                                ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500'
-                                : 'text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
+                                ? "bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500"
+                                : "text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
                             }`}
                             aria-label={`Monthly volume: ${range}`}
                           >
-                            {range === '0-50K' && '$0-50K'}
-                            {range === '50K-250K' && '$50K-250K'}
-                            {range === '250K-1MM' && '$250K-1MM'}
-                            {range === '1MM+' && '$1MM+'}
+                            {range === "0-50K" && "$0-50K"}
+                            {range === "50K-250K" && "$50K-250K"}
+                            {range === "250K-1MM" && "$250K-1MM"}
+                            {range === "1MM+" && "$1MM+"}
                           </motion.button>
                         ))}
                       </div>
                     </div>
 
-                    {/* Privacy notice */}
+                    {/* Privacy Notice */}
                     <div className="text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
                       <p className="flex items-start">
                         <FaLock className="text-green-600 dark:text-green-400 mt-0.5 mr-2 flex-shrink-0" />
                         <span>
-                          By submitting this form, you agree to our{' '}
+                          By submitting this form, you agree to our{" "}
                           <Link
                             href="/privacy"
                             className="text-blue-600 dark:text-blue-400 hover:underline"
                           >
                             Privacy Policy
                           </Link>
-                          . We’ll never share your information with third parties.
+                          . We’ll never share your info with third parties.
                         </span>
                       </p>
                     </div>
@@ -3031,7 +3025,7 @@ export default function Home() {
                         className="w-full py-4 px-6 rounded-full font-semibold text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
                         whileHover={{
                           scale: 1.02,
-                          boxShadow: '0px 4px 20px rgba(59,130,246,0.3)'
+                          boxShadow: "0px 4px 20px rgba(59,130,246,0.3)",
                         }}
                         whileTap={{ scale: 0.98 }}
                         disabled={contactSubmission.isLoading}
@@ -3060,19 +3054,19 @@ export default function Home() {
                             Sending...
                           </span>
                         ) : (
-                          'Get Your Free Consultation'
+                          "Get Your Free Consultation"
                         )}
                       </motion.button>
                     </div>
 
-                    {contactSubmission.status !== 'idle' && (
+                    {contactSubmission.status !== "idle" && (
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className={`p-4 rounded-lg mt-2 ${
-                          contactSubmission.status === 'success'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-200'
-                            : 'bg-red-100 text-red-800 dark:bg-red-800/30 dark:text-red-200'
+                          contactSubmission.status === "success"
+                            ? "bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-200"
+                            : "bg-red-100 text-red-800 dark:bg-red-800/30 dark:text-red-200"
                         }`}
                         role="alert"
                       >
@@ -3082,6 +3076,7 @@ export default function Home() {
                   </form>
                 </div>
 
+                {/* Contact Info / Sales Points */}
                 <div className="space-y-8">
                   <div className="p-8 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-2xl shadow-lg">
                     <h3 className="mb-6 text-2xl font-semibold dark:text-white">
@@ -3090,36 +3085,36 @@ export default function Home() {
                     <div className="space-y-6">
                       {[
                         {
-                          title: 'Save on Processing Fees',
+                          title: "Save on Processing Fees",
                           description:
-                            'Our transparent pricing and zero-fee options save merchants up to 100% of their processing costs.',
+                            "Our transparent pricing and zero-fee options save merchants up to 100% of their processing costs.",
                           icon: (
                             <FaChartLine className="text-green-500 dark:text-green-400 text-2xl" />
-                          )
+                          ),
                         },
                         {
-                          title: 'Local Support Team',
+                          title: "Local Support Team",
                           description:
-                            'Get personalized assistance from payment experts who understand your local market and industry.',
+                            "Get personalized assistance from payment experts who understand your local market and industry.",
                           icon: (
                             <FaUsers className="text-blue-500 dark:text-blue-400 text-2xl" />
-                          )
+                          ),
                         },
                         {
-                          title: 'Future-Proof Technology',
+                          title: "Future-Proof Technology",
                           description:
-                            'We continually update our systems to support the latest payment methods and security standards.',
+                            "Our systems are constantly updated to support the latest payment methods and security standards.",
                           icon: (
                             <FaMobileAlt className="text-purple-500 dark:text-purple-400 text-2xl" />
-                          )
-                        }
+                          ),
+                        },
                       ].map((item, index) => (
                         <motion.div
                           key={index}
                           className="flex items-start space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-800"
                           whileHover={{
                             y: -2,
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                            boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                           }}
                         >
                           <div className="flex-shrink-0 p-3 bg-white dark:bg-gray-700 rounded-full shadow-sm">
@@ -3201,9 +3196,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/**
-           * FOOTER & Floating “Apply Now” 
-           */}
+          {/* ------------------ FOOTER ------------------ */}
           <footer className="py-12 bg-white dark:bg-gray-900">
             <div className="max-w-6xl px-4 mx-auto">
               <div className="grid gap-8 md:grid-cols-4 mb-8">
@@ -3309,8 +3302,8 @@ export default function Home() {
 
               <div className="pt-8 mt-8 border-t border-gray-200 dark:border-gray-700 text-center md:flex md:justify-between md:text-left">
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  © {new Date().getFullYear()} Star Accept Business Solutions.
-                  All rights reserved.
+                  © {new Date().getFullYear()} Star Accept Business Solutions. All
+                  rights reserved.
                 </p>
                 <div className="mt-4 md:mt-0">
                   <p className="text-sm text-gray-500 dark:text-gray-500">
@@ -3319,18 +3312,18 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            {/* Floating "Apply Now" Bar -- full-width at bottom */}
+
+            {/* Floating "Apply Now" Bar (full-width at bottom) */}
             <motion.div
               className="fixed bottom-0 left-0 w-full p-4 bg-amber-500 transition-transform z-40"
-              initial={{ y: '100%' }}
+              initial={{ y: "100%" }}
               animate={{ y: 0 }}
-              transition={{ type: 'spring', stiffness: 100 }}
+              transition={{ type: "spring", stiffness: 100 }}
               whileHover={{ scale: 1.02 }}
             >
               <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between">
                 <p className="text-gray-900 font-medium mb-2 md:mb-0">
-                  Ready to eliminate credit card processing fees? Apply now and
-                  start saving!
+                  Ready to eliminate credit card processing fees? Apply now and start saving!
                 </p>
                 <a
                   href="https://onboarding.tillpayments.com/signup/6748abe55b6362feca0a75f3"
