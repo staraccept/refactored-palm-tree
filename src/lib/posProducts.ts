@@ -6,6 +6,10 @@ export interface PosProduct {
   bestFor: string[];
   features: string[];
   searchTerms: {
+    industries: {
+      includes(industry: string): boolean;
+      map(arg0: (ind: any, i: any) => import("react").JSX.Element): import("react").ReactNode; businessTypes: string[]; useCase: string[]; keywords: string[]; 
+};
     businessTypes: string[];
     useCase: string[];
     keywords: string[];
@@ -109,7 +113,18 @@ export const posProducts: PosProduct[] = [
         "multiple users",
         "advanced system",
         "premium"
-      ]
+      ],
+      industries: {
+        includes: function (industry: string): boolean {
+          throw new Error("Function not implemented.");
+        },
+        map: function (arg0: (ind: any, i: any) => import("react").JSX.Element): import("react").ReactNode {
+          throw new Error("Function not implemented.");
+        },
+        businessTypes: [],
+        useCase: [],
+        keywords: []
+      }
     },
     relatedProducts: ["kds", "starprinter"],
     primaryCategory: "pos",
@@ -180,7 +195,18 @@ export const posProducts: PosProduct[] = [
         "quick",
         "medium sized",
         "standard"
-      ]
+      ],
+      industries: {
+        includes: function (industry: string): boolean {
+          throw new Error("Function not implemented.");
+        },
+        map: function (arg0: (ind: any, i: any) => import("react").JSX.Element): import("react").ReactNode {
+          throw new Error("Function not implemented.");
+        },
+        businessTypes: [],
+        useCase: [],
+        keywords: []
+      }
     },
     relatedProducts: ["kds", "starprinter"],
     primaryCategory: "pos",
@@ -263,7 +289,18 @@ export const posProducts: PosProduct[] = [
         "consultant",
         "tax",
         "medical"
-      ]
+      ],
+      industries: {
+        includes: function (industry: string): boolean {
+          throw new Error("Function not implemented.");
+        },
+        map: function (arg0: (ind: any, i: any) => import("react").JSX.Element): import("react").ReactNode {
+          throw new Error("Function not implemented.");
+        },
+        businessTypes: [],
+        useCase: [],
+        keywords: []
+      }
     },
     relatedProducts: ["flex4"],
     primaryCategory: "pos",
@@ -363,7 +400,18 @@ export const posProducts: PosProduct[] = [
         "medical",
         "professional",
         "consultant"
-      ]
+      ],
+      industries: {
+        includes: function (industry: string): boolean {
+          throw new Error("Function not implemented.");
+        },
+        map: function (arg0: (ind: any, i: any) => import("react").JSX.Element): import("react").ReactNode {
+          throw new Error("Function not implemented.");
+        },
+        businessTypes: [],
+        useCase: [],
+        keywords: []
+      }
     },
     relatedProducts: ["mini3"],
     primaryCategory: "mobile",
@@ -426,7 +474,18 @@ export const posProducts: PosProduct[] = [
         "kitchen equipment",
         "chit printer",
         "order printer"
-      ]
+      ],
+      industries: {
+        includes: function (industry: string): boolean {
+          throw new Error("Function not implemented.");
+        },
+        map: function (arg0: (ind: any, i: any) => import("react").JSX.Element): import("react").ReactNode {
+          throw new Error("Function not implemented.");
+        },
+        businessTypes: [],
+        useCase: [],
+        keywords: []
+      }
     },
     relatedProducts: ["duo2", "solo", "kds"],
     primaryCategory: "peripheral",
@@ -490,7 +549,18 @@ export const posProducts: PosProduct[] = [
         "metrics",
         "performance tracking",
         "digital kitchen"
-      ]
+      ],
+      industries: {
+        includes: function (industry: string): boolean {
+          throw new Error("Function not implemented.");
+        },
+        map: function (arg0: (ind: any, i: any) => import("react").JSX.Element): import("react").ReactNode {
+          throw new Error("Function not implemented.");
+        },
+        businessTypes: [],
+        useCase: [],
+        keywords: []
+      }
     },
     relatedProducts: ["duo2", "solo", "starprinter"],
     primaryCategory: "peripheral",
@@ -560,7 +630,18 @@ export const posProducts: PosProduct[] = [
         "autonomous",
         "interactive",
         "self order"
-      ]
+      ],
+      industries: {
+        includes: function (industry: string): boolean {
+          throw new Error("Function not implemented.");
+        },
+        map: function (arg0: (ind: any, i: any) => import("react").JSX.Element): import("react").ReactNode {
+          throw new Error("Function not implemented.");
+        },
+        businessTypes: [],
+        useCase: [],
+        keywords: []
+      }
     },
     relatedProducts: ["starprinter", "kds"],
     primaryCategory: "selfservice",
