@@ -9,13 +9,10 @@ import Link from 'next/link';
 export default function Restaurants() {
   const { darkMode, toggleDarkMode } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  // Scroll to top functionality
   const [showScrollToTop, setShowScrollToTop] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      // Show "Scroll to top" after scrolling 300px
       if (window.scrollY > 300) setShowScrollToTop(true);
       else setShowScrollToTop(false);
     };
@@ -26,6 +23,27 @@ export default function Restaurants() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  /**
+   * --------------------------------------------
+   * State for the Interactive Fee Comparison
+   * --------------------------------------------
+   */
+  // Default average order: $25
+  const [orderAmount, setOrderAmount] = useState<number>(25);
+  // Default aggregator fee: 30%
+  const [aggregatorFee, setAggregatorFee] = useState<number>(30);
+
+  // For display convenience:
+  // "Traditional Third-Party" => Restaurant retains (100% - aggregatorFee%)
+  // "StarAccept Strategy" => Restaurant recaptures 100% of the aggregator fee (implied pass-through).
+  // So we show the difference visually.
+  const aggregatorRetained = 100 - aggregatorFee; // e.g., 70% if fee is 30
+  const starAcceptRetained = 100;                // 100% in the new strategy
+
+  // Convert to actual dollar values for a single average order
+  const aggregatorDollarRetained = (orderAmount * aggregatorRetained) / 100;
+  const starAcceptDollarRetained = (orderAmount * starAcceptRetained) / 100;
 
   return (
     <ThemeProvider>
@@ -40,7 +58,7 @@ export default function Restaurants() {
             <link rel="icon" href="/favicon.ico" />
           </Head>
 
-          {/* NAVBAR */}
+          {/* NAVBAR (Unchanged) */}
           <motion.nav
             className="fixed top-0 z-50 w-full bg-white dark:bg-gray-800 shadow-sm bg-opacity-90 backdrop-blur-sm"
             initial={{ y: -100 }}
@@ -113,14 +131,14 @@ export default function Restaurants() {
                       Working Capital
                     </motion.a>
                     <motion.a
-                                                              whileHover={{ scale: 1.05 }}
-                                                              whileTap={{ scale: 0.95 }}
-                                                              className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
-                                                              href="/poslineup"
-                                                              aria-label="View All POS Systems"
-                                                            >
-                                                              POS Systems
-                                                            </motion.a>
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
+                      href="/poslineup"
+                      aria-label="View All POS Systems"
+                    >
+                      POS Systems
+                    </motion.a>
                     <motion.a
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -237,7 +255,7 @@ export default function Restaurants() {
             )}
           </motion.nav>
 
-          {/* HERO SECTION */}
+          {/* HERO SECTION (Unchanged) */}
           <section className="relative w-full min-h-[60vh] flex items-center justify-center pt-24">
             <Image
               src="/restaurant.jpg"
@@ -261,29 +279,38 @@ export default function Restaurants() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                From full service to coffee shops, we handle the heavy lifting—turning a napkin idea into a thriving business or scaling your 10th location seamlessly.
+                From full service to coffee shops, we handle the heavy lifting—turning a napkin idea 
+                into a thriving business or scaling your 10th location seamlessly.
               </motion.p>
               <motion.button
                 className="px-8 py-3 bg-amber-500 rounded-full font-semibold hover:bg-amber-600 transition-colors"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => document.getElementById('restaurant-solutions')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 Learn More
               </motion.button>
             </div>
           </section>
 
-          {/* FEATURES SECTION */}
-          <section className="py-16 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" id="features">
+          {/* MERGED: All-in-One Restaurant Solutions */}
+          <section
+            id="restaurant-solutions"
+            className="py-16 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
+          >
             <div className="max-w-6xl mx-auto px-4">
               <div className="mb-12 text-center">
-                <h2 className="text-3xl font-bold mb-4">Built for Restaurants, Cafés, & Quick-Service</h2>
+                <h2 className="text-3xl font-bold mb-4">
+                  All-in-One Restaurant Solutions
+                </h2>
                 <p className="text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
-                  We integrate with Grubhub, Uber Eats, and DoorDash to unify all your orders in a single POS, sync sales and expenses with QuickBooks, and offer custom label printing for takeout cups, boba teas, or coffee cups.
+                  From robust dine-in features and quick counter service 
+                  to seamless third-party delivery integration, StarAccept 
+                  has everything you need to go live in as little as 1-2 days.
                 </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Key Features */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
                 <motion.div
                   className="p-6 bg-white dark:bg-gray-700 rounded-xl shadow-md"
                   whileHover={{ scale: 1.02 }}
@@ -297,7 +324,7 @@ export default function Restaurants() {
                   />
                   <h3 className="text-xl font-semibold mb-2">Full Table Service</h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    Streamlined ordering, table mapping, and staff management for traditional dine-in restaurants.
+                    Streamlined ordering, table mapping, and staff management for dine-in restaurants.
                   </p>
                 </motion.div>
                 <motion.div
@@ -313,7 +340,8 @@ export default function Restaurants() {
                   />
                   <h3 className="text-xl font-semibold mb-2">Quick/Counter Service</h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    Speedy checkouts, easy menu customization, and integrated online ordering for busy counters.
+                    Speedy checkouts, easy menu customization, and integrated online ordering 
+                    for busy counters.
                   </p>
                 </motion.div>
                 <motion.div
@@ -329,17 +357,13 @@ export default function Restaurants() {
                   />
                   <h3 className="text-xl font-semibold mb-2">Coffee Shops & Teahouses</h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    Customized label printing, loyalty programs, and efficient inventory tracking for drinks.
+                    Customized label printing, loyalty programs, 
+                    and efficient inventory tracking for drinks.
                   </p>
                 </motion.div>
               </div>
-            </div>
-          </section>
 
-          {/* INTEGRATION & LABELING SECTION */}
-          <section className="py-16 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
-            <div className="max-w-6xl mx-auto px-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-12">
                 <motion.div
                   className="order-2 md:order-1"
                   initial={{ opacity: 0, x: -50 }}
@@ -347,12 +371,17 @@ export default function Restaurants() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5 }}
                 >
-                  <h2 className="text-3xl font-bold mb-4">Third-Party Delivery & QuickBooks Sync</h2>
+                  <h2 className="text-2xl font-bold mb-4">
+                    Third-Party Delivery & QuickBooks Sync
+                  </h2>
                   <p className="text-gray-600 dark:text-gray-300 mb-4">
-                    No more juggling multiple tablets. We unify delivery services into our POS, and automatically sync sales and expenses with QuickBooks for a real-time business overview.
+                    No more juggling multiple tablets. We unify delivery services into a single POS, 
+                    automatically syncing sales and expenses with QuickBooks for a real-time overview. 
+                    Manage your entire restaurant operation under one system.
                   </p>
                   <p className="text-gray-600 dark:text-gray-300">
-                    We also provide custom label printing options for takeout and beverages, ensuring brand consistency while keeping orders organized.
+                    We also provide custom label printing for takeout and beverages, ensuring brand 
+                    consistency and organization at all times.
                   </p>
                 </motion.div>
                 <motion.div
@@ -371,89 +400,150 @@ export default function Restaurants() {
                   />
                 </motion.div>
               </div>
+
+              <div className="text-center bg-white dark:bg-gray-700 p-8 rounded-lg shadow-md">
+                <h2 className="text-2xl font-bold mb-4">
+                  Go Live in 1-2 Business Days
+                </h2>
+                <p className="max-w-3xl mx-auto text-gray-600 dark:text-gray-300 mb-4">
+                  Get your restaurant’s system approved, deployed, and operational 
+                  in as little as 1-2 days. Whether transferring from an older system 
+                  or starting from scratch, our team ensures a seamless transition.
+                </p>
+                <motion.button
+                  className="px-8 py-3 bg-amber-500 rounded-full font-semibold hover:bg-amber-600 transition-colors mt-4"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  Get Started
+                </motion.button>
+              </div>
             </div>
           </section>
 
-          {/* QUICK SETUP SECTION */}
-          <section className="py-16 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white">
-            <div className="max-w-6xl mx-auto px-4 text-center">
-              <h2 className="text-3xl font-bold mb-6">Go Live in 1-2 Business Days</h2>
-              <p className="max-w-3xl mx-auto text-lg text-gray-600 dark:text-gray-300 mb-6">
-                We’ll get your restaurant’s system approved, deployed, and operational in as little as 1-2 days. Whether transferring from an older system or starting from scratch, our team ensures a smooth transition.
-              </p>
-            
-            </div>
-          </section>
-
-          {/* NEW TESTIMONIALS SECTION */}
+          {/* NEW: Take Control of Third-Party Costs */}
           <section className="py-16 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
             <div className="max-w-6xl mx-auto px-4">
               <div className="mb-10 text-center">
-                <h2 className="text-3xl font-bold mb-2">What People Are Saying</h2>
+                <h2 className="text-3xl font-bold mb-2">Take Control of Third-Party Costs</h2>
                 <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                  Real restaurateurs share their experience with StarAccept.
+                  Many popular online ordering and delivery platforms charge up to <strong>30%</strong> per order, 
+                  eroding your margins. StarAccept’s integrated strategy can help you 
+                  <strong> recapture that revenue entirely</strong>—all while keeping the ordering process 
+                  convenient and transparent.
                 </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <motion.div
-                  className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl shadow-md"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    “StarAccept integrated all our online orders in one place, saving us hours of confusion. Our staff loves how straightforward it is.”
-                  </p>
-                  <div className="flex items-center space-x-3">
-                   
-                    <div>
-                      <p className="text-sm font-semibold">Sarah Johnson</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Owner, Bella Bistro</p>
+
+              {/*
+                Side-by-Side Bar Comparison:
+                "Traditional Third-Party" vs. "StarAccept Strategy"
+                We'll use a slider input to represent the aggregator fee and order amount.
+              */}
+              <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+                {/* User Inputs */}
+                <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl shadow-md w-full md:w-1/2">
+                  <label
+                    className="block mb-2 text-sm font-semibold"
+                    htmlFor="orderAmount"
+                  >
+                    Average Online Order Amount ($):
+                  </label>
+                  <input
+                    id="orderAmount"
+                    type="number"
+                    value={orderAmount}
+                    onChange={(e) => setOrderAmount(Number(e.target.value))}
+                    className="w-full p-2 mb-4 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none"
+                  />
+
+                  <label
+                    className="block mb-2 text-sm font-semibold"
+                    htmlFor="aggregatorFee"
+                  >
+                    Typical Third-Party Fee (%):
+                  </label>
+                  <input
+                    id="aggregatorFee"
+                    type="number"
+                    value={aggregatorFee}
+                    onChange={(e) => setAggregatorFee(Number(e.target.value))}
+                    className="w-full p-2 mb-4 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none"
+                  />
+                </div>
+
+                {/* Visual Bars */}
+                <div className="w-full md:w-1/2 flex flex-col space-y-6">
+                  {/* Traditional Third-Party Bar */}
+                  <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl shadow-md">
+                    <h3 className="text-lg font-semibold mb-2">Traditional Third-Party</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                      You keep <strong>{aggregatorRetained}%</strong> of each order.
+                    </p>
+
+                    <div className="relative w-full bg-gray-300 dark:bg-gray-600 h-6 rounded-full overflow-hidden">
+                      <motion.div
+                        className="bg-red-500 h-6"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${aggregatorRetained}%` }}
+                        transition={{ duration: 0.5 }}
+                      />
                     </div>
+                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                      On an <strong>${orderAmount}</strong> order, you’d keep around 
+                      <strong> ${aggregatorDollarRetained.toFixed(2)}</strong>.
+                    </p>
                   </div>
-                </motion.div>
-                <motion.div
-                  className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl shadow-md"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    “I never imagined the setup would be so fast. In two days, we were fully operational, and the QuickBooks sync is a game-changer.”
-                  </p>
-                  <div className="flex items-center space-x-3">
-                   
-                    <div>
-                      <p className="text-sm font-semibold">James Rodriguez</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Manager, Midtown Cafe</p>
+
+                  {/* StarAccept Strategy Bar */}
+                  <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl shadow-md">
+                    <h3 className="text-lg font-semibold mb-2">StarAccept Strategy</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                      You recapture <strong>100%</strong> of your revenue.
+                    </p>
+
+                    <div className="relative w-full bg-gray-300 dark:bg-gray-600 h-6 rounded-full overflow-hidden">
+                      <motion.div
+                        className="bg-amber-500 h-6"
+                        initial={{ width: 0 }}
+                        animate={{ width: `100%` }}
+                        transition={{ duration: 0.5 }}
+                      />
                     </div>
+                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                      On an <strong>${orderAmount}</strong> order, you keep 
+                      <strong> ${starAcceptDollarRetained.toFixed(2)}</strong>.
+                    </p>
                   </div>
-                </motion.div>
-                <motion.div
-                  className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl shadow-md"
-                  whileHover={{ scale: 1.02 }}
+                </div>
+              </div>
+
+              <div className="text-center mt-8">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-3 bg-amber-500 rounded-full font-semibold hover:bg-amber-600 transition-colors"
+                  onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
                 >
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    “We run a busy coffee shop with crazy morning rushes. StarAccept’s label printing saves us from messed-up orders, and customers love the quick service!”
-                  </p>
-                  <div className="flex items-center space-x-3">
-        
-                    <div>
-                      <p className="text-sm font-semibold">Linda W.</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Owner, Brew & Bloom</p>
-                    </div>
-                  </div>
-                </motion.div>
+                  Learn How
+                </motion.button>
               </div>
             </div>
           </section>
 
-          {/* CONTACT SECTION */}
+          {/* CONTACT SECTION (Unchanged) */}
           <div
             className="relative px-4 py-20 bg-gradient-to-b from-gray-50 dark:from-gray-800 to-white dark:to-gray-900"
             id="contact"
           >
             <div className="max-w-6xl mx-auto">
               <div className="mb-12 text-center">
-                <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">Talk to Our Restaurant Experts</h2>
+                <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">
+                  Talk to Our Restaurant Experts
+                </h2>
                 <p className="max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">
-                  Ready to optimize your restaurant’s workflow? Fill out our form or call us directly, and we’ll be in touch within 24 hours.
+                  Ready to optimize your restaurant’s workflow? Fill out our form or call us directly, 
+                  and we’ll be in touch within 24 hours.
                 </p>
               </div>
               <div className="flex justify-center">
@@ -469,7 +559,7 @@ export default function Restaurants() {
             </div>
           </div>
 
-          {/* FOOTER */}
+          {/* FOOTER (Unchanged) */}
           <footer className="py-12 bg-white dark:bg-gray-900 relative">
             <div className="max-w-6xl px-4 mx-auto text-center">
               <div className="mb-6">
@@ -485,32 +575,44 @@ export default function Restaurants() {
                 © {new Date().getFullYear()} StarAccept Business Solutions. All rights reserved.
               </p>
               <div className="flex flex-wrap items-center justify-center space-x-4">
-                {/* Add any social links or disclaimers here */}
+                {/* Social or disclaimers */}
               </div>
             </div>
+
             <motion.div
-                          className="fixed bottom-0 left-0 w-full p-4 bg-amber-500 transition-transform"
-                          initial={{ y: '100%' }}
-                          animate={{ y: 0 }}
-                          transition={{ type: 'spring', stiffness: 100 }}
-                          whileHover={{ scale: 1.02 }}
-                        >
-                          <div className="max-w-6xl mx-auto flex items-center justify-center">
-                            <a
-                              href="https://onboarding.tillpayments.com/signup/6748abe55b6362feca0a75f3"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <motion.button
-                                whileTap={{ scale: 0.95 }}
-                                className="px-6 py-2 text-lg font-semibold text-white transition-colors rounded-full bg-gray-900 hover:bg-gray-800"
-                              >
-                                Apply Now
-                              </motion.button>
-                            </a>
-                          </div>
-                        </motion.div>
+              className="fixed bottom-0 left-0 w-full p-4 bg-amber-500 transition-transform"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              transition={{ type: 'spring', stiffness: 100 }}
+              whileHover={{ scale: 1.02 }}
+            >
+              <div className="max-w-6xl mx-auto flex items-center justify-center">
+                <a
+                  href="https://onboarding.tillpayments.com/signup/6748abe55b6362feca0a75f3"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    className="px-6 py-2 text-lg font-semibold text-white transition-colors rounded-full bg-gray-900 hover:bg-gray-800"
+                  >
+                    Apply Now
+                  </motion.button>
+                </a>
+              </div>
+            </motion.div>
           </footer>
+
+          {/* Scroll to Top Button */}
+          {showScrollToTop && (
+            <button
+              onClick={scrollToTop}
+              className="fixed bottom-16 right-4 p-3 bg-gray-700 dark:bg-gray-600 text-white rounded-full shadow hover:bg-gray-800 dark:hover:bg-gray-500 transition"
+              aria-label="Scroll to top"
+            >
+              ↑
+            </button>
+          )}
         </div>
       </main>
     </ThemeProvider>
