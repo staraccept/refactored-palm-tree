@@ -6,6 +6,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { ThemeProvider, useTheme } from "../components/ThemeProvider";
 
+/**
+ * Retail Page – Optimized for Enhanced Digital Marketing
+ *
+ * Primary Changes:
+ * - Consolidated three separate sections into one "All-in-One Retail Solutions" section.
+ * - Introduced an interactive ROI Calculator to showcase potential savings and engage users.
+ * - Removed repetitive or redundant elements, preserving key messaging in a streamlined layout.
+ * - Maintained Hero, Navbar, and Footer sections per requirements.
+ */
+
 export default function Retail() {
   const { darkMode, toggleDarkMode } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,6 +36,23 @@ export default function Retail() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // --- START: ROI Calculator State & Logic ---
+  const [averageMonthlySales, setAverageMonthlySales] = useState<number>(5000);
+  const [estimatedSavings, setEstimatedSavings] = useState<number>(0);
+
+  // Simple ROI calculation: 
+  // e.g., ~2% improved efficiency and additional cost savings in labor
+  const calculateROI = () => {
+    const savings = averageMonthlySales * 0.02; // 2% assumption for demonstration
+    setEstimatedSavings(parseFloat(savings.toFixed(2)));
+  };
+
+  useEffect(() => {
+    calculateROI();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [averageMonthlySales]);
+  // --- END: ROI Calculator State & Logic ---
+
   return (
     <ThemeProvider>
       <main className={darkMode ? "dark" : ""}>
@@ -38,7 +65,7 @@ export default function Retail() {
             />
           </Head>
 
-          {/* NAVBAR */}
+          {/* NAVBAR (Preserved) */}
           <motion.nav
             className="fixed top-0 z-50 w-full bg-white dark:bg-gray-800 shadow-sm bg-opacity-90 backdrop-blur-sm"
             initial={{ y: -100 }}
@@ -111,14 +138,14 @@ export default function Retail() {
                       Working Capital
                     </motion.a>
                     <motion.a
-                                          whileHover={{ scale: 1.05 }}
-                                          whileTap={{ scale: 0.95 }}
-                                          className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
-                                          href="/poslineup"
-                                          aria-label="View All POS Systems"
-                                        >
-                                          POS Systems
-                                        </motion.a>
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
+                      href="/poslineup"
+                      aria-label="View All POS Systems"
+                    >
+                      POS Systems
+                    </motion.a>
                     <motion.a
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -131,7 +158,6 @@ export default function Retail() {
                 </div>
 
                 <div className="flex items-center">
-                  {/* Back to Home (hidden on small screens) */}
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -253,7 +279,7 @@ export default function Retail() {
             )}
           </motion.nav>
 
-          {/* HERO SECTION */}
+          {/* HERO SECTION (Preserved) */}
           <section className="relative flex items-center justify-center w-full h-[75vh] md:h-[80vh] bg-gray-200 dark:bg-gray-700 mt-16">
             <Image
               src="/retailshop.jpg"
@@ -292,40 +318,77 @@ export default function Retail() {
             </div>
           </section>
 
-          {/* RETAIL FEATURES SECTION */}
+          {/*
+            ----------------------------------------------------------------
+            NEW CONSOLIDATED SECTION
+            Combines:
+              1) Let Us Handle the Heavy Lifting
+              2) QuickBooks Sync & Barcode Solutions
+              3) Get Set Up in 1-2 Business Days
+            ----------------------------------------------------------------
+          */}
           <section
             id="details"
             className="py-20 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
           >
             <div className="max-w-6xl px-4 mx-auto">
-              <div className="mb-10 text-center">
-                <h2 className="text-3xl font-bold">Let Us Handle the Heavy Lifting</h2>
-                <p className="mt-2 text-gray-600 dark:text-gray-300">
-                  We integrate all your sales channels and set up your inventory so everything stays in sync.
+              {/* Top Heading & Subtext */}
+              <div className="text-center mb-10">
+                <h2 className="text-3xl font-bold">All-in-One Retail Solutions</h2>
+                <p className="mt-2 text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                  Boost your store’s efficiency with streamlined inventory management, 
+                  automated accounting, barcode solutions, and a rapid setup to get you 
+                  selling faster than ever.
                 </p>
               </div>
 
+              {/* Benefits and Image Layout */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                 <motion.div
-                  className="order-2 lg:order-1 space-y-6"
+                  className="space-y-6 order-2 lg:order-1"
                   initial={{ opacity: 0, x: -50 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5 }}
                   viewport={{ once: true }}
                 >
-                  <h3 className="text-2xl font-semibold">
-                    Clothing, Electronics, Convenience, or Multi-Location
-                  </h3>
-                  <p>
-                    We help boutique owners build their first storefront and also assist large retailers expanding into new locations. Our platform ensures real-time updates across in-store and online purchases.
-                  </p>
-                  <p>
-                    We integrate Shopify, WooCommerce, Amazon, and more into your POS and keep your inventory accurate, so you don’t have to.
-                  </p>
-                  <p>
-                    We eliminate the hassle of juggling different systems and bring everything into a single, user-friendly dashboard.
-                  </p>
+                  <h3 className="text-2xl font-semibold">We Handle the Heavy Lifting</h3>
+                  <ul className="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
+                    <li>
+                      <strong>Seamless Integrations:</strong> From Shopify to Amazon, keep all sales 
+                      channels in sync and up to date.
+                    </li>
+                    <li>
+                      <strong>Barcode & Label Printing:</strong> Improve checkout speed and reduce errors 
+                      with professional-grade barcode solutions.
+                    </li>
+                    <li>
+                      <strong>QuickBooks Sync:</strong> Automate your bookkeeping and eliminate manual data entry.
+                    </li>
+                    <li>
+                      <strong>1-2 Business Day Deployment:</strong> Our experts will have you up and running 
+                      with minimal downtime, so you can focus on growing your business.
+                    </li>
+                  </ul>
+                  <motion.div
+                    className="mt-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    viewport={{ once: true }}
+                  >
+                    <Link href="/#contact">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-8 py-3 bg-amber-500 rounded-full font-semibold hover:bg-amber-600 transition-colors"
+                      >
+                        Talk to a Retail Specialist
+                      </motion.button>
+                    </Link>
+                  </motion.div>
                 </motion.div>
+
+                {/* Image Display */}
                 <motion.div
                   className="relative w-full h-[400px] order-1 lg:order-2"
                   initial={{ opacity: 0, x: 50 }}
@@ -335,80 +398,53 @@ export default function Retail() {
                 >
                   <Image
                     src="/retailinventory.jpg"
-                    alt="Inventory Management"
+                    alt="Consolidated Retail Solutions"
                     fill
                     className="object-cover rounded-xl"
                   />
                 </motion.div>
               </div>
-            </div>
-          </section>
 
-          {/* ACCOUNTING & BARCODE SECTION */}
-          <section className="py-20 bg-gray-50 dark:bg-gray-800">
-            <div className="max-w-6xl px-4 mx-auto">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                <motion.div
-                  className="relative w-full h-[400px]"
-                  initial={{ opacity: 0, x: -50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5 }}
-                  viewport={{ once: true }}
-                >
-                  <Image
-                    src="/barcode-label.jpg"
-                    alt="Barcode Printing"
-                    fill
-                    className="object-cover rounded-xl"
-                  />
-                </motion.div>
-                <motion.div
-                  className="space-y-6 text-gray-900 dark:text-white"
-                  initial={{ opacity: 0, x: 50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5 }}
-                  viewport={{ once: true }}
-                >
-                  <h3 className="text-2xl font-semibold">QuickBooks Sync & Barcode Solutions</h3>
-                  <p>
-                    Our automated accounting integrations send your sales data to QuickBooks, saving you from manual bookkeeping. We also provide barcode printing and label design tools that keep your store organized and help employees and shoppers find products faster.
-                  </p>
-                  <p>
-                    Whether you’re importing inventory from another system or a simple handwritten ledger, we ensure a smooth transition with zero downtime.
-                  </p>
-                </motion.div>
-              </div>
-            </div>
-          </section>
+              {/* ROI Calculator Section */}
+              <div className="mt-20 max-w-3xl mx-auto bg-gray-100 dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                <h3 className="text-2xl font-semibold text-center mb-4">
+                  Calculate Your Potential ROI
+                </h3>
+                <p className="text-center text-gray-700 dark:text-gray-300 mb-4">
+                  Estimate how much you could save every month with StarAccept's 
+                  integrated retail solutions.
+                </p>
+                <div className="flex flex-col items-center space-y-4">
+                  <label className="flex flex-col w-full sm:w-2/3 text-gray-600 dark:text-gray-300">
+                    Average Monthly Sales ($)
+                    <input
+                      type="number"
+                      value={averageMonthlySales}
+                      onChange={(e) => setAverageMonthlySales(+e.target.value)}
+                      className="mt-1 px-4 py-2 border border-gray-300 rounded focus:outline-none 
+                                 dark:text-gray-900"
+                      min={0}
+                      step={100}
+                    />
+                  </label>
 
-          {/* FAST DEPLOYMENT SECTION */}
-          <section className="py-20 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
-            <div className="max-w-6xl px-4 mx-auto text-center">
-              <h2 className="mb-4 text-3xl font-bold">Get Set Up in 1-2 Business Days</h2>
-              <p className="max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-300">
-                From the moment you’re approved, we’ll get your system deployed and ready to run so you can focus on growing your business.
-              </p>
-              <motion.div
-                className="mt-8"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                viewport={{ once: true }}
-              >
-                <Link href="/#contact">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-8 py-3 bg-amber-500 rounded-full font-semibold hover:bg-amber-600 transition-colors"
+                  <motion.div
+                    className="text-center bg-white dark:bg-gray-700 p-4 rounded-xl w-full sm:w-2/3"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    viewport={{ once: true }}
                   >
-                    Talk to a Retail Specialist
-                  </motion.button>
-                </Link>
-              </motion.div>
+                    <p className="text-lg text-gray-700 dark:text-gray-200">
+                      <strong>Estimated Monthly Savings:</strong> ${estimatedSavings}
+                    </p>
+                  </motion.div>
+                </div>
+              </div>
             </div>
           </section>
 
-          {/* CONTACT SECTION */}
+          {/* CONTACT SECTION (Preserved) */}
           <section
             id="contact"
             className="py-20 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
@@ -429,7 +465,7 @@ export default function Retail() {
             </div>
           </section>
 
-          {/* FOOTER */}
+          {/* FOOTER (Preserved) */}
           <footer className="py-12 bg-white dark:bg-gray-900 relative">
             <div className="max-w-6xl px-4 mx-auto text-center">
               <div className="mb-6">
@@ -468,6 +504,16 @@ export default function Retail() {
               </div>
             </motion.div>
           </footer>
+
+          {/* Scroll-to-Top Button (preserved functionality) */}
+          {showScrollToTop && (
+            <button
+              onClick={scrollToTop}
+              className="fixed bottom-16 right-4 p-3 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition-colors"
+            >
+              ↑
+            </button>
+          )}
         </div>
       </main>
     </ThemeProvider>

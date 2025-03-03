@@ -6,10 +6,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { ThemeProvider, useTheme } from "../components/ThemeProvider";
 import {
-  FaMoneyBillWave,
+  FaHandHoldingUsd,
   FaCheckCircle,
-  FaArrowRight,
-  FaHandHoldingUsd
+  FaArrowRight
 } from "react-icons/fa";
 
 export default function WorkingCapitalFunding() {
@@ -26,7 +25,7 @@ export default function WorkingCapitalFunding() {
             <title>Working Capital Funding | StarAccept</title>
             <meta
               name="description"
-              content="Access up to 250% of your monthly processing volume with minimal requirements."
+              content="Access up to 250% of your monthly processing volume with minimal requirements: no collateral, no FICO, and only 1 month of history needed."
             />
             <link rel="icon" href="/favicon.ico" />
           </Head>
@@ -41,6 +40,7 @@ export default function WorkingCapitalFunding() {
           >
             <div className="max-w-6xl px-2 mx-auto sm:px-4 lg:px-6">
               <div className="flex justify-between items-center h-16">
+                {/* Left side logo and links */}
                 <div className="flex items-center space-x-3">
                   <motion.div
                     className="flex items-center"
@@ -53,7 +53,7 @@ export default function WorkingCapitalFunding() {
                     <Link href="/">
                       <Image
                         src="/staracceptlogo.png"
-                        alt="staraccept"
+                        alt="StarAccept"
                         width={187.5}
                         height={50}
                         className="transition-all duration-300 hover:brightness-110 dark:brightness-150 cursor-pointer"
@@ -62,7 +62,7 @@ export default function WorkingCapitalFunding() {
                     </Link>
                   </motion.div>
 
-                  {/* Left Navigation Items */}
+                  {/* Desktop nav links */}
                   <div className="hidden md:flex items-center text-sm space-x-4">
                     <motion.a
                       whileHover={{ scale: 1.05 }}
@@ -105,14 +105,14 @@ export default function WorkingCapitalFunding() {
                       Working Capital
                     </motion.a>
                     <motion.a
-                                                                                  whileHover={{ scale: 1.05 }}
-                                                                                  whileTap={{ scale: 0.95 }}
-                                                                                  className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
-                                                                                  href="/poslineup"
-                                                                                  aria-label="View All POS Systems"
-                                                                                >
-                                                                                  POS Systems
-                                                                                </motion.a>
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
+                      href="/poslineup"
+                      aria-label="View All POS Systems"
+                    >
+                      POS Systems
+                    </motion.a>
                     <motion.a
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -124,7 +124,7 @@ export default function WorkingCapitalFunding() {
                   </div>
                 </div>
 
-                {/* Right side */}
+                {/* Right side: dark mode + mobile menu */}
                 <div className="flex items-center">
                   {/* Dark Mode Toggle */}
                   <button
@@ -158,12 +158,32 @@ export default function WorkingCapitalFunding() {
                       className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none"
                     >
                       {isMenuOpen ? (
-                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                          className="w-6 h-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                       ) : (
-                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                        <svg
+                          className="w-6 h-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 6h16M4 12h16M4 18h16"
+                          />
                         </svg>
                       )}
                     </button>
@@ -172,11 +192,12 @@ export default function WorkingCapitalFunding() {
               </div>
             </div>
 
+            {/* Mobile Dropdown */}
             {isMenuOpen && (
               <motion.div
                 className="md:hidden bg-white dark:bg-gray-800 px-4 pt-2 pb-3 space-y-1"
                 initial={{ height: 0 }}
-                animate={{ height: 'auto' }}
+                animate={{ height: "auto" }}
               >
                 <Link
                   className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -207,7 +228,7 @@ export default function WorkingCapitalFunding() {
                   Online Ordering
                 </a>
                 <Link
-                  className="text-blue-600 dark:text-blue-400 font-semibold"
+                  className="block w-full text-left px-3 py-2 text-blue-600 dark:text-blue-400 font-semibold"
                   href="/working-capital-funding"
                   onClick={() => setIsMenuOpen(false)}
                 >
@@ -216,6 +237,7 @@ export default function WorkingCapitalFunding() {
                 <Link
                   className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   href="/poslineup"
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   POS Systems
                 </Link>
@@ -239,12 +261,12 @@ export default function WorkingCapitalFunding() {
             )}
           </motion.nav>
 
-          {/* HERO / INTRO */}
-          <section className="relative w-full pt-24 pb-16 bg-gradient-to-br from-blue-50 to-white dark:from-gray-800 dark:to-gray-900">
-            <div className="max-w-6xl px-4 mx-auto">
-              <div className="text-center">
+          {/* HERO + KEY BENEFITS */}
+          <section className="relative w-full pt-24 pb-12 bg-gradient-to-br from-blue-50 to-white dark:from-gray-800 dark:to-gray-900">
+            <div className="max-w-6xl mx-auto px-4">
+              <div className="text-center mb-12">
                 <motion.h1
-                  className="text-4xl md:text-5xl font-extrabold mb-6 text-gray-900 dark:text-white"
+                  className="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900 dark:text-white"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
@@ -257,51 +279,61 @@ export default function WorkingCapitalFunding() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  Get up to 250% of your monthly processing volume, with no collateral and no minimum FICO. All you need is one month of processing history with us to get started.
+                  Get up to{" "}
+                  <span className="font-bold text-blue-600 dark:text-blue-400">
+                    250%
+                  </span>{" "}
+                  of your monthly processing volume with{" "}
+                  <span className="font-bold">no collateral</span>,{" "}
+                  <span className="font-bold">no minimum FICO</span>, and just{" "}
+                  <span className="font-bold">1 month</span> of processing
+                  history.
                 </motion.p>
               </div>
 
-              <div className="mt-10 flex flex-wrap justify-center gap-8">
+              <div className="flex flex-wrap gap-6 justify-center">
                 <motion.div
+                  className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-md w-64"
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.3 }}
-                  className="flex flex-col items-center text-center p-6 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-md"
                 >
                   <FaHandHoldingUsd className="text-green-500 dark:text-green-400 text-5xl mb-4" />
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                     No Collateral
                   </h3>
-                  <p className="text-gray-700 dark:text-gray-300">
-                    Quick approvals without tying up your assets. We’ve made it hassle-free.
+                  <p className="text-gray-700 dark:text-gray-300 text-sm">
+                    Quick approvals without tying up your assets.
                   </p>
                 </motion.div>
+
                 <motion.div
+                  className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-md w-64"
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.4 }}
-                  className="flex flex-col items-center text-center p-6 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-md"
                 >
                   <FaCheckCircle className="text-blue-500 dark:text-blue-400 text-5xl mb-4" />
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    No Minimum FICO
+                    No Min FICO
                   </h3>
-                  <p className="text-gray-700 dark:text-gray-300">
-                    We focus on your business performance, not a credit score.
+                  <p className="text-gray-700 dark:text-gray-300 text-sm">
+                    Approval based on your business performance.
                   </p>
                 </motion.div>
+
                 <motion.div
+                  className="flex flex-col items-center p-6 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-md w-64"
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.5 }}
-                  className="flex flex-col items-center text-center p-6 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-md"
                 >
                   <FaArrowRight className="text-orange-500 dark:text-orange-400 text-5xl mb-4" />
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    Just 1 Month History
+                    1 Month History
                   </h3>
-                  <p className="text-gray-700 dark:text-gray-300">
-                    Start building your eligibility in 30 days of processing with us.
+                  <p className="text-gray-700 dark:text-gray-300 text-sm">
+                    Gain eligibility after just 30 days of processing with us.
                   </p>
                 </motion.div>
               </div>
@@ -310,13 +342,16 @@ export default function WorkingCapitalFunding() {
 
           {/* INTERACTIVE CALCULATOR */}
           <section className="py-16 bg-gray-100 dark:bg-gray-800">
-            <div className="max-w-4xl mx-auto px-4 text-center">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-                Funding Calculator
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                We base our funding on your monthly credit card processing. Enter or slide to see what you could qualify for.
-              </p>
+            <div className="max-w-4xl mx-auto px-4">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
+                  Check Your Potential Funding
+                </h2>
+                <p className="text-gray-600 dark:text-gray-300 text-md md:text-lg">
+                  Use our slider below to see how much capital you could access
+                  based on your monthly credit card processing volume.
+                </p>
+              </div>
 
               <div className="flex flex-col items-center">
                 <div className="mb-8 w-full max-w-xl">
@@ -333,7 +368,9 @@ export default function WorkingCapitalFunding() {
                     max="100000"
                     step="1000"
                     value={monthlyProcessing}
-                    onChange={(e) => setMonthlyProcessing(Number(e.target.value))}
+                    onChange={(e) =>
+                      setMonthlyProcessing(Number(e.target.value))
+                    }
                     className="w-full cursor-pointer accent-blue-600"
                   />
                   <div className="mt-2 text-gray-900 dark:text-white font-semibold">
@@ -345,41 +382,42 @@ export default function WorkingCapitalFunding() {
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.5 }}
-                  className="p-8 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-md w-full max-w-xl"
+                  className="p-8 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-md w-full max-w-xl text-center"
                 >
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                    Up to 250% of Your Monthly Volume
+                    Estimated Funding (up to 250%)
                   </h3>
                   <div className="text-4xl font-bold text-amber-500">
                     ${maxFunding.toLocaleString()}
                   </div>
-                  <p className="mt-2 text-gray-600 dark:text-gray-300">
-                    This is an estimate of how much working capital you might access based on the slider above.
+                  <p className="mt-2 text-gray-600 dark:text-gray-300 text-sm">
+                    This quick estimate shows the working capital you may access.
                   </p>
                 </motion.div>
               </div>
             </div>
           </section>
 
-          {/* CTA SECTION */}
+          {/* PRIMARY CTA */}
           <section className="py-16 bg-white dark:bg-gray-900">
             <div className="max-w-5xl mx-auto px-4 text-center">
-              <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-6">
-                Ready to secure the funding your business deserves?
+              <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-6">
+                Ready to Get Funded?
               </h2>
-              <p className="text-xl text-gray-700 dark:text-gray-300 mb-8">
-                Reach out to us directly. We’ll get the ball rolling so you can focus on growing your business.
+              <p className="text-lg text-gray-700 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+                No collateral. No minimum FICO. Just one month of processing history.
+                Secure the capital your business needs to thrive.
               </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <motion.a
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  href="/#contact"
-                  className="inline-block px-8 py-3 bg-amber-500 rounded-full font-semibold hover:bg-amber-600 transition-colors text-white"
-                >
-                  Contact Us
-                </motion.a>
-              </div>
+              <motion.a
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                href="https://onboarding.tillpayments.com/signup/6748abe55b6362feca0a75f3"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-8 py-3 bg-amber-500 rounded-full font-semibold hover:bg-amber-600 transition-colors text-white"
+              >
+                Apply Now
+              </motion.a>
             </div>
           </section>
 
@@ -396,33 +434,10 @@ export default function WorkingCapitalFunding() {
                 />
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                © {new Date().getFullYear()} Star Accept Business Solutions. All rights reserved.
+                © {new Date().getFullYear()} Star Accept Business Solutions. All
+                rights reserved.
               </p>
             </div>
-
-            {/* Optional pinned CTA for visual consistency, feel free to remove if undesired */}
-            <motion.div
-              className="fixed bottom-0 left-0 w-full p-4 bg-amber-500 transition-transform"
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              transition={{ type: "spring", stiffness: 100 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <div className="max-w-6xl mx-auto flex items-center justify-center">
-                <a
-                  href="https://onboarding.tillpayments.com/signup/6748abe55b6362feca0a75f3"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    className="px-6 py-2 text-lg font-semibold text-white transition-colors rounded-full bg-gray-900 hover:bg-gray-800"
-                  >
-                    Apply Now
-                  </motion.button>
-                </a>
-              </div>
-            </motion.div>
           </footer>
         </div>
       </main>
