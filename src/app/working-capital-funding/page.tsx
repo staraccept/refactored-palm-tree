@@ -580,7 +580,7 @@ export default function WorkingCapitalFunding() {
               </div>
             </motion.div>
           </footer>
-
+          
           {/* Scroll-to-Top Button (now fully functional) */}
           {showScrollToTop && (
             <button
