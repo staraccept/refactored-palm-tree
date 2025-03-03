@@ -43,7 +43,7 @@ export default function Retail() {
   // Simple ROI calculation: 
   // e.g., ~2% improved efficiency and additional cost savings in labor
   const calculateROI = () => {
-    const savings = averageMonthlySales * 0.02; // 2% assumption for demonstration
+    const savings = averageMonthlySales * 0.0399; // 3.99% assumption for demonstration
     setEstimatedSavings(parseFloat(savings.toFixed(2)));
   };
 
@@ -280,8 +280,8 @@ export default function Retail() {
           </motion.nav>
 
           {/* HERO SECTION (Preserved) */}
-          <section className="relative flex items-center justify-center w-full h-[75vh] md:h-[80vh] bg-gray-200 dark:bg-gray-700 mt-16">
-            <Image
+          <section className="relative w-full min-h-[60vh] flex items-center justify-center pt-24">
+  <Image
               src="/retailshop.jpg"
               alt="Retail Solutions"
               fill
@@ -465,51 +465,156 @@ export default function Retail() {
             </div>
           </section>
 
-          {/* FOOTER (Preserved) */}
-          <footer className="py-12 bg-white dark:bg-gray-900 relative">
-            <div className="max-w-6xl px-4 mx-auto text-center">
-              <div className="mb-6">
-                <Image
-                  src="/staracceptlogo.png"
-                  alt="StarAccept"
-                  width={187.5}
-                  height={50}
-                  className="mx-auto transition-all duration-300 hover:brightness-110 dark:brightness-150"
-                />
-              </div>
-              <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                © {new Date().getFullYear()} Star Accept Business Solutions. All rights reserved.
-              </p>
-            </div>
-            <motion.div
-              className="fixed bottom-0 left-0 w-full p-4 bg-amber-500 transition-transform"
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              transition={{ type: "spring", stiffness: 100 }}
-              whileHover={{ scale: 1.02 }}
+          <footer className="py-12 bg-white dark:bg-gray-900">
+  <div className="max-w-6xl px-4 mx-auto">
+    <div className="grid gap-8 md:grid-cols-4 mb-8">
+      <div>
+        <div className="mb-6">
+          <Image
+            src="/staracceptlogo.png"
+            alt="StarAccept Logo"
+            width={187.5}
+            height={50}
+            className="transition-all duration-300 hover:brightness-110 dark:brightness-150"
+          />
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            StarAccept provides cutting-edge POS systems and payment
+            processing solutions for businesses of all sizes.
+          </p>
+        </div>
+      </div>
+      <div>
+        <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
+          Industry Solutions
+        </h3>
+        <ul className="space-y-2">
+          <li>
+            <Link
+              href="/restaurants"
+              className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
             >
-              <div className="max-w-6xl mx-auto flex items-center justify-center">
-                <a
-                  href="https://onboarding.tillpayments.com/signup/6748abe55b6362feca0a75f3"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    className="px-6 py-2 text-lg font-semibold text-white transition-colors rounded-full bg-gray-900 hover:bg-gray-800"
-                  >
-                    Apply Now
-                  </motion.button>
-                </a>
-              </div>
-            </motion.div>
-          </footer>
+              Restaurant POS Systems
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/retail"
+              className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
+            >
+              Retail POS Systems
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/services"
+              className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
+            >
+              Service Business Solutions
+            </Link>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
+          Products
+        </h3>
+        <ul className="space-y-2">
+          <li>
+            <Link
+              href="/poslineup"
+              className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
+            >
+              POS Systems
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/online-ordering"
+              className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
+            >
+              Online Ordering
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/working-capital-funding"
+              className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
+            >
+              Working Capital Funding
+            </Link>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
+          Contact Us
+        </h3>
+        <ul className="space-y-2">
+          <li className="text-gray-600 dark:text-gray-400 text-sm">
+            <strong>Phone:</strong> (888) 885-7333
+          </li>
+          <li className="text-gray-600 dark:text-gray-400 text-sm">
+            <strong>Email:</strong> support@staraccept.com
+          </li>
+        </ul>
+        <div className="mt-4">
+          <Link
+            href="#contact"
+            className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-sm transition-colors"
+          >
+            Contact Us
+          </Link>
+        </div>
+      </div>
+    </div>
+
+    <div className="pt-8 mt-8 border-t border-gray-200 dark:border-gray-700 text-center md:flex md:justify-between md:text-left">
+      <p className="text-sm text-gray-600 dark:text-gray-400">
+        © {new Date().getFullYear()} Star Accept Business Solutions.
+        All rights reserved.
+      </p>
+      <div className="mt-4 md:mt-0">
+        <p className="text-sm text-gray-500 dark:text-gray-500">
+          Terms • Privacy Policy • Accessibility
+        </p>
+      </div>
+    </div>
+  </div>
+  {/* Floating "Apply Now" Bar */}
+  <motion.div
+    className="fixed bottom-0 left-0 w-full p-4 bg-amber-500 transition-transform z-40"
+    initial={{ y: '100%' }}
+    animate={{ y: 0 }}
+    transition={{ type: 'spring', stiffness: 100 }}
+    whileHover={{ scale: 1.02 }}
+  >
+    <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between">
+      <p className="text-gray-900 font-medium mb-2 md:mb-0">
+        Ready to eliminate credit card processing fees? Apply now and
+        start saving!
+      </p>
+      <a
+        href="https://onboarding.tillpayments.com/signup/6748abe55b6362feca0a75f3"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <motion.button
+          type="button"
+          whileTap={{ scale: 0.95 }}
+          className="px-6 py-2 text-lg font-semibold text-white transition-colors rounded-full bg-gray-900 hover:bg-gray-800 shadow-md"
+        >
+          Apply Now
+        </motion.button>
+      </a>
+    </div>
+  </motion.div>
+</footer>
 
           {/* Scroll-to-Top Button (preserved functionality) */}
           {showScrollToTop && (
             <button
               onClick={scrollToTop}
-              className="fixed bottom-16 right-4 p-3 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition-colors"
+              className="fixed bottom-24 right-4 p-3 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition-colors"
             >
               ↑
             </button>

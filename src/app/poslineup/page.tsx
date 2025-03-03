@@ -113,7 +113,7 @@ export default function POSLineup() {
   // Determine featured products for comparison section
   const featuredProducts = posProducts.filter(product => 
     product.primaryCategory === 'pos' && 
-    (product.size === 'medium' || product.size === 'large')
+    (product.size === 'standard' || product.size === 'large')
   ).slice(0, 3);
 
   return (
@@ -597,7 +597,7 @@ export default function POSLineup() {
 
           {/* INDUSTRY-SPECIFIC VALUE PROPOSITIONS */}
           {industry !== 'all' && (
-            <section className="py-12 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+            <section className="relative w-full min-h-[60vh] flex items-center justify-center pt-24">
               <div className="max-w-6xl mx-auto px-4">
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   <div>

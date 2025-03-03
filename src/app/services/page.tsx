@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -9,6 +9,23 @@ import Link from "next/link";
 export default function Services() {
   const { darkMode, toggleDarkMode } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // -- ADD THESE LINES TO FIX THE SCROLL-TO-TOP BUTTON --
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) setShowScrollToTop(true);
+      else setShowScrollToTop(false);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  // ------------------------------------------------------
 
   return (
     <ThemeProvider>
@@ -232,57 +249,46 @@ export default function Services() {
             )}
           </motion.nav>
 
-          {/* HERO SECTION */}
-          <div className="relative h-[75vh] md:h-[80vh] lg:h-[90vh] w-full max-w-[1920px] mx-auto pt-24 flex items-center justify-center">
-            <motion.div
-              className="absolute inset-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1 }}
-            >
-              <div className="relative w-full h-full max-w-[1920px] mx-auto">
-                <Image
-                  src="/retailmini3.png"
-                  alt="Services Hero"
-                  fill
-                  priority
-                  className="object-cover"
-                  quality={90}
-                />
-                <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/60 via-black/40 to-transparent"></div>
-              </div>
-            </motion.div>
-            <div className="absolute inset-0 flex items-center max-w-[1920px] mx-auto">
-              <div className="relative z-20 max-w-4xl px-4 mx-auto mt-16 text-white">
-                <motion.h1
-                  className="mb-4 text-4xl font-extrabold md:text-5xl lg:text-6xl"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  Seamless Payment Solutions for Service-Based Businesses
-                </motion.h1>
-                <motion.p
-                  className="mb-8 text-xl text-white/80 md:text-2xl"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  HIPAA-compliant, automated invoicing & QuickBooks integration. Get set up in 1–2 days.
-                </motion.p>
-                <motion.div className="flex flex-wrap gap-4">
-                  <motion.a
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    href="#benefits"
-                    className="px-8 py-3 bg-amber-500 rounded-full font-semibold hover:bg-amber-600 transition-colors"
-                  >
-                    Learn More
-                  </motion.a>
-                </motion.div>
-              </div>
+          {/* HERO SECTION (matching Restaurants page style) */}
+          <section className="relative w-full min-h-[60vh] flex items-center justify-center pt-24">
+            <Image
+              src="/retailmini3.png"
+              alt="Services Hero"
+              fill
+              priority
+              quality={90}
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-black/50"></div>
+            <div className="relative z-10 max-w-4xl mx-auto text-center text-white px-4">
+              <motion.h1
+                className="text-4xl md:text-5xl font-extrabold mb-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                Seamless Payment Solutions for Service-Based Businesses
+              </motion.h1>
+              <motion.p
+                className="text-lg md:text-2xl text-white/90 mb-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                HIPAA-compliant, automated invoicing & QuickBooks integration.
+                Get set up in 1–2 days.
+              </motion.p>
+              <motion.button
+                className="px-8 py-3 bg-amber-500 rounded-full font-semibold hover:bg-amber-600 transition-colors"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() =>
+                  document.getElementById("benefits")?.scrollIntoView({ behavior: "smooth" })
+                }
+              >
+                Learn More
+              </motion.button>
             </div>
-          </div>
+          </section>
 
           {/* KEY BENEFITS SECTION */}
           <section
@@ -295,7 +301,8 @@ export default function Services() {
                   Powerful Features for Your Service Business
                 </h2>
                 <p className="text-lg text-gray-600 dark:text-gray-300">
-                  StarAccept simplifies payment processing and business operations, so you can focus on your clients and patients.
+                  StarAccept simplifies payment processing and business operations,
+                  so you can focus on your clients and patients.
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -313,7 +320,8 @@ export default function Services() {
                   />
                   <h3 className="text-xl font-semibold mb-2">HIPAA-Compliant Systems</h3>
                   <p className="text-gray-700 dark:text-gray-300">
-                    Rest assured your payment and patient data stay secure with healthcare-grade compliance.
+                    Rest assured your payment and patient data stay secure
+                    with healthcare-grade compliance.
                   </p>
                 </motion.div>
 
@@ -329,9 +337,12 @@ export default function Services() {
                     height={400}
                     className="rounded-xl w-full h-auto mb-4 object-cover"
                   />
-                  <h3 className="text-xl font-semibold mb-2">Automated Invoicing & Recurring Billing</h3>
+                  <h3 className="text-xl font-semibold mb-2">
+                    Automated Invoicing &amp; Recurring Billing
+                  </h3>
                   <p className="text-gray-700 dark:text-gray-300">
-                    Simplify your back-office by automating billing and offering convenient recurring payment options.
+                    Simplify your back-office by automating billing and offering
+                    convenient recurring payment options.
                   </p>
                 </motion.div>
 
@@ -347,9 +358,10 @@ export default function Services() {
                     height={400}
                     className="rounded-xl w-full h-auto mb-4 object-cover"
                   />
-                  <h3 className="text-xl font-semibold mb-2">QuickBooks & EHR Integration</h3>
+                  <h3 className="text-xl font-semibold mb-2">QuickBooks &amp; EHR Integration</h3>
                   <p className="text-gray-700 dark:text-gray-300">
-                    Sync seamlessly with popular accounting and healthcare record systems to maintain accurate records.
+                    Sync seamlessly with popular accounting and healthcare record
+                    systems to maintain accurate records.
                   </p>
                 </motion.div>
               </div>
@@ -374,7 +386,7 @@ export default function Services() {
                   className="p-6 bg-gray-50 dark:bg-gray-800 rounded-xl"
                   whileHover={{ scale: 1.02 }}
                 >
-                  <h3 className="text-xl font-semibold mb-2">Medical & Dental</h3>
+                  <h3 className="text-xl font-semibold mb-2">Medical &amp; Dental</h3>
                   <p>Streamline co-pays and billing with full HIPAA compliance.</p>
                 </motion.div>
 
@@ -392,7 +404,7 @@ export default function Services() {
                   className="p-6 bg-gray-50 dark:bg-gray-800 rounded-xl"
                   whileHover={{ scale: 1.02 }}
                 >
-                  <h3 className="text-xl font-semibold mb-2">Wellness & Spas</h3>
+                  <h3 className="text-xl font-semibold mb-2">Wellness &amp; Spas</h3>
                   <p>Manage memberships, appointments, and recurring monthly fees easily.</p>
                 </motion.div>
 
@@ -412,7 +424,9 @@ export default function Services() {
           <section className="py-16 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">
             <div className="max-w-6xl mx-auto px-4">
               <div className="max-w-3xl mx-auto mb-12 text-center">
-                <h2 className="text-3xl font-bold mb-4">Get Up and Running in 1–2 Business Days</h2>
+                <h2 className="text-3xl font-bold mb-4">
+                  Get Up and Running in 1–2 Business Days
+                </h2>
                 <p className="text-lg text-gray-600 dark:text-gray-300">
                   We handle approvals, shipping, and setup so you can focus on serving your clients.
                 </p>
@@ -474,40 +488,143 @@ export default function Services() {
             </div>
           </section>
 
-          {/* FOOTER */}
           <footer className="py-12 bg-white dark:bg-gray-900">
-            <div className="max-w-6xl px-4 mx-auto text-center">
-              <div className="mb-6">
-                <Image
-                  src="/staracceptlogo.png"
-                  alt="staraccept"
-                  width={187.5}
-                  height={50}
-                  className="mx-auto transition-all duration-300 hover:brightness-110 dark:brightness-150"
-                />
+            <div className="max-w-6xl px-4 mx-auto">
+              <div className="grid gap-8 md:grid-cols-4 mb-8">
+                <div>
+                  <div className="mb-6">
+                    <Image
+                      src="/staracceptlogo.png"
+                      alt="StarAccept Logo"
+                      width={187.5}
+                      height={50}
+                      className="transition-all duration-300 hover:brightness-110 dark:brightness-150"
+                    />
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                      StarAccept provides cutting-edge POS systems and payment
+                      processing solutions for businesses of all sizes.
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
+                    Industry Solutions
+                  </h3>
+                  <ul className="space-y-2">
+                    <li>
+                      <Link
+                        href="/restaurants"
+                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
+                      >
+                        Restaurant POS Systems
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/retail"
+                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
+                      >
+                        Retail POS Systems
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/services"
+                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
+                      >
+                        Service Business Solutions
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
+                    Products
+                  </h3>
+                  <ul className="space-y-2">
+                    <li>
+                      <Link
+                        href="/poslineup"
+                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
+                      >
+                        POS Systems
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/online-ordering"
+                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
+                      >
+                        Online Ordering
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/working-capital-funding"
+                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
+                      >
+                        Working Capital Funding
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
+                    Contact Us
+                  </h3>
+                  <ul className="space-y-2">
+                    <li className="text-gray-600 dark:text-gray-400 text-sm">
+                      <strong>Phone:</strong> (888) 885-7333
+                    </li>
+                    <li className="text-gray-600 dark:text-gray-400 text-sm">
+                      <strong>Email:</strong> support@staraccept.com
+                    </li>
+                  </ul>
+                  <div className="mt-4">
+                    <Link
+                      href="#contact"
+                      className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-sm transition-colors"
+                    >
+                      Contact Us
+                    </Link>
+                  </div>
+                </div>
               </div>
-              <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                © {new Date().getFullYear()} Star Accept Business Solutions. All rights reserved.
-              </p>
-            </div>
 
-            {/* Sticky 'Apply Now' Button */}
+              <div className="pt-8 mt-8 border-t border-gray-200 dark:border-gray-700 text-center md:flex md:justify-between md:text-left">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  © {new Date().getFullYear()} Star Accept Business Solutions.
+                  All rights reserved.
+                </p>
+                <div className="mt-4 md:mt-0">
+                  <p className="text-sm text-gray-500 dark:text-gray-500">
+                    Terms • Privacy Policy • Accessibility
+                  </p>
+                </div>
+              </div>
+            </div>
+            {/* Floating "Apply Now" Bar */}
             <motion.div
-              className="fixed bottom-0 left-0 w-full p-4 bg-amber-500 transition-transform"
+              className="fixed bottom-0 left-0 w-full p-4 bg-amber-500 transition-transform z-40"
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               transition={{ type: "spring", stiffness: 100 }}
               whileHover={{ scale: 1.02 }}
             >
-              <div className="max-w-6xl mx-auto flex items-center justify-center">
+              <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between">
+                <p className="text-gray-900 font-medium mb-2 md:mb-0">
+                  Ready to eliminate credit card processing fees? Apply now and
+                  start saving!
+                </p>
                 <a
                   href="https://onboarding.tillpayments.com/signup/6748abe55b6362feca0a75f3"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <motion.button
+                    type="button"
                     whileTap={{ scale: 0.95 }}
-                    className="px-6 py-2 text-lg font-semibold text-white transition-colors rounded-full bg-gray-900 hover:bg-gray-800"
+                    className="px-6 py-2 text-lg font-semibold text-white transition-colors rounded-full bg-gray-900 hover:bg-gray-800 shadow-md"
                   >
                     Apply Now
                   </motion.button>
@@ -515,6 +632,16 @@ export default function Services() {
               </div>
             </motion.div>
           </footer>
+
+          {/* Scroll-to-Top Button (now fixed) */}
+          {showScrollToTop && (
+            <button
+              onClick={scrollToTop}
+              className="fixed bottom-24 right-4 p-3 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition-colors"
+            >
+              ↑
+            </button>
+          )}
         </div>
       </main>
     </ThemeProvider>
