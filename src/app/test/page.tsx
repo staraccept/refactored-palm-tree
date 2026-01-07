@@ -1063,11 +1063,13 @@ export default function Home() {
 
           {/* NAVBAR */}
           <motion.nav
-            className="fixed top-0 z-50 w-full bg-white/80 dark:bg-slate-900/80 shadow-sm backdrop-blur-md border-b border-gray-100 dark:border-gray-800"
-            initial={{ y: -100 }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+  // Changed bg-white/80 to bg-white/90 for better contrast when scrolling down
+  // But added specific logic for top of page if you want it transparent initially (optional)
+  className="fixed top-0 z-50 w-full bg-white/95 dark:bg-slate-900/95 shadow-sm backdrop-blur-md border-b border-gray-100 dark:border-gray-800"
+  initial={{ y: -100 }}
+  animate={{ y: 0 }}
+  transition={{ duration: 0.6 }}
+>
             <div className="max-w-7xl px-4 mx-auto sm:px-6 lg:px-8">
               <div className="flex justify-between items-center h-20">
                 <div className="flex items-center cursor-pointer" onClick={() => window.scrollTo(0,0)}>
@@ -1091,48 +1093,56 @@ export default function Home() {
             </div>
           </motion.nav>
 
-          {/* HERO SECTION */}
+          {/* HERO SECTION - REVISED (Vibrant & Immersive) */}
           <div className="relative h-screen w-full flex items-center justify-center overflow-hidden">
-             {/* Background Image with Parallax-like feel */}
+             
+             {/* Background Image with Dark Overlay for Contrast */}
              <div className="absolute inset-0 z-0">
                 <Image
-                  src={images[currentImage].src}
+                  src={images[currentImage].src} // This keeps your rotating images
                   alt="Hero"
                   fill
-                  className="object-cover opacity-20 dark:opacity-10 scale-105"
+                  className="object-cover"
                   priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/80 to-white dark:via-slate-900/80 dark:to-slate-900"></div>
+                {/* Dark Gradient Overlay: Makes text pop while keeping image visible */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent"></div>
              </div>
 
-             <div className="relative z-10 max-w-5xl px-6 text-center pt-20">
+             <div className="relative z-10 w-full max-w-7xl px-6 pt-20">
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, x: -30 }} // Slide in from left
+                    animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="max-w-3xl"
                 >
-                    <span className="inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-600 text-sm font-bold tracking-wide mb-6 border border-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
+                    <span className="inline-block py-1 px-3 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/50 text-sm font-bold tracking-wide mb-6 backdrop-blur-sm">
                         TRUSTED BY 10,000+ MERCHANTS
                     </span>
-                    <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-slate-900 dark:text-white leading-tight">
-                        Payments Made <br className="hidden md:block"/>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Effortless.</span>
+                    
+                    <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-white leading-tight drop-shadow-lg">
+                        Simplify Payments. <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-amber-500">
+                            Maximize Savings.
+                        </span>
                     </h1>
-                    <p className="text-xl md:text-2xl text-slate-500 dark:text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-                        Eliminate processing fees and upgrade your hardware with the most reliable payment platform for modern businesses.
+                    
+                    <p className="text-xl md:text-2xl text-gray-200 mb-10 max-w-2xl leading-relaxed drop-shadow-md">
+                        Embrace secure, fast, and <span className="text-white font-bold">Zero-Fee</span> card processing with next-gen POS systems trusted by thousands of businesses.
                     </p>
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <button 
-                            onClick={() => scrollToSection('product-selector')}
-                            className="px-8 py-4 bg-blue-600 text-white rounded-full font-bold text-lg shadow-xl shadow-blue-600/20 hover:bg-blue-700 hover:shadow-blue-600/40 transition-all transform hover:-translate-y-1"
-                        >
-                            Find My POS
-                        </button>
+                    
+                    <div className="flex flex-col sm:flex-row items-start gap-4">
                         <button 
                              onClick={() => scrollToSection('contact')}
-                            className="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-bold text-lg hover:bg-slate-50 transition-all dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                            className="px-8 py-4 bg-amber-500 text-slate-900 rounded-full font-bold text-lg shadow-xl shadow-amber-500/20 hover:bg-amber-400 hover:scale-105 transition-all transform"
                         >
-                            Talk to Sales
+                            Talk to an Expert
+                        </button>
+                        <button 
+                            onClick={() => scrollToSection('product-selector')}
+                            className="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-bold text-lg hover:bg-white/20 transition-all"
+                        >
+                            View POS Systems
                         </button>
                     </div>
                 </motion.div>
