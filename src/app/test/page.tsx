@@ -20,7 +20,7 @@ import {
   FaBolt,
   FaMobileAlt
 } from 'react-icons/fa';
-import { ThemeProvider, useTheme } from './components/ThemeProvider';
+import { ThemeProvider, useTheme } from '../components/ThemeProvider';
 import { posProducts } from '@/lib/posProducts';
 import { findRelatedProducts as localFindProducts } from '@/lib/posProducts';
 import Link from 'next/link';
