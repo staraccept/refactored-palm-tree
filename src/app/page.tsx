@@ -1911,13 +1911,6 @@ export default function Home() {
                     </Link>
                     <Link
                       className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
-                      href="/working-capital-funding"
-                      aria-label="Go to Working Capital Funding page"
-                    >
-                      Working Capital
-                    </Link>
-                    <Link
-                      className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
                       href="/poslineup"
                       aria-label="View All POS Systems"
                     >
@@ -2056,14 +2049,6 @@ export default function Home() {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Online Ordering
-                </Link>
-                <Link
-                  className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  href="/working-capital-funding"
-                  role="menuitem"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Working Capital Funding
                 </Link>
                 <Link
                   className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -3175,12 +3160,7 @@ export default function Home() {
                       </Link>
                     </li>
                     <li>
-                      <Link
-                        href="/working-capital-funding"
-                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm"
-                      >
-                        Working Capital Funding
-                      </Link>
+
                     </li>
                   </ul>
                 </div>
