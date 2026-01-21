@@ -593,8 +593,7 @@ export default function Services() {
 
               <div className="pt-8 mt-8 border-t border-gray-200 dark:border-gray-700 text-center md:flex md:justify-between md:text-left">
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  © {new Date().getFullYear()} Star Accept Business Solutions.
-                  All rights reserved.
+                  © {new Date().getFullYear()} Star Accept. Star Accept is a trade name of Star Network LLC. All rights reserved.
                 </p>
                 <div className="mt-4 md:mt-0">
                   <p className="text-sm text-gray-500 dark:text-gray-500">
