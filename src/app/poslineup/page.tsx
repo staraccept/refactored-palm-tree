@@ -249,7 +249,7 @@ function POSLineupPage() {
         {/* FOOTER */}
         <footer className="py-12 bg-gray-800 dark:bg-black text-gray-300">
              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <p>© {new Date().getFullYear()} Star Accept Business Solutions. All rights reserved.</p>
+                <p>© {new Date().getFullYear()} Star Accept. Star Accept is a trade name of Star Network LLC. All rights reserved.</p>
             </div>
         </footer>
 
